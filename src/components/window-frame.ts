@@ -3,6 +3,7 @@
  * macOS-style window frame with title bar, traffic lights, and drop shadow.
  */
 
+import { BORDER_RADIUS, COLORS } from '../utils/design-tokens.js';
 import { createSvgElement } from '../utils/svg-utils.js';
 import { assert } from '../utils/utils.js';
 import { createDropShadowFilter, DROP_SHADOW_FILTER_ID } from './drop-shadow.js';
@@ -17,11 +18,6 @@ const WINDOW_CONFIG = {
         right: 20,
         bottom: 20,
         left: 20,
-    },
-
-    colors: {
-        background: '#F5F5F5',
-        border: '#007AFF',
     },
 
     borderWidth: 2,
@@ -84,8 +80,8 @@ function createWindowFrame(container: HTMLElement, width: number, height: number
         y: '0',
         width: String(width),
         height: String(height),
-        fill: WINDOW_CONFIG.colors.background,
-        rx: '4',
+        fill: COLORS.windowBackground,
+        rx: BORDER_RADIUS,
         'data-name': 'background',
     });
 
@@ -98,9 +94,9 @@ function createWindowFrame(container: HTMLElement, width: number, height: number
         width: String(width - WINDOW_CONFIG.borderWidth),
         height: String(height - WINDOW_CONFIG.borderWidth),
         fill: 'none',
-        stroke: WINDOW_CONFIG.colors.border,
+        stroke: COLORS.windowBorder,
         'stroke-width': String(WINDOW_CONFIG.borderWidth),
-        rx: '4',
+        rx: BORDER_RADIUS,
         'data-name': 'border',
     });
 

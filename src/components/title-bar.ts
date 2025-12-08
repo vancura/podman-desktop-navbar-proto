@@ -3,6 +3,7 @@
  * macOS-style window title bar with traffic lights and centered title.
  */
 
+import { BORDER_RADIUS, COLORS, TYPOGRAPHY } from '../utils/design-tokens.js';
 import { createSvgElement } from '../utils/svg-utils.js';
 import { createTrafficLights } from './traffic-lights.js';
 
@@ -10,15 +11,7 @@ const TITLE_BAR_CONFIG = {
     height: 32,
 
     text: {
-        fontSize: 13,
         top: 16,
-        fontFamily: 'Innovator Grotesk Medium, system-ui, -apple-system, sans-serif',
-        fontWeight: '500',
-        color: '#000000',
-    },
-
-    colors: {
-        background: '#E5E5E5',
     },
 } as const;
 
@@ -44,8 +37,8 @@ export function createTitleBar(offsetX: number, offsetY: number, width: number, 
         y: String(offsetY),
         width: String(width - offsetX * 2),
         height: String(TITLE_BAR_CONFIG.height),
-        fill: TITLE_BAR_CONFIG.colors.background,
-        rx: '4',
+        fill: COLORS.titleBarBackground,
+        rx: BORDER_RADIUS,
         'data-name': 'title-bar',
     });
 
@@ -60,10 +53,10 @@ export function createTitleBar(offsetX: number, offsetY: number, width: number, 
     const titleText = createSvgElement('text', {
         x: String(width / 2),
         y: String(offsetY + TITLE_BAR_CONFIG.text.top),
-        fill: TITLE_BAR_CONFIG.text.color,
-        'font-family': TITLE_BAR_CONFIG.text.fontFamily,
-        'font-size': String(TITLE_BAR_CONFIG.text.fontSize),
-        'font-weight': TITLE_BAR_CONFIG.text.fontWeight,
+        fill: COLORS.textPrimary,
+        'font-family': TYPOGRAPHY.fontFamily,
+        'font-size': String(TYPOGRAPHY.titleFontSize),
+        'font-weight': TYPOGRAPHY.titleFontWeight,
         'text-anchor': 'middle',
         'dominant-baseline': 'middle',
         'data-node-id': '1:7',

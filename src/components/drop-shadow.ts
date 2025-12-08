@@ -3,13 +3,13 @@
  * macOS-style drop shadow SVG filter definition.
  */
 
+import { COLORS } from '../utils/design-tokens.js';
 import { createSvgElement } from '../utils/svg-utils.js';
 
 const DROP_SHADOW_CONFIG = {
     id: 'window-drop-shadow',
     offsetY: 4,
     blur: 12,
-    color: '#000000',
     opacity: 0.2,
 } as const;
 
@@ -52,7 +52,7 @@ export function createDropShadowFilter(): SVGDefsElement {
 
     // Shadow color and opacity.
     const feFlood = createSvgElement('feFlood', {
-        'flood-color': DROP_SHADOW_CONFIG.color,
+        'flood-color': COLORS.shadowColor,
         'flood-opacity': String(DROP_SHADOW_CONFIG.opacity),
         result: 'shadowColor',
     });

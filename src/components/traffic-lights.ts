@@ -3,6 +3,7 @@
  * macOS-style window control buttons (close, minimize, maximize).
  */
 
+import { COLORS } from '../utils/design-tokens.js';
 import { createSvgElement } from '../utils/svg-utils.js';
 
 const TRAFFIC_LIGHTS_CONFIG = {
@@ -10,11 +11,6 @@ const TRAFFIC_LIGHTS_CONFIG = {
     top: 9,
     spacing: 6,
     circleRadius: 6,
-    colors: {
-        close: '#FF5F57',
-        minimize: '#FFBD2E',
-        maximize: '#28CA42',
-    },
 } as const;
 
 /**
@@ -29,7 +25,7 @@ export function createTrafficLights(offsetX: number, offsetY: number): SVGGEleme
         'data-name': 'traffic lights',
     });
 
-    const { circleRadius, spacing, left, top, colors } = TRAFFIC_LIGHTS_CONFIG;
+    const { circleRadius, spacing, left, top } = TRAFFIC_LIGHTS_CONFIG;
     const circleDiameter = circleRadius * 2;
     const startX = offsetX + left + circleRadius;
     const centerY = offsetY + top + circleRadius;
@@ -39,7 +35,7 @@ export function createTrafficLights(offsetX: number, offsetY: number): SVGGEleme
         cx: String(startX),
         cy: String(centerY),
         r: String(circleRadius),
-        fill: colors.close,
+        fill: COLORS.trafficLightClose,
         'data-name': 'close',
     });
 
@@ -50,7 +46,7 @@ export function createTrafficLights(offsetX: number, offsetY: number): SVGGEleme
         cx: String(startX + circleDiameter + spacing),
         cy: String(centerY),
         r: String(circleRadius),
-        fill: colors.minimize,
+        fill: COLORS.trafficLightMinimize,
         'data-name': 'minimize',
     });
 
@@ -61,7 +57,7 @@ export function createTrafficLights(offsetX: number, offsetY: number): SVGGEleme
         cx: String(startX + (circleDiameter + spacing) * 2),
         cy: String(centerY),
         r: String(circleRadius),
-        fill: colors.maximize,
+        fill: COLORS.trafficLightMaximize,
         'data-name': 'maximize',
     });
 
