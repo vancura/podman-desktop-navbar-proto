@@ -25,18 +25,23 @@ export const en = {
     'nav.more': 'More',
 
     // Context menu - Item
+    'menu.pin': 'Pin to Top',
     'menu.pinToTop': 'Pin to Top',
     'menu.unpin': 'Unpin',
+    'menu.hide': 'Hide From Navigation Bar',
     'menu.hideFromNavBar': 'Hide From Navigation Bar',
     'menu.keyboardShortcut': 'Keyboard Shortcut...',
     'menu.extensionSettings': 'Extension Settings',
     'menu.removeExtension': 'Remove Extension',
+    'menu.configureNavbar': 'Configure Navigation Bar',
     'menu.configureNavBar': 'Configure Navigation Bar',
 
     // Context menu - Empty space
     'menu.showIconsAndTitles': 'Show Icons and Titles',
     'menu.showIconsOnly': 'Show Icons Only',
     'menu.showHiddenItems': 'Show Hidden Items',
+    'menu.noHiddenItems': '(No hidden items)',
+    'menu.resetNavbar': 'Reset Navigation Bar',
     'menu.resetNavBar': 'Reset Navigation Bar',
 
     // Context menu - Settings

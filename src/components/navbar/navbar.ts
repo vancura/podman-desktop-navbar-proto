@@ -6,6 +6,7 @@
 import type { NavBarState } from '../../state/navbar-state.js';
 import { COLORS, NAVBAR } from '../../utils/design-tokens.js';
 import { createSvgElement } from '../../utils/svg-utils.js';
+import { ContextMenuManager, type MenuItemDef } from '../overlays/context-menu.js';
 import { TooltipManager } from '../overlays/tooltip.js';
 import {
     createFadeGradient,
@@ -68,8 +69,9 @@ export class NavBar {
     private fadeTopGradientId = '';
     private fadeBottomGradientId = '';
 
-    // Tooltip
+    // Tooltip and context menu
     private tooltipManager: TooltipManager | null = null;
+    private contextMenuManager: ContextMenuManager | null = null;
     private overlayGroup: SVGGElement | null = null;
 
     // Configuration
@@ -214,7 +216,10 @@ export class NavBar {
         // Create tooltip manager
         this.tooltipManager = new TooltipManager(this.overlayGroup);
 
-        // Setup mouse event handlers for tooltips
+        // Create context menu manager
+        this.contextMenuManager = new ContextMenuManager(this.overlayGroup);
+
+        // Setup mouse event handlers for tooltips and context menus
         this.setupMouseHandlers();
     }
 
@@ -226,11 +231,12 @@ export class NavBar {
     }
 
     /**
-     * Sets up mouse event handlers for tooltips.
+     * Sets up mouse event handlers for tooltips and context menus.
      */
     private setupMouseHandlers(): void {
         this.group.addEventListener('mousemove', this.handleMouseMove.bind(this));
         this.group.addEventListener('mouseleave', this.handleMouseLeave.bind(this));
+        this.group.addEventListener('contextmenu', this.handleContextMenu.bind(this));
     }
 
     /**
@@ -278,6 +284,157 @@ export class NavBar {
      */
     private handleMouseLeave(): void {
         this.tooltipManager?.scheduleHide();
+    }
+
+    /**
+     * Handles context menu (right-click) events.
+     */
+    private handleContextMenu(e: MouseEvent): void {
+        e.preventDefault();
+
+        // Hide tooltip when showing context menu
+        this.tooltipManager?.cancel();
+
+        // Get mouse position relative to navbar
+        const rect = (this.group as unknown as SVGGraphicsElement).getBoundingClientRect?.();
+        if (!rect) return;
+
+        const x = e.clientX - rect.x;
+        const y = e.clientY - rect.y;
+
+        // Find item at position
+        const itemId = this.findItemAtPoint(x, y);
+        const item = itemId ? this.findItemById(itemId) : null;
+
+        // Build menu items based on context
+        const menuItems = item
+            ? this.buildItemContextMenu(item)
+            : this.buildEmptySpaceContextMenu();
+
+        // Get viewport dimensions
+        const viewportWidth = this.config.width;
+        const viewportHeight = this.config.height;
+
+        // Show context menu
+        this.contextMenuManager?.show(
+            { items: menuItems, x, y },
+            viewportWidth,
+            viewportHeight,
+            (selectedItemId) => this.handleContextMenuSelect(selectedItemId, item),
+            () => {
+                // Menu closed
+            },
+        );
+    }
+
+    /**
+     * Builds context menu for a navbar item.
+     */
+    private buildItemContextMenu(item: import('../../state/navigation-items.js').NavItem): MenuItemDef[] {
+        const items: MenuItemDef[] = [];
+
+        // Pin/Unpin action
+        if (item.canPin) {
+            const isPinned = item.iconVariant === 'filled';
+            items.push({
+                id: isPinned ? 'unpin' : 'pin',
+                labelKey: isPinned ? 'menu.unpin' : 'menu.pin',
+                icon: 'pin',
+            });
+        }
+
+        // Hide action
+        if (item.canHide) {
+            items.push({
+                id: 'hide',
+                labelKey: 'menu.hide',
+                icon: 'eyeOff',
+            });
+        }
+
+        // Separator
+        if (items.length > 0) {
+            items.push({ id: 'sep1', labelKey: '', isSeparator: true });
+        }
+
+        // Keyboard shortcut
+        items.push({
+            id: 'shortcut',
+            labelKey: 'menu.keyboardShortcut',
+            icon: 'keyboard',
+        });
+
+        // For extensions
+        if (item.id.includes('extension') || item.id === 'extensions') {
+            items.push({
+                id: 'extensionSettings',
+                labelKey: 'menu.extensionSettings',
+                icon: 'settings',
+            });
+            items.push({
+                id: 'removeExtension',
+                labelKey: 'menu.removeExtension',
+                icon: 'trash',
+                isDestructive: true,
+            });
+        }
+
+        // Separator
+        items.push({ id: 'sep2', labelKey: '', isSeparator: true });
+
+        // Configure navbar
+        items.push({
+            id: 'configureNavbar',
+            labelKey: 'menu.configureNavbar',
+        });
+
+        return items;
+    }
+
+    /**
+     * Builds context menu for empty navbar space.
+     */
+    private buildEmptySpaceContextMenu(): MenuItemDef[] {
+        return [
+            {
+                id: 'toggleIconMode',
+                labelKey: this.displayMode === 'icons-only' ? 'menu.showIconsAndTitles' : 'menu.showIconsOnly',
+            },
+            {
+                id: 'showHiddenItems',
+                labelKey: 'menu.showHiddenItems',
+                submenu: [
+                    { id: 'noHiddenItems', labelKey: 'menu.noHiddenItems', disabled: true },
+                ],
+            },
+            { id: 'sep1', labelKey: '', isSeparator: true },
+            {
+                id: 'configureNavbar',
+                labelKey: 'menu.configureNavbar',
+            },
+            {
+                id: 'resetNavbar',
+                labelKey: 'menu.resetNavbar',
+            },
+        ];
+    }
+
+    /**
+     * Handles context menu item selection.
+     */
+    private handleContextMenuSelect(
+        menuItemId: string,
+        _item: import('../../state/navigation-items.js').NavItem | null,
+    ): void {
+        // For now, just log the selection
+        // In a real app, these would trigger state changes
+        console.log('Context menu selected:', menuItemId);
+
+        // Handle toggle icon mode
+        if (menuItemId === 'toggleIconMode') {
+            const newMode = this.displayMode === 'icons-only' ? 'icons-titles' : 'icons-only';
+            this.setDisplayMode(newMode);
+        }
     }
 
     /**
@@ -727,9 +884,12 @@ export class NavBar {
             this.scrollbarHideTimeout();
         }
 
-        // Cleanup tooltip manager
+        // Cleanup tooltip and context menu managers
         if (this.tooltipManager) {
             this.tooltipManager.destroy();
+        }
+        if (this.contextMenuManager) {
+            this.contextMenuManager.destroy();
         }
 
         // Destroy panels
