@@ -3,8 +3,8 @@
  * Entry point for the dynamic SVG navigation bar.
  */
 
-import { assert } from './utils.js';
-import { SHADOW_PADDING as _SHADOW_PADDING, WindowFrame as _WindowFrame } from './window-frame.js';
+import { SHADOW_PADDING as _SHADOW_PADDING, WindowFrame as _WindowFrame } from './components/window-frame.js';
+import { assert } from './utils/utils.js';
 
 let WindowFrame = _WindowFrame;
 let SHADOW_PADDING = _SHADOW_PADDING;
@@ -24,7 +24,8 @@ function updateInfo(): void {
     const height = svgHeight - SHADOW_PADDING * 2;
 
     const info = assert(document.getElementById('info'), 'Info element not found');
-    info.textContent = `Podman Desktop Navigation Bar Prototype — Window Frame (${Math.round(width)}×${Math.round(height)}px)`;
+
+    info.textContent = `Podman Desktop Navigation Bar Prototype — Window Frame (${Math.round(width)} × ${Math.round(height)} px)`;
 }
 
 /**
@@ -63,7 +64,7 @@ main();
 
 // Handle HMR updates.
 if (import.meta.hot) {
-    import.meta.hot.accept('./window-frame.ts', (newModule) => {
+    import.meta.hot.accept('./components/window-frame.ts', (newModule) => {
         if (newModule) {
             WindowFrame = newModule.WindowFrame;
             SHADOW_PADDING = newModule.SHADOW_PADDING;
