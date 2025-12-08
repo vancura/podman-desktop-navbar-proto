@@ -6,6 +6,7 @@
 import { COLORS } from '../utils/design-tokens.js';
 import { createSvgElement } from '../utils/svg-utils.js';
 import { assert } from '../utils/utils.js';
+import { createContentArea, updateContentArea } from './content-area.js';
 import { createDropShadowFilter, DROP_SHADOW_FILTER_ID } from './drop-shadow.js';
 import { createStatusBar, updateStatusBar } from './status-bar.js';
 import { createTitleBar, updateTitleBar } from './title-bar.js';
@@ -14,13 +15,6 @@ import { createTitleBar, updateTitleBar } from './title-bar.js';
 export const SHADOW_PADDING = 100;
 
 const WINDOW_CONFIG = {
-    contentPadding: {
-        top: 34,
-        right: 0,
-        bottom: 34,
-        left: 80,
-    },
-
     borderWidth: 2,
 
     padding: {
@@ -104,50 +98,6 @@ function createWindowBorder(width: number, height: number): SVGRectElement {
         stroke: COLORS.windowBorder,
         'stroke-width': String(WINDOW_CONFIG.borderWidth),
         'data-name': 'border',
-    });
-}
-
-/**
- * Calculates the content area dimensions based on window size and padding.
- * @param padding - Border padding value.
- * @param windowWidth - Total window width.
- * @param windowHeight - Total window height.
- * @returns Object with x, y, width, and height for the content area.
- */
-function calculateContentAreaDimensions(
-    padding: number,
-    windowWidth: number,
-    windowHeight: number,
-): { x: number; y: number; width: number; height: number } {
-    const x = padding + WINDOW_CONFIG.contentPadding.left;
-    const y = padding + WINDOW_CONFIG.contentPadding.top;
-
-    return {
-        x,
-        y,
-        width: windowWidth - x - WINDOW_CONFIG.contentPadding.right - padding,
-        height: windowHeight - y - WINDOW_CONFIG.contentPadding.bottom - padding,
-    };
-}
-
-/**
- * Creates the content area rectangle.
- * @param padding - Border padding value.
- * @param width - Total window width.
- * @param height - Total window height.
- * @returns The content area SVG rect element.
- */
-function createContentArea(padding: number, width: number, height: number): SVGRectElement {
-    const dimensions = calculateContentAreaDimensions(padding, width, height);
-
-    return createSvgElement('rect', {
-        x: String(dimensions.x),
-        y: String(dimensions.y),
-        width: String(dimensions.width),
-        height: String(dimensions.height),
-        fill: COLORS.contentAreaBackground,
-        'data-node-id': '1:8',
-        'data-name': 'content',
     });
 }
 
@@ -240,23 +190,6 @@ function updateWindowBorder(svg: SVGSVGElement, width: number, height: number): 
 }
 
 /**
- * Updates the content area dimensions.
- * @param svg - The SVG element containing the content area.
- * @param padding - Border padding value.
- * @param width - New window width.
- * @param height - New window height.
- */
-function updateContentArea(svg: SVGSVGElement, padding: number, width: number, height: number): void {
-    const dimensions = calculateContentAreaDimensions(padding, width, height);
-    const contentArea = assert(svg.querySelector('rect[data-name="content"]'), 'Content area element not found');
-
-    contentArea.setAttribute('x', String(dimensions.x));
-    contentArea.setAttribute('y', String(dimensions.y));
-    contentArea.setAttribute('width', String(dimensions.width));
-    contentArea.setAttribute('height', String(dimensions.height));
-}
-
-/**
  * Handles window resize events and updates the SVG accordingly.
  * @param svg - The SVG element to update.
  */
@@ -313,7 +246,7 @@ export class WindowFrame {
      */
     getContentArea(): SVGRectElement {
         return assert(
-            this.svg.querySelector<SVGRectElement>('rect[data-name="content"]'),
+            this.svg.querySelector<SVGRectElement>('rect[data-name="content-area"]'),
             'Content area element not found',
         );
     }
