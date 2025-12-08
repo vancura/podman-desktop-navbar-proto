@@ -7,8 +7,8 @@ import { COLORS } from '../utils/design-tokens.js';
 import { createSvgElement } from '../utils/svg-utils.js';
 
 const TRAFFIC_LIGHTS_CONFIG = {
-    left: 9,
-    top: 9,
+    left: 10,
+    top: 10,
     spacing: 6,
     circleRadius: 6,
 } as const;

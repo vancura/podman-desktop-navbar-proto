@@ -15,9 +15,9 @@ export const SHADOW_PADDING = 100;
 
 const WINDOW_CONFIG = {
     contentPadding: {
-        top: 32,
+        top: 34,
         right: 0,
-        bottom: 32,
+        bottom: 34,
         left: 80,
     },
 

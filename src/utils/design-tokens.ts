@@ -6,15 +6,15 @@
 /** Color palette for all components. */
 export const COLORS = {
     // Window.
-    contentAreaBackground: '#f0f', //'#f6f6f6',
-    windowBackground: '#F5F5F5',
-    windowBorder: '#007AFF',
+    contentAreaBackground: '#e5e5e5',
+    windowBackground: '#f5f5f5',
+    windowBorder: '#007aff',
 
     // Title bar.
-    titleBarBackground: '#E5E5E5',
+    titleBarBackground: '#e5e5e5',
 
     // Status bar.
-    statusBarBackground: '#34265a',
+    statusBarBackground: '#dbd6ea',
 
     // Text.
     textPrimary: '#222',
@@ -23,9 +23,9 @@ export const COLORS = {
     shadowColor: 'black',
 
     // Traffic lights (macOS window controls).
-    trafficLightClose: '#FF5F57',
-    trafficLightMinimize: '#FFBD2E',
-    trafficLightMaximize: '#28CA42',
+    trafficLightClose: '#ff5f57',
+    trafficLightMinimize: '#ffbd2e',
+    trafficLightMaximize: '#28ca42',
 } as const;
 
 /** Typography settings. */
