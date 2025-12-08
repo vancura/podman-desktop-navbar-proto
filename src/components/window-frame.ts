@@ -1,13 +1,17 @@
 /**
  * Window Frame Component
- * macOS-style window frame with title bar, status bar, and drop shadow.
+ * macOS-style window frame with title bar, status bar, navbar, and drop shadow.
  */
 
+import { subscribeToLocale } from '../i18n/i18n.js';
+import { stateManager, type NavBarState } from '../state/navbar-state.js';
 import { COLORS } from '../utils/design-tokens.js';
 import { createSvgElement } from '../utils/svg-utils.js';
 import { assert } from '../utils/utils.js';
-import { createContentArea, updateContentArea } from './content-area.js';
+import { createContentArea, setNavbarWidth, setRtlMode, updateContentArea } from './content-area.js';
 import { createDropShadowFilter, DROP_SHADOW_FILTER_ID } from './drop-shadow.js';
+import { NavBar } from './navbar/navbar.js';
+import { createResizeHandle, setupResizeDragHandlers, updateResizeHandle } from './navbar/resize-handle.js';
 import { createStatusBar, updateStatusBar } from './status-bar.js';
 import { createTitleBar, updateTitleBar } from './title-bar.js';
 
@@ -190,23 +194,6 @@ function updateWindowBorder(svg: SVGSVGElement, width: number, height: number): 
 }
 
 /**
- * Handles window resize events and updates the SVG accordingly.
- * @param svg - The SVG element to update.
- */
-function handleResize(svg: SVGSVGElement): void {
-    const { width, height } = calculateWindowDimensions();
-    const borderPadding = WINDOW_CONFIG.borderWidth;
-
-    updateSvgDimensions(svg, width, height);
-    updateWindowBackground(svg, width, height);
-    updateWindowBorder(svg, width, height);
-
-    updateTitleBar(svg, borderPadding, width);
-    updateStatusBar(svg, borderPadding, width, height);
-    updateContentArea(svg, borderPadding, width, height);
-}
-
-/**
  * Window Frame Component
  * Manages a macOS-style window frame with responsive sizing and drop shadow.
  */
@@ -214,6 +201,11 @@ export class WindowFrame {
     private svg: SVGSVGElement;
     private resizeAnimationFrame = 0;
     private resizeHandler: () => void;
+    private navbar: NavBar | null = null;
+    private resizeHandleGroup: SVGGElement | null = null;
+    private cleanupResizeHandlers: (() => void) | null = null;
+    private unsubscribeState: (() => void) | null = null;
+    private unsubscribeLocale: (() => void) | null = null;
 
     /**
      * Creates a new window frame instance.
@@ -221,15 +213,195 @@ export class WindowFrame {
      */
     constructor(container: HTMLElement) {
         const { width, height } = calculateWindowDimensions();
+        const state = stateManager.getState();
+
+        // Initialize content area with current navbar width
+        setNavbarWidth(state.navbarWidth);
+        setRtlMode(state.isRtl);
 
         this.svg = createWindowFrame(container, width, height);
 
+        // Create navbar
+        this.createNavbar(width, height);
+
+        // Subscribe to state changes
+        this.unsubscribeState = stateManager.subscribe(this.handleStateChange.bind(this));
+
+        // Subscribe to locale changes
+        this.unsubscribeLocale = subscribeToLocale((locale) => {
+            stateManager.setLocale(locale);
+        });
+
         this.resizeHandler = (): void => {
             cancelAnimationFrame(this.resizeAnimationFrame);
-            this.resizeAnimationFrame = requestAnimationFrame(() => handleResize(this.svg));
+            this.resizeAnimationFrame = requestAnimationFrame(() => this.handleWindowResize());
         };
 
         window.addEventListener('resize', this.resizeHandler);
+    }
+
+    /**
+     * Creates the navbar and resize handle.
+     */
+    private createNavbar(windowWidth: number, windowHeight: number): void {
+        const state = stateManager.getState();
+        const borderPadding = WINDOW_CONFIG.borderWidth;
+
+        // Calculate navbar dimensions
+        const navbarX = state.isRtl
+            ? windowWidth - state.navbarWidth - borderPadding
+            : borderPadding;
+        const navbarY = borderPadding + 32; // Below title bar
+        const navbarHeight = windowHeight - navbarY - 32 - borderPadding; // Above status bar
+
+        // Create navbar
+        this.navbar = new NavBar({
+            x: navbarX,
+            y: navbarY,
+            width: state.navbarWidth,
+            height: navbarHeight,
+        });
+
+        this.navbar.updateFromState(state);
+
+        // Add navbar to window group
+        const windowGroup = this.svg.querySelector('g[filter]');
+        if (windowGroup) {
+            // Insert navbar before content area
+            const contentAreaGroup = this.svg.querySelector('g[data-name="content-area-group"]');
+            if (contentAreaGroup) {
+                windowGroup.insertBefore(this.navbar.getGroup(), contentAreaGroup);
+            } else {
+                windowGroup.appendChild(this.navbar.getGroup());
+            }
+        }
+
+        // Create resize handle
+        const handleX = state.isRtl
+            ? windowWidth - state.navbarWidth - borderPadding
+            : borderPadding + state.navbarWidth;
+
+        this.resizeHandleGroup = createResizeHandle({
+            x: handleX,
+            y: navbarY,
+            height: navbarHeight,
+            isRtl: state.isRtl,
+        });
+
+        if (windowGroup) {
+            windowGroup.appendChild(this.resizeHandleGroup);
+        }
+
+        // Setup resize drag handlers
+        this.cleanupResizeHandlers = setupResizeDragHandlers(this.resizeHandleGroup, {
+            isRtl: () => stateManager.getState().isRtl,
+            getCurrentWidth: () => stateManager.getState().navbarWidth,
+            onDragStart: () => stateManager.startResizeDrag(),
+            onDrag: (newWidth) => stateManager.setNavbarWidth(newWidth),
+            onDragEnd: () => stateManager.endResizeDrag(),
+            onDragCancel: () => stateManager.cancelResizeDrag(),
+        });
+    }
+
+    /**
+     * Handles state changes from the state manager.
+     */
+    private handleStateChange(state: NavBarState, prevState: NavBarState): void {
+        const { width, height } = calculateWindowDimensions();
+        const borderPadding = WINDOW_CONFIG.borderWidth;
+
+        // Update content area if navbar width or RTL changed
+        if (state.navbarWidth !== prevState.navbarWidth || state.isRtl !== prevState.isRtl) {
+            setNavbarWidth(state.navbarWidth);
+            setRtlMode(state.isRtl);
+            updateContentArea(this.svg, borderPadding, width, height);
+
+            // Update navbar dimensions
+            if (this.navbar) {
+                const navbarX = state.isRtl
+                    ? width - state.navbarWidth - borderPadding
+                    : borderPadding;
+                const navbarY = borderPadding + 32;
+                const navbarHeight = height - navbarY - 32 - borderPadding;
+
+                this.navbar.updateDimensions({
+                    x: navbarX,
+                    y: navbarY,
+                    width: state.navbarWidth,
+                    height: navbarHeight,
+                });
+            }
+
+            // Update resize handle position
+            if (this.resizeHandleGroup) {
+                const handleX = state.isRtl
+                    ? width - state.navbarWidth - borderPadding
+                    : borderPadding + state.navbarWidth;
+                const navbarY = borderPadding + 32;
+                const navbarHeight = height - navbarY - 32 - borderPadding;
+
+                updateResizeHandle(this.resizeHandleGroup, {
+                    x: handleX,
+                    y: navbarY,
+                    height: navbarHeight,
+                    isRtl: state.isRtl,
+                });
+            }
+        }
+
+        // Update navbar from state
+        if (this.navbar) {
+            this.navbar.updateFromState(state);
+        }
+    }
+
+    /**
+     * Handles window resize events.
+     */
+    private handleWindowResize(): void {
+        const { width, height } = calculateWindowDimensions();
+        const borderPadding = WINDOW_CONFIG.borderWidth;
+        const state = stateManager.getState();
+
+        // Update SVG dimensions
+        updateSvgDimensions(this.svg, width, height);
+        updateWindowBackground(this.svg, width, height);
+        updateWindowBorder(this.svg, width, height);
+        updateTitleBar(this.svg, borderPadding, width);
+        updateStatusBar(this.svg, borderPadding, width, height);
+        updateContentArea(this.svg, borderPadding, width, height);
+
+        // Update navbar dimensions
+        if (this.navbar) {
+            const navbarX = state.isRtl
+                ? width - state.navbarWidth - borderPadding
+                : borderPadding;
+            const navbarY = borderPadding + 32;
+            const navbarHeight = height - navbarY - 32 - borderPadding;
+
+            this.navbar.updateDimensions({
+                x: navbarX,
+                y: navbarY,
+                width: state.navbarWidth,
+                height: navbarHeight,
+            });
+        }
+
+        // Update resize handle
+        if (this.resizeHandleGroup) {
+            const handleX = state.isRtl
+                ? width - state.navbarWidth - borderPadding
+                : borderPadding + state.navbarWidth;
+            const navbarY = borderPadding + 32;
+            const navbarHeight = height - navbarY - 32 - borderPadding;
+
+            updateResizeHandle(this.resizeHandleGroup, {
+                x: handleX,
+                y: navbarY,
+                height: navbarHeight,
+                isRtl: state.isRtl,
+            });
+        }
     }
 
     /**
@@ -238,6 +410,14 @@ export class WindowFrame {
      */
     getSvg(): SVGSVGElement {
         return this.svg;
+    }
+
+    /**
+     * Gets the navbar instance.
+     * @returns The navbar or null.
+     */
+    getNavbar(): NavBar | null {
+        return this.navbar;
     }
 
     /**
@@ -257,6 +437,23 @@ export class WindowFrame {
     destroy(): void {
         window.removeEventListener('resize', this.resizeHandler);
         cancelAnimationFrame(this.resizeAnimationFrame);
+
+        if (this.cleanupResizeHandlers) {
+            this.cleanupResizeHandlers();
+        }
+
+        if (this.unsubscribeState) {
+            this.unsubscribeState();
+        }
+
+        if (this.unsubscribeLocale) {
+            this.unsubscribeLocale();
+        }
+
+        if (this.navbar) {
+            this.navbar.destroy();
+        }
+
         this.svg.remove();
     }
 }
