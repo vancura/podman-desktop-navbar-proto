@@ -19,6 +19,7 @@ function createSvgElement<K extends keyof SVGElementTagNameMap>(
     for (const [key, value] of Object.entries(attrs)) {
         element.setAttribute(key, value);
     }
+
     return element;
 }
 
@@ -37,6 +38,7 @@ function initNavbarSvg(container: HTMLElement, width: number, height: number): S
     });
 
     container.appendChild(svg);
+
     return svg;
 }
 
@@ -49,6 +51,7 @@ function main() {
 
     if (!container) {
         showError('Container element not found');
+
         return;
     }
 
@@ -75,11 +78,14 @@ function main() {
         'font-size': '14',
         'text-anchor': 'middle',
     });
+
     text.textContent = 'Navigation Bar Placeholder';
+
     svg.appendChild(text);
 
     // Update info
     const info = document.getElementById('info');
+
     if (info) {
         info.textContent = 'Podman Desktop Navigation Bar Prototype — SVG initialized';
     }
@@ -92,9 +98,11 @@ function main() {
  */
 function showError(message: string) {
     const errorDiv = document.getElementById('error');
+
     if (errorDiv) {
         errorDiv.textContent = `Error: ${message}`;
     }
+
     console.error(message);
 }
 
