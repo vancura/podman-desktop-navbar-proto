@@ -6,6 +6,20 @@
 import type { NavBarState } from '../../state/navbar-state.js';
 import { COLORS, NAVBAR } from '../../utils/design-tokens.js';
 import { createSvgElement } from '../../utils/svg-utils.js';
+import {
+    createFadeGradient,
+    createFadeGradientDef,
+    updateFadeGradient,
+    updateFadeGradientVisibility,
+} from '../scrollbar/fade-gradient.js';
+import {
+    createScrollbar,
+    hideScrollbar,
+    needsScrollbar,
+    setupScrollbarDragHandlers,
+    showScrollbar,
+    updateScrollbar,
+} from '../scrollbar/scrollbar.js';
 import { BottomPanel } from './bottom-panel.js';
 import { EssentialsPanel } from './essentials-panel.js';
 import { createNavBarDivider, getDividerTotalHeight } from './navbar-divider.js';
@@ -21,6 +35,7 @@ export interface NavBarConfig {
     width: number;
     height: number;
 }
+
 
 /**
  * Main NavBar component.
@@ -42,6 +57,15 @@ export class NavBar {
 
     // Dividers
     private dividers: Map<string, SVGGElement> = new Map();
+
+    // Scrollbar and fade gradients
+    private scrollbarGroup: SVGGElement | null = null;
+    private fadeGradientTop: SVGGElement | null = null;
+    private fadeGradientBottom: SVGGElement | null = null;
+    private cleanupScrollbarHandlers: (() => void) | null = null;
+    private scrollbarHideTimeout: (() => void) | null = null;
+    private fadeTopGradientId = '';
+    private fadeBottomGradientId = '';
 
     // Configuration
     private config: NavBarConfig;
@@ -87,9 +111,16 @@ export class NavBar {
         });
         this.clipPath.appendChild(this.clipRect);
 
-        // Add clip path to defs (we'll need to move this to SVG defs later)
+        // Add clip path and gradient defs
         const defs = createSvgElement('defs', {});
         defs.appendChild(this.clipPath);
+
+        // Add fade gradient definitions
+        this.fadeTopGradientId = `navbar-fade-top-${Date.now()}`;
+        this.fadeBottomGradientId = `navbar-fade-bottom-${Date.now()}`;
+        defs.appendChild(createFadeGradientDef(this.fadeTopGradientId, 'top'));
+        defs.appendChild(createFadeGradientDef(this.fadeBottomGradientId, 'bottom'));
+
         this.group.appendChild(defs);
 
         // Create content group
@@ -118,6 +149,87 @@ export class NavBar {
 
         // Bottom panel is outside scrollable area (sticky)
         this.contentGroup.appendChild(this.bottomPanel.getGroup());
+
+        // Create fade gradients (added to group, not content group, so they're not clipped)
+        this.fadeGradientTop = createFadeGradient(
+            { position: 'top', width: config.width, parentHeight: config.height },
+            this.fadeTopGradientId,
+        );
+        this.fadeGradientBottom = createFadeGradient(
+            { position: 'bottom', width: config.width, parentHeight: config.height },
+            this.fadeBottomGradientId,
+        );
+        this.group.appendChild(this.fadeGradientTop);
+        this.group.appendChild(this.fadeGradientBottom);
+
+        // Create scrollbar
+        this.scrollbarGroup = createScrollbar({
+            x: config.width - NAVBAR.scrollbar.width - 2,
+            y: 0,
+            height: config.height,
+            contentHeight: config.height,
+            scrollTop: 0,
+        });
+        this.group.appendChild(this.scrollbarGroup);
+
+        // Setup scrollbar drag handlers
+        this.cleanupScrollbarHandlers = setupScrollbarDragHandlers(this.scrollbarGroup, {
+            getConfig: () => ({
+                x: this.config.width - NAVBAR.scrollbar.width - 2,
+                y: 0,
+                height: this.viewportHeight,
+                contentHeight: this.scrollableHeight,
+                scrollTop: this.scrollTop,
+            }),
+            onScroll: (newScrollTop) => {
+                this.setScrollTop(newScrollTop);
+            },
+            onDragStart: () => {
+                if (this.scrollbarHideTimeout) {
+                    this.scrollbarHideTimeout();
+                    this.scrollbarHideTimeout = null;
+                }
+            },
+            onDragEnd: () => {
+                if (this.scrollbarGroup) {
+                    this.scrollbarHideTimeout = showScrollbar(this.scrollbarGroup, true);
+                }
+            },
+        });
+
+        // Setup wheel event handling
+        this.setupWheelHandler();
+    }
+
+    /**
+     * Sets up wheel event handling for scrolling.
+     */
+    private setupWheelHandler(): void {
+        this.group.addEventListener('wheel', this.handleWheel.bind(this), { passive: false });
+    }
+
+    /**
+     * Handles wheel events for scrolling.
+     */
+    private handleWheel(e: WheelEvent): void {
+        if (this.maxScrollTop <= 0) return;
+
+        e.preventDefault();
+        const newScrollTop = Math.max(0, Math.min(this.maxScrollTop, this.scrollTop + e.deltaY));
+
+        if (newScrollTop !== this.scrollTop) {
+            this.scrollTop = newScrollTop;
+            this.updateScrollPosition();
+            this.updateScrollVisuals();
+
+            // Show scrollbar and fade gradients
+            if (this.scrollbarGroup) {
+                if (this.scrollbarHideTimeout) {
+                    this.scrollbarHideTimeout();
+                }
+                this.scrollbarHideTimeout = showScrollbar(this.scrollbarGroup, true);
+            }
+        }
     }
 
     /**
@@ -159,6 +271,22 @@ export class NavBar {
         this.backgroundRect.setAttribute('height', String(config.height));
         this.clipRect.setAttribute('width', String(config.width));
         this.clipRect.setAttribute('height', String(config.height));
+
+        // Update fade gradients
+        if (this.fadeGradientTop) {
+            updateFadeGradient(this.fadeGradientTop, {
+                position: 'top',
+                width: config.width,
+                parentHeight: this.viewportHeight,
+            });
+        }
+        if (this.fadeGradientBottom) {
+            updateFadeGradient(this.fadeGradientBottom, {
+                position: 'bottom',
+                width: config.width,
+                parentHeight: this.viewportHeight,
+            });
+        }
 
         this.render();
     }
@@ -340,6 +468,41 @@ export class NavBar {
         // Position bottom panel
         context.y = this.viewportHeight;
         this.bottomPanel.render(context);
+
+        // Update scrollbar and fade gradient dimensions
+        if (this.scrollbarGroup) {
+            updateScrollbar(this.scrollbarGroup, {
+                x: this.config.width - NAVBAR.scrollbar.width - 2,
+                y: 0,
+                height: this.viewportHeight,
+                contentHeight: this.scrollableHeight,
+                scrollTop: this.scrollTop,
+            });
+
+            // Hide scrollbar if not needed
+            if (!needsScrollbar(this.viewportHeight, this.scrollableHeight)) {
+                hideScrollbar(this.scrollbarGroup);
+            }
+        }
+
+        // Update fade gradients
+        if (this.fadeGradientTop) {
+            updateFadeGradient(this.fadeGradientTop, {
+                position: 'top',
+                width: this.config.width,
+                parentHeight: this.viewportHeight,
+            });
+        }
+        if (this.fadeGradientBottom) {
+            updateFadeGradient(this.fadeGradientBottom, {
+                position: 'bottom',
+                width: this.config.width,
+                parentHeight: this.viewportHeight,
+            });
+        }
+
+        // Update scroll visuals
+        this.updateScrollVisuals();
     }
 
     /**
@@ -347,6 +510,30 @@ export class NavBar {
      */
     private updateScrollPosition(): void {
         this.scrollableGroup.setAttribute('transform', `translate(0, ${-this.scrollTop})`);
+    }
+
+    /**
+     * Updates scrollbar and fade gradient visuals.
+     */
+    private updateScrollVisuals(): void {
+        // Update scrollbar position
+        if (this.scrollbarGroup && needsScrollbar(this.viewportHeight, this.scrollableHeight)) {
+            updateScrollbar(this.scrollbarGroup, {
+                x: this.config.width - NAVBAR.scrollbar.width - 2,
+                y: 0,
+                height: this.viewportHeight,
+                contentHeight: this.scrollableHeight,
+                scrollTop: this.scrollTop,
+            });
+        }
+
+        // Update fade gradient visibility
+        if (this.fadeGradientTop) {
+            updateFadeGradientVisibility(this.fadeGradientTop, this.scrollTop > 0);
+        }
+        if (this.fadeGradientBottom) {
+            updateFadeGradientVisibility(this.fadeGradientBottom, this.scrollTop < this.maxScrollTop);
+        }
     }
 
     /**
@@ -449,6 +636,15 @@ export class NavBar {
      * Destroys the navbar.
      */
     destroy(): void {
+        // Cleanup scrollbar handlers
+        if (this.cleanupScrollbarHandlers) {
+            this.cleanupScrollbarHandlers();
+        }
+        if (this.scrollbarHideTimeout) {
+            this.scrollbarHideTimeout();
+        }
+
+        // Destroy panels
         this.essentialsPanel.destroy();
         this.pinnedPanel.destroy();
         this.regularPanel.destroy();
