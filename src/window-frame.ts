@@ -28,7 +28,7 @@ const WINDOW_CONFIG = {
     titleText: {
         fontSize: 11,
         top: 15,
-        fontFamily: 'IBM Plex Sans, system-ui, -apple-system, sans-serif',
+        fontFamily: 'Innovator Grotesk Medium, system-ui, -apple-system, sans-serif',
         fontWeight: '500',
         color: '#000000',
     },
