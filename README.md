@@ -1,38 +1,22 @@
-# WebGPU Template
+# Podman Desktop Navigation Bar Prototype
 
-[![CI](https://github.com/ambilab/webgpu-template/actions/workflows/ci.yml/badge.svg)](https://github.com/ambilab/webgpu-template/actions/workflows/ci.yml)
-[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
-[![pnpm](https://img.shields.io/badge/pnpm-10.24.0-yellow.svg)](https://pnpm.io/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)](https://www.typescriptlang.org/)
-[![WebGPU](https://img.shields.io/badge/WebGPU-Enabled-green.svg)](https://www.w3.org/TR/webgpu/)
-
-A minimal starter template for WebGPU projects using TypeScript. Get up and running with modern GPU programming on the
-web in minutes.
+A prototype for the Podman Desktop navigation bar using dynamic SVG and TypeScript.
 
 ## Features
 
-- **WebGPU ready** — Pre-configured with `@webgpu/types` for full TypeScript support
+- **Dynamic SVG** — Programmatically generated and manipulated SVG elements
+- **TypeScript** — Full type safety for SVG manipulation
 - **Modern tooling** — Vite for fast development with HMR
-- **Strict TypeScript** — Comprehensive type checking enabled
-- **Code quality** — ESLint, Prettier, and Husky pre-configured
-- **Release workflow** — Changesets for versioning and publishing
+- **Code quality** — ESLint, Prettier, Biome, and Husky pre-configured
 
 ## Prerequisites
 
 - **Node.js** v20 or higher (LTS recommended)
 - **pnpm** v10.24.0 or higher
-- A **WebGPU-compatible browser**:
-  - Chrome/Edge 113+ (Windows, macOS, Linux, Android)
-  - Firefox Nightly (with `dom.webgpu.enabled` in `about:config`)
-  - Safari 18+ (macOS/iOS)
 
 ## Quick Start
 
 ```bash
-# Clone the repository
-git clone https://github.com/ambilab/webgpu-template.git
-cd webgpu-template
-
 # Install dependencies
 pnpm install
 
@@ -40,7 +24,7 @@ pnpm install
 pnpm dev
 ```
 
-Open your browser at `http://localhost:5173` to see a WebGPU-rendered triangle.
+Open your browser at `http://localhost:5173` to see the navigation bar prototype.
 
 ## Scripts
 
@@ -51,20 +35,17 @@ Open your browser at `http://localhost:5173` to see a WebGPU-rendered triangle.
 | `pnpm preview`      | Preview the production build        |
 | `pnpm lint`         | Run ESLint                          |
 | `pnpm lint:fix`     | Run ESLint with auto-fix            |
-| `pnpm format`       | Format code with Prettier           |
+| `pnpm format`       | Format code with Biome and Prettier |
 | `pnpm format:check` | Check formatting without changes    |
 | `pnpm typecheck`    | Run TypeScript type checking        |
 | `pnpm clean`        | Remove dist and cache directories   |
-| `pnpm changeset`    | Create a changeset for version bump |
-| `pnpm version:bump` | Bump version based on changesets    |
-| `pnpm release`      | Build library and publish to npm    |
 
 ## Project Structure
 
 ```text
-webgpu-template/
+podman-desktop-navbar-proto/
 ├── src/
-│   └── main.ts           # WebGPU demo entry point
+│   └── main.ts           # SVG navigation bar entry point
 ├── index.html            # HTML template
 ├── package.json
 ├── tsconfig.json         # TypeScript configuration
@@ -74,58 +55,11 @@ webgpu-template/
 └── commitlint.config.js  # Commit message linting
 ```
 
-## How It Works
-
-The template includes a minimal WebGPU demo that:
-
-1. **Checks WebGPU support** — Displays a helpful error if unavailable
-2. **Initializes the GPU** — Requests adapter and device
-3. **Configures the canvas** — Sets up the WebGPU context
-4. **Creates shaders** — Vertex and fragment shaders in WGSL
-5. **Builds a pipeline** — Configures the render pipeline
-6. **Renders a triangle** — Clears to dark gray, draws a blue triangle
-
-```typescript
-// Example: Creating a shader module
-const vertexShaderModule = device.createShaderModule({
-  label: 'Vertex Shader',
-  code: `
-        @vertex
-        fn main(@builtin(vertex_index) vertexIndex: u32) -> @builtin(position) vec4f {
-            var positions = array<vec2f, 3>(
-                vec2f(0.0, 0.5),
-                vec2f(-0.5, -0.5),
-                vec2f(0.5, -0.5)
-            );
-            return vec4f(positions[vertexIndex], 0.0, 1.0);
-        }
-    `,
-});
-```
-
-## Browser Compatibility
-
-| Browser     | Version | Status                      |
-| ----------- | ------- | --------------------------- |
-| Chrome/Edge | 113+    | Enabled by default          |
-| Firefox     | Nightly | Enable `dom.webgpu.enabled` |
-| Safari      | 18+     | Enabled by default          |
-
-The demo displays a user-friendly error message if WebGPU is not supported.
-
 ## Technologies
 
-- **[WebGPU](https://www.w3.org/TR/webgpu/)** — Modern GPU API for the web
+- **[SVG](https://developer.mozilla.org/en-US/docs/Web/SVG)** — Scalable Vector Graphics
 - **[TypeScript](https://www.typescriptlang.org/)** — Type-safe JavaScript
 - **[Vite](https://vite.dev/)** — Fast build tool with HMR
-- **[WGSL](https://www.w3.org/TR/WGSL/)** — WebGPU Shading Language
-
-## Resources
-
-- [WebGPU Specification](https://www.w3.org/TR/webgpu/)
-- [WGSL Specification](https://www.w3.org/TR/WGSL/)
-- [WebGPU Fundamentals](https://webgpufundamentals.org/)
-- [Tour of WGSL](https://google.github.io/tour-of-wgsl/)
 
 ## License
 

@@ -4,9 +4,6 @@ export default defineConfig(({ command }) => {
     const isProduction = command === 'build';
 
     return {
-        // Handle WGSL shader files as raw text
-        assetsInclude: ['**/*.wgsl'],
-
         build: {
             target: 'es2022',
             minify: isProduction ? 'esbuild' : false,

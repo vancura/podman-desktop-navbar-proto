@@ -1,35 +1,28 @@
 {
-  "name": "webgpu-template",
+  "name": "podman-desktop-navbar-proto",
   "version": "0.0.1",
   "type": "module",
-  "description": "A template for WebGPU projects using TypeScript.",
+  "description": "Podman Desktop Navigation Bar prototype using dynamic SVG and TypeScript.",
   "author": "Václav Vančura",
   "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ambilab/webgpu-template.git"
-  },
-  "homepage": "https://github.com/ambilab/webgpu-template#readme",
-  "bugs": {
-    "url": "https://github.com/ambilab/webgpu-template/issues"
-  },
   "keywords": [
-    "webgpu",
+    "podman-desktop",
+    "navigation",
+    "svg",
     "typescript",
-    "template",
-    "webgpu-template"
+    "prototype"
   ],
   "engines": {
     "node": ">=20.0.0"
   },
-  "main": "./dist/webgpu-template.cjs",
-  "module": "./dist/webgpu-template.js",
-  "types": "./dist/WebGPU-Template.d.ts",
+  "main": "./dist/podman-desktop-navbar-proto.cjs",
+  "module": "./dist/podman-desktop-navbar-proto.js",
+  "types": "./dist/podman-desktop-navbar-proto.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/WebGPU-Template.d.ts",
-      "import": "./dist/webgpu-template.js",
-      "require": "./dist/webgpu-template.cjs"
+      "types": "./dist/podman-desktop-navbar-proto.d.ts",
+      "import": "./dist/podman-desktop-navbar-proto.js",
+      "require": "./dist/podman-desktop-navbar-proto.cjs"
     }
   },
   "files": [
@@ -70,7 +63,6 @@
     "@types/node": "^24.10.1",
     "@typescript-eslint/eslint-plugin": "^8.48.1",
     "@typescript-eslint/parser": "^8.48.1",
-    "@webgpu/types": "^0.1.67",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-jsdoc": "^61.5.0",

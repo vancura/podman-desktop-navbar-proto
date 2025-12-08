@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>WebGPU Demo</title>
+        <title>Podman Desktop Navigation Bar Prototype</title>
         <style>
             * {
                 margin: 0;
@@ -23,9 +23,11 @@
                 color: #fff;
             }
 
-            canvas {
+            #navbar-container {
                 border: 1px solid #333;
                 border-radius: 4px;
+                background: #0d0d0d;
+                padding: 1rem;
             }
 
             #info {
@@ -44,8 +46,8 @@
     </head>
 
     <body>
-        <canvas id="canvas" width="800" height="600"></canvas>
-        <div id="info">WebGPU Demo</div>
+        <div id="navbar-container"></div>
+        <div id="info">Podman Desktop Navigation Bar Prototype</div>
         <div id="error"></div>
         <script type="module" src="/src/main.ts"></script>
     </body>
