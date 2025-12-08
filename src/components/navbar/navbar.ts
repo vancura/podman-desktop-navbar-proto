@@ -6,6 +6,7 @@
 import type { NavBarState } from '../../state/navbar-state.js';
 import { COLORS, NAVBAR } from '../../utils/design-tokens.js';
 import { createSvgElement } from '../../utils/svg-utils.js';
+import { TooltipManager } from '../overlays/tooltip.js';
 import {
     createFadeGradient,
     createFadeGradientDef,
@@ -66,6 +67,10 @@ export class NavBar {
     private scrollbarHideTimeout: (() => void) | null = null;
     private fadeTopGradientId = '';
     private fadeBottomGradientId = '';
+
+    // Tooltip
+    private tooltipManager: TooltipManager | null = null;
+    private overlayGroup: SVGGElement | null = null;
 
     // Configuration
     private config: NavBarConfig;
@@ -199,6 +204,18 @@ export class NavBar {
 
         // Setup wheel event handling
         this.setupWheelHandler();
+
+        // Create overlay group for tooltips and menus
+        this.overlayGroup = createSvgElement('g', {
+            'data-name': 'navbar-overlays',
+        });
+        this.group.appendChild(this.overlayGroup);
+
+        // Create tooltip manager
+        this.tooltipManager = new TooltipManager(this.overlayGroup);
+
+        // Setup mouse event handlers for tooltips
+        this.setupMouseHandlers();
     }
 
     /**
@@ -206,6 +223,72 @@ export class NavBar {
      */
     private setupWheelHandler(): void {
         this.group.addEventListener('wheel', this.handleWheel.bind(this), { passive: false });
+    }
+
+    /**
+     * Sets up mouse event handlers for tooltips.
+     */
+    private setupMouseHandlers(): void {
+        this.group.addEventListener('mousemove', this.handleMouseMove.bind(this));
+        this.group.addEventListener('mouseleave', this.handleMouseLeave.bind(this));
+    }
+
+    /**
+     * Handles mouse move events for tooltip display.
+     */
+    private handleMouseMove(e: MouseEvent): void {
+        // Only show tooltips in icon-only mode
+        if (this.displayMode !== 'icons-only') {
+            this.tooltipManager?.cancel();
+            return;
+        }
+
+        // Get mouse position relative to navbar
+        const rect = (this.group as unknown as SVGGraphicsElement).getBoundingClientRect?.();
+        if (!rect) return;
+
+        const x = e.clientX - rect.x;
+        const y = e.clientY - rect.y;
+
+        // Find item at position
+        const itemId = this.findItemAtPoint(x, y);
+
+        if (itemId) {
+            // Find the item data
+            const item = this.findItemById(itemId);
+            const bounds = this.getItemBounds(itemId);
+
+            if (item && bounds) {
+                this.tooltipManager?.scheduleShow({
+                    item,
+                    anchorX: bounds.x,
+                    anchorY: bounds.y,
+                    anchorWidth: bounds.width,
+                    anchorHeight: bounds.height,
+                    navbarWidth: this.config.width,
+                });
+            }
+        } else {
+            this.tooltipManager?.scheduleHide();
+        }
+    }
+
+    /**
+     * Handles mouse leave events.
+     */
+    private handleMouseLeave(): void {
+        this.tooltipManager?.scheduleHide();
+    }
+
+    /**
+     * Finds an item by ID across all panels.
+     */
+    private findItemById(itemId: string): import('../../state/navigation-items.js').NavItem | null {
+        for (const panel of [this.essentialsPanel, this.pinnedPanel, this.regularPanel, this.bottomPanel]) {
+            const item = panel.getItems().find((i) => i.id === itemId);
+            if (item) return item;
+        }
+        return null;
     }
 
     /**
@@ -642,6 +725,11 @@ export class NavBar {
         }
         if (this.scrollbarHideTimeout) {
             this.scrollbarHideTimeout();
+        }
+
+        // Cleanup tooltip manager
+        if (this.tooltipManager) {
+            this.tooltipManager.destroy();
         }
 
         // Destroy panels
