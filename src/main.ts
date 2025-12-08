@@ -3,108 +3,87 @@
  * Entry point for the dynamic SVG navigation bar.
  */
 
-const SVG_NS = 'http://www.w3.org/2000/svg';
+import { assert } from './utils.js';
+import { SHADOW_PADDING as _SHADOW_PADDING, WindowFrame as _WindowFrame } from './window-frame.js';
+
+let WindowFrame = _WindowFrame;
+let SHADOW_PADDING = _SHADOW_PADDING;
+let windowFrame: InstanceType<typeof WindowFrame> | null = null;
+let resizeHandler: (() => void) | null = null;
 
 /**
- * Creates an SVG element with the specified attributes.
- * @param tag - The SVG element tag name.
- * @param attrs - Attributes to set on the element.
- * @returns The created SVG element.
+ * Updates the info display with the current window dimensions.
  */
-function createSvgElement<K extends keyof SVGElementTagNameMap>(
-    tag: K,
-    attrs: Record<string, string> = {},
-): SVGElementTagNameMap[K] {
-    const element = document.createElementNS(SVG_NS, tag);
-    for (const [key, value] of Object.entries(attrs)) {
-        element.setAttribute(key, value);
-    }
+function updateInfo(): void {
+    const svg = assert(windowFrame, 'WindowFrame not initialized').getSvg();
 
-    return element;
-}
+    const svgWidth = parseFloat(assert(svg.getAttribute('width'), 'SVG missing width attribute'));
+    const svgHeight = parseFloat(assert(svg.getAttribute('height'), 'SVG missing height attribute'));
 
-/**
- * Initializes the navigation bar SVG.
- * @param container - The container element to append the SVG to.
- * @param width - Width of the SVG viewport.
- * @param height - Height of the SVG viewport.
- * @returns The created SVG element.
- */
-function initNavbarSvg(container: HTMLElement, width: number, height: number): SVGSVGElement {
-    const svg = createSvgElement('svg', {
-        width: String(width),
-        height: String(height),
-        viewBox: `0 0 ${width} ${height}`,
-    });
+    const width = svgWidth - SHADOW_PADDING * 2;
+    const height = svgHeight - SHADOW_PADDING * 2;
 
-    container.appendChild(svg);
-
-    return svg;
+    const info = assert(document.getElementById('info'), 'Info element not found');
+    info.textContent = `Podman Desktop Navigation Bar Prototype — Window Frame (${Math.round(width)}×${Math.round(height)}px)`;
 }
 
 /**
  * Main application entry point.
- * Sets up the SVG navigation bar prototype.
+ * Sets up the SVG window frame prototype.
  */
-function main() {
-    const container = document.getElementById('navbar-container');
+function main(): void {
+    const container = assert(document.getElementById('prototype-container'), 'Container element not found');
 
-    if (!container) {
-        showError('Container element not found');
-
-        return;
+    // Clean up existing instance if any (for HMR).
+    if (windowFrame) {
+        windowFrame.destroy();
     }
 
-    // Initialize SVG with placeholder dimensions
-    const svg = initNavbarSvg(container, 800, 60);
-
-    // Add a placeholder rectangle to verify SVG is working
-    const placeholder = createSvgElement('rect', {
-        x: '0',
-        y: '0',
-        width: '800',
-        height: '60',
-        fill: '#292929',
-        rx: '4',
-    });
-    svg.appendChild(placeholder);
-
-    // Add placeholder text
-    const text = createSvgElement('text', {
-        x: '400',
-        y: '35',
-        fill: '#666',
-        'font-family': 'system-ui, -apple-system, sans-serif',
-        'font-size': '14',
-        'text-anchor': 'middle',
-    });
-
-    text.textContent = 'Navigation Bar Placeholder';
-
-    svg.appendChild(text);
-
-    // Update info
-    const info = document.getElementById('info');
-
-    if (info) {
-        info.textContent = 'Podman Desktop Navigation Bar Prototype — SVG initialized';
+    // Remove previous resize listener if any (for HMR).
+    if (resizeHandler) {
+        window.removeEventListener('resize', resizeHandler);
     }
+
+    // Clear container for HMR.
+    container.innerHTML = '';
+
+    // Create window frame component.
+    windowFrame = new WindowFrame(container);
+
+    // Set up resize handler for info updates.
+    resizeHandler = () => updateInfo();
+    window.addEventListener('resize', resizeHandler);
+
+    // Initial info update.
+    updateInfo();
 }
 
-/**
- * Displays an error message to the user.
- * Shows in both the page error div and console.
- * @param message - Error description to display.
- */
-function showError(message: string) {
-    const errorDiv = document.getElementById('error');
-
-    if (errorDiv) {
-        errorDiv.textContent = `Error: ${message}`;
-    }
-
-    console.error(message);
-}
-
-// Start the application
+// Start the application.
 main();
+
+// Handle HMR updates.
+if (import.meta.hot) {
+    import.meta.hot.accept('./window-frame.ts', (newModule) => {
+        if (newModule) {
+            WindowFrame = newModule.WindowFrame;
+            SHADOW_PADDING = newModule.SHADOW_PADDING;
+            main();
+        }
+    });
+
+    import.meta.hot.accept();
+
+    import.meta.hot.dispose(() => {
+        if (resizeHandler) {
+            window.removeEventListener('resize', resizeHandler);
+
+            resizeHandler = null;
+        }
+
+        if (windowFrame) {
+            windowFrame.destroy();
+
+            windowFrame = null;
+        }
+    });
+}
