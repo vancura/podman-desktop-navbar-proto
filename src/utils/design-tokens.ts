@@ -3,25 +3,26 @@
  * Centralized design constants for consistent styling across components.
  */
 
-/** Border radius used across window and title bar elements. */
-export const BORDER_RADIUS = '4';
-
 /** Color palette for all components. */
 export const COLORS = {
-    // Window
+    // Window.
+    contentAreaBackground: '#f0f', //'#f6f6f6',
     windowBackground: '#F5F5F5',
     windowBorder: '#007AFF',
 
-    // Title bar
+    // Title bar.
     titleBarBackground: '#E5E5E5',
 
-    // Text
-    textPrimary: '#000000',
+    // Status bar.
+    statusBarBackground: '#34265a',
 
-    // Shadow
-    shadowColor: '#000000',
+    // Text.
+    textPrimary: '#222',
 
-    // Traffic lights (macOS window controls)
+    // Shadow.
+    shadowColor: 'black',
+
+    // Traffic lights (macOS window controls).
     trafficLightClose: '#FF5F57',
     trafficLightMinimize: '#FFBD2E',
     trafficLightMaximize: '#28CA42',
@@ -30,6 +31,6 @@ export const COLORS = {
 /** Typography settings. */
 export const TYPOGRAPHY = {
     fontFamily: 'Innovator Grotesk Medium, system-ui, -apple-system, sans-serif',
-    titleFontSize: 13,
+    titleFontSize: 14,
     titleFontWeight: '500',
 } as const;

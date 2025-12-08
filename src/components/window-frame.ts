@@ -1,12 +1,13 @@
 /**
  * Window Frame Component
- * macOS-style window frame with title bar, traffic lights, and drop shadow.
+ * macOS-style window frame with title bar, status bar, and drop shadow.
  */
 
-import { BORDER_RADIUS, COLORS } from '../utils/design-tokens.js';
+import { COLORS } from '../utils/design-tokens.js';
 import { createSvgElement } from '../utils/svg-utils.js';
 import { assert } from '../utils/utils.js';
 import { createDropShadowFilter, DROP_SHADOW_FILTER_ID } from './drop-shadow.js';
+import { createStatusBar, updateStatusBar } from './status-bar.js';
 import { createTitleBar, updateTitleBar } from './title-bar.js';
 
 /** Shadow padding exported for external calculations. */
@@ -14,10 +15,10 @@ export const SHADOW_PADDING = 100;
 
 const WINDOW_CONFIG = {
     contentPadding: {
-        top: 34,
-        right: 20,
-        bottom: 20,
-        left: 20,
+        top: 32,
+        right: 0,
+        bottom: 32,
+        left: 80,
     },
 
     borderWidth: 2,
@@ -42,53 +43,59 @@ function calculateWindowDimensions(): { width: number; height: number } {
 }
 
 /**
- * Creates the window frame SVG structure.
- * @param container - The container element to append the SVG to.
- * @param width - Width of the window frame.
- * @param height - Height of the window frame.
- * @returns The created SVG element.
+ * Calculates the SVG container dimensions including shadow padding.
+ * @param width - Window frame width.
+ * @param height - Window frame height.
+ * @returns Object with SVG width, height, and position offsets.
  */
-function createWindowFrame(container: HTMLElement, width: number, height: number): SVGSVGElement {
-    const svgWidth = width + SHADOW_PADDING * 2;
-    const svgHeight = height + SHADOW_PADDING * 2;
+function calculateSvgDimensions(
+    width: number,
+    height: number,
+): { width: number; height: number; top: number; left: number } {
+    return {
+        width: width + SHADOW_PADDING * 2,
+        height: height + SHADOW_PADDING * 2,
+        top: WINDOW_CONFIG.padding.top - SHADOW_PADDING,
+        left: WINDOW_CONFIG.padding.left - SHADOW_PADDING,
+    };
+}
 
-    const svg = createSvgElement('svg', {
-        width: String(svgWidth),
-        height: String(svgHeight),
-        viewBox: `0 0 ${svgWidth} ${svgHeight}`,
-        'data-node-id': '1:2',
-        'data-name': 'WF window',
-    });
-
-    // Padding from border for all inner elements.
-    const titleBarPadding = WINDOW_CONFIG.borderWidth;
-
-    // Drop shadow filter.
-    const defs = createDropShadowFilter();
-
-    svg.appendChild(defs);
-
-    // Group for window content (offset by shadow padding).
-    const windowGroup = createSvgElement('g', {
+/**
+ * Creates the main window group container with shadow filter.
+ * @returns The window group SVG element.
+ */
+function createWindowGroup(): SVGGElement {
+    return createSvgElement('g', {
         transform: `translate(${SHADOW_PADDING}, ${SHADOW_PADDING})`,
         filter: `url(#${DROP_SHADOW_FILTER_ID})`,
     });
+}
 
-    // Window background.
-    const background = createSvgElement('rect', {
+/**
+ * Creates the window background rectangle.
+ * @param width - Width of the background.
+ * @param height - Height of the background.
+ * @returns The background SVG rect element.
+ */
+function createWindowBackground(width: number, height: number): SVGRectElement {
+    return createSvgElement('rect', {
         x: '0',
         y: '0',
         width: String(width),
         height: String(height),
         fill: COLORS.windowBackground,
-        rx: BORDER_RADIUS,
         'data-name': 'background',
     });
+}
 
-    windowGroup.appendChild(background);
-
-    // Window border (around the whole window).
-    const border = createSvgElement('rect', {
+/**
+ * Creates the window border rectangle.
+ * @param width - Width of the window.
+ * @param height - Height of the window.
+ * @returns The border SVG rect element.
+ */
+function createWindowBorder(width: number, height: number): SVGRectElement {
+    return createSvgElement('rect', {
         x: String(WINDOW_CONFIG.borderWidth / 2),
         y: String(WINDOW_CONFIG.borderWidth / 2),
         width: String(width - WINDOW_CONFIG.borderWidth),
@@ -96,43 +103,157 @@ function createWindowFrame(container: HTMLElement, width: number, height: number
         fill: 'none',
         stroke: COLORS.windowBorder,
         'stroke-width': String(WINDOW_CONFIG.borderWidth),
-        rx: BORDER_RADIUS,
         'data-name': 'border',
     });
+}
 
-    windowGroup.appendChild(border);
+/**
+ * Calculates the content area dimensions based on window size and padding.
+ * @param padding - Border padding value.
+ * @param windowWidth - Total window width.
+ * @param windowHeight - Total window height.
+ * @returns Object with x, y, width, and height for the content area.
+ */
+function calculateContentAreaDimensions(
+    padding: number,
+    windowWidth: number,
+    windowHeight: number,
+): { x: number; y: number; width: number; height: number } {
+    const x = padding + WINDOW_CONFIG.contentPadding.left;
+    const y = padding + WINDOW_CONFIG.contentPadding.top;
 
-    // Title bar (includes background, traffic lights, and title text).
-    const titleBarGroup = createTitleBar(titleBarPadding, titleBarPadding, width, 'Window Title');
+    return {
+        x,
+        y,
+        width: windowWidth - x - WINDOW_CONFIG.contentPadding.right - padding,
+        height: windowHeight - y - WINDOW_CONFIG.contentPadding.bottom - padding,
+    };
+}
 
-    windowGroup.appendChild(titleBarGroup);
+/**
+ * Creates the content area rectangle.
+ * @param padding - Border padding value.
+ * @param width - Total window width.
+ * @param height - Total window height.
+ * @returns The content area SVG rect element.
+ */
+function createContentArea(padding: number, width: number, height: number): SVGRectElement {
+    const dimensions = calculateContentAreaDimensions(padding, width, height);
 
-    // Content area (for future navigation bar, padded from border).
-    const contentAreaX = titleBarPadding + WINDOW_CONFIG.contentPadding.left;
-    const contentAreaY = titleBarPadding + WINDOW_CONFIG.contentPadding.top;
-    const contentArea = createSvgElement('rect', {
-        x: String(contentAreaX),
-        y: String(contentAreaY),
-        width: String(width - contentAreaX - WINDOW_CONFIG.contentPadding.right - titleBarPadding),
-        height: String(height - contentAreaY - WINDOW_CONFIG.contentPadding.bottom - titleBarPadding),
-        fill: 'transparent',
+    return createSvgElement('rect', {
+        x: String(dimensions.x),
+        y: String(dimensions.y),
+        width: String(dimensions.width),
+        height: String(dimensions.height),
+        fill: COLORS.contentAreaBackground,
         'data-node-id': '1:8',
         'data-name': 'content',
     });
+}
 
-    windowGroup.appendChild(contentArea);
+/**
+ * Creates the window frame SVG structure.
+ * @param container - The container element to append the SVG to.
+ * @param width - Width of the window frame.
+ * @param height - Height of the window frame.
+ * @returns The created SVG element.
+ */
+function createWindowFrame(container: HTMLElement, width: number, height: number): SVGSVGElement {
+    const svgDimensions = calculateSvgDimensions(width, height);
 
-    // Add window group to SVG.
+    const svg = createSvgElement('svg', {
+        width: String(svgDimensions.width),
+        height: String(svgDimensions.height),
+        viewBox: `0 0 ${svgDimensions.width} ${svgDimensions.height}`,
+        'data-node-id': '1:2',
+        'data-name': 'WF window',
+    });
+
+    // Padding from border for all inner elements.
+    const borderPadding = WINDOW_CONFIG.borderWidth;
+
+    // Drop shadow filter.
+    svg.appendChild(createDropShadowFilter());
+
+    // Window group with all content.
+    const windowGroup = createWindowGroup();
+
+    windowGroup.appendChild(createWindowBackground(width, height));
+    windowGroup.appendChild(createWindowBorder(width, height));
+    windowGroup.appendChild(createTitleBar(borderPadding, borderPadding, width, 'Search'));
+    windowGroup.appendChild(createStatusBar(borderPadding, width, height));
+    windowGroup.appendChild(createContentArea(borderPadding, width, height));
+
     svg.appendChild(windowGroup);
 
     // Position SVG with padding (account for shadow padding offset).
     svg.style.position = 'absolute';
-    svg.style.top = `${WINDOW_CONFIG.padding.top - SHADOW_PADDING}px`;
-    svg.style.left = `${WINDOW_CONFIG.padding.left - SHADOW_PADDING}px`;
+    svg.style.top = `${svgDimensions.top}px`;
+    svg.style.left = `${svgDimensions.left}px`;
 
     container.appendChild(svg);
 
     return svg;
+}
+
+/**
+ * Updates the SVG element dimensions and position.
+ * @param svg - The SVG element to update.
+ * @param width - New window width.
+ * @param height - New window height.
+ */
+function updateSvgDimensions(svg: SVGSVGElement, width: number, height: number): void {
+    const svgDimensions = calculateSvgDimensions(width, height);
+
+    svg.setAttribute('width', String(svgDimensions.width));
+    svg.setAttribute('height', String(svgDimensions.height));
+    svg.setAttribute('viewBox', `0 0 ${svgDimensions.width} ${svgDimensions.height}`);
+
+    svg.style.top = `${svgDimensions.top}px`;
+    svg.style.left = `${svgDimensions.left}px`;
+}
+
+/**
+ * Updates the window background dimensions.
+ * @param svg - The SVG element containing the background.
+ * @param width - New width.
+ * @param height - New height.
+ */
+function updateWindowBackground(svg: SVGSVGElement, width: number, height: number): void {
+    const background = assert(svg.querySelector('rect[data-name="background"]'), 'Background element not found');
+
+    background.setAttribute('width', String(width));
+    background.setAttribute('height', String(height));
+}
+
+/**
+ * Updates the window border dimensions.
+ * @param svg - The SVG element containing the border.
+ * @param width - New width.
+ * @param height - New height.
+ */
+function updateWindowBorder(svg: SVGSVGElement, width: number, height: number): void {
+    const border = assert(svg.querySelector('rect[data-name="border"]'), 'Border element not found');
+
+    border.setAttribute('width', String(width - WINDOW_CONFIG.borderWidth));
+    border.setAttribute('height', String(height - WINDOW_CONFIG.borderWidth));
+}
+
+/**
+ * Updates the content area dimensions.
+ * @param svg - The SVG element containing the content area.
+ * @param padding - Border padding value.
+ * @param width - New window width.
+ * @param height - New window height.
+ */
+function updateContentArea(svg: SVGSVGElement, padding: number, width: number, height: number): void {
+    const dimensions = calculateContentAreaDimensions(padding, width, height);
+    const contentArea = assert(svg.querySelector('rect[data-name="content"]'), 'Content area element not found');
+
+    contentArea.setAttribute('x', String(dimensions.x));
+    contentArea.setAttribute('y', String(dimensions.y));
+    contentArea.setAttribute('width', String(dimensions.width));
+    contentArea.setAttribute('height', String(dimensions.height));
 }
 
 /**
@@ -141,49 +262,15 @@ function createWindowFrame(container: HTMLElement, width: number, height: number
  */
 function handleResize(svg: SVGSVGElement): void {
     const { width, height } = calculateWindowDimensions();
-    const svgWidth = width + SHADOW_PADDING * 2;
-    const svgHeight = height + SHADOW_PADDING * 2;
+    const borderPadding = WINDOW_CONFIG.borderWidth;
 
-    svg.setAttribute('width', String(svgWidth));
-    svg.setAttribute('height', String(svgHeight));
-    svg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
+    updateSvgDimensions(svg, width, height);
+    updateWindowBackground(svg, width, height);
+    updateWindowBorder(svg, width, height);
 
-    svg.style.top = `${WINDOW_CONFIG.padding.top - SHADOW_PADDING}px`;
-    svg.style.left = `${WINDOW_CONFIG.padding.left - SHADOW_PADDING}px`;
-
-    // Update all elements that depend on dimensions.
-    const background = assert(svg.querySelector('rect[data-name="background"]'), 'Background element not found');
-
-    background.setAttribute('width', String(width));
-    background.setAttribute('height', String(height));
-
-    const border = assert(svg.querySelector('rect[data-name="border"]'), 'Border element not found');
-
-    border.setAttribute('width', String(width - WINDOW_CONFIG.borderWidth));
-    border.setAttribute('height', String(height - WINDOW_CONFIG.borderWidth));
-
-    const titleBarPadding = WINDOW_CONFIG.borderWidth;
-    const titleBarGroup = assert(
-        svg.querySelector<SVGGElement>('g[data-name="title-bar-group"]'),
-        'Title bar group not found',
-    );
-
-    updateTitleBar(titleBarGroup, titleBarPadding, width);
-
-    const contentAreaX = titleBarPadding + WINDOW_CONFIG.contentPadding.left;
-    const contentAreaY = titleBarPadding + WINDOW_CONFIG.contentPadding.top;
-    const contentArea = assert(svg.querySelector('rect[data-name="content"]'), 'Content area element not found');
-
-    contentArea.setAttribute('x', String(contentAreaX));
-    contentArea.setAttribute('y', String(contentAreaY));
-    contentArea.setAttribute(
-        'width',
-        String(width - contentAreaX - WINDOW_CONFIG.contentPadding.right - titleBarPadding),
-    );
-    contentArea.setAttribute(
-        'height',
-        String(height - contentAreaY - WINDOW_CONFIG.contentPadding.bottom - titleBarPadding),
-    );
+    updateTitleBar(svg, borderPadding, width);
+    updateStatusBar(svg, borderPadding, width, height);
+    updateContentArea(svg, borderPadding, width, height);
 }
 
 /**
