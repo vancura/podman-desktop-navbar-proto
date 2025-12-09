@@ -307,6 +307,11 @@ export class NavBar {
             return;
         }
 
+        // Don't handle clicks on context menus
+        if (target.closest('[data-name="context-menu"]')) {
+            return;
+        }
+
         // Get mouse position relative to navbar
         const rect = (this.group as unknown as SVGGraphicsElement).getBoundingClientRect?.();
         if (!rect) return;

@@ -181,6 +181,11 @@ export function createContextMenu(
         transform: `translate(${adjustedPos.x}, ${adjustedPos.y})`,
     });
 
+    // Stop click propagation at menu group level to prevent bubbling to navbar
+    group.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+
     // Background with border
     const background = createSvgElement('rect', {
         x: '0',
@@ -310,7 +315,8 @@ export class ContextMenuManager {
         this.boundHandleKeyDown = this.handleKeyDown.bind(this);
 
         document.addEventListener('mousemove', this.boundHandleMouseMove);
-        document.addEventListener('click', this.boundHandleClick);
+        // Use capture phase so we handle clicks before the menu group stops propagation
+        document.addEventListener('click', this.boundHandleClick, true);
         document.addEventListener('keydown', this.boundHandleKeyDown);
     }
 
@@ -383,6 +389,11 @@ export class ContextMenuManager {
             const itemDef = this.items.find((i) => i.id === itemId);
 
             if (itemId && itemDef && !itemDef.disabled && !itemDef.submenu) {
+                // Stop event propagation to prevent bubbling to navbar
+                // We're in capture phase, so this stops it before it reaches navbar handler
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
                 this.onItemSelect?.(itemId);
                 this.close();
                 return;
