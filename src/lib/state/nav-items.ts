@@ -103,4 +103,3 @@ export const DEFAULT_BOTTOM_ITEMS: NavItem[] = [
         originalCategory: 'bottom',
     },
 ];
-

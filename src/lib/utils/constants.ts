@@ -24,4 +24,3 @@ export const NAVBAR = {
     /** Maximum number of pinned items allowed. */
     maxPinnedItems: 10,
 } as const;
-

@@ -95,4 +95,3 @@ export const he: Record<TranslationKey, string> = {
     'a11y.moreOptions': 'אפשרויות נוספות',
     'a11y.closeMenu': 'סגור תפריט',
 };
-

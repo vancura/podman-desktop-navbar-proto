@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 /**
  * Design Tokens
@@ -94,7 +94,7 @@
     --spacing-navbar-threshold: 160px;
 
     /* Typography */
-    --font-display: 'Innovator Grotesk', system-ui, -apple-system, sans-serif;
+    --font-display: "Innovator Grotesk", system-ui, -apple-system, sans-serif;
     --font-ui: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 
     /* Animation timing */
@@ -118,8 +118,8 @@
 
 /* Custom font */
 @font-face {
-    font-family: 'Innovator Grotesk';
-    src: url('https://fonts.vancura.dev/InnovatorGrotesk-Medium.woff2') format('woff2');
+    font-family: "Innovator Grotesk";
+    src: url("https://fonts.vancura.dev/InnovatorGrotesk-Medium.woff2") format("woff2");
     font-weight: 500;
     font-style: normal;
     font-display: swap;

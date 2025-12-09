@@ -102,7 +102,7 @@ function navigateFocusByDelta(delta: number): void {
     const items = getAllVisibleItems();
     if (items.length === 0) return;
 
-    const currentIndex = items.findIndex(i => i.id === appState.ui.focusedItemId);
+    const currentIndex = items.findIndex((i) => i.id === appState.ui.focusedItemId);
 
     let newIndex: number;
     if (currentIndex === -1) {
@@ -121,9 +121,12 @@ function executeAction(action: string): void {
     const items = getAllVisibleItems();
 
     // Quick navigation by index (Cmd+1-5)
-    if (action.startsWith('navigate-') && !['navigate-up', 'navigate-down', 'navigate-first', 'navigate-last'].includes(action)) {
+    if (
+        action.startsWith('navigate-') &&
+        !['navigate-up', 'navigate-down', 'navigate-first', 'navigate-last'].includes(action)
+    ) {
         if (action === 'navigate-settings') {
-            const settings = appState.items.bottom.find(i => i.id === 'settings');
+            const settings = appState.items.bottom.find((i) => i.id === 'settings');
             if (settings) activateItem(settings.id);
         } else {
             const index = parseInt(action.replace('navigate-', ''), 10);
@@ -157,7 +160,7 @@ function executeAction(action: string): void {
             const item = actions.findItem(activeId);
             if (!item?.canPin) break;
 
-            const isPinned = appState.items.pinned.some(p => p.id === item.id);
+            const isPinned = appState.items.pinned.some((p) => p.id === item.id);
             if (isPinned) {
                 actions.unpinItem(item.id);
             } else if (appState.canPinMore) {

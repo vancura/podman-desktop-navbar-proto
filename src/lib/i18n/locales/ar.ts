@@ -95,4 +95,3 @@ export const ar: Record<TranslationKey, string> = {
     'a11y.moreOptions': 'خيارات إضافية',
     'a11y.closeMenu': 'إغلاق القائمة',
 };
-

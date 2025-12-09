@@ -66,7 +66,8 @@ export const de: Record<TranslationKey, string> = {
     'banner.clickToDismiss': 'Klicken Sie irgendwo zum Schließen',
 
     'modal.hideItem': 'Element ausblenden',
-    'modal.hideItemDescription': 'Dieses Element wird ausgeblendet. Sie können es in den Einstellungen wiederherstellen.',
+    'modal.hideItemDescription':
+        'Dieses Element wird ausgeblendet. Sie können es in den Einstellungen wiederherstellen.',
     'modal.dontShowAgain': 'Nicht mehr anzeigen',
     'modal.ok': 'OK',
     'modal.cancel': 'Abbrechen',
@@ -95,4 +96,3 @@ export const de: Record<TranslationKey, string> = {
     'a11y.moreOptions': 'Weitere Optionen',
     'a11y.closeMenu': 'Menü schließen',
 };
-

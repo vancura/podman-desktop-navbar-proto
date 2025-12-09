@@ -35,7 +35,7 @@ export function navigateNext(currentIndex: number, itemCount: number): number {
 export function navigateActionable(
     direction: 'up' | 'down' | 'first' | 'last',
     currentIndex: number,
-    actionableIndices: number[]
+    actionableIndices: number[],
 ): number {
     if (actionableIndices.length === 0) return -1;
 
@@ -89,4 +89,3 @@ export function getMenuKeyAction(key: string): MenuKeyAction {
             return 'none';
     }
 }
-

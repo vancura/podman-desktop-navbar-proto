@@ -95,4 +95,3 @@ export const ja: Record<TranslationKey, string> = {
     'a11y.moreOptions': 'その他のオプション',
     'a11y.closeMenu': 'メニューを閉じる',
 };
-

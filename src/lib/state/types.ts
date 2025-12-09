@@ -52,4 +52,3 @@ export interface NavItem {
     /** Original category before any user customization. */
     originalCategory: ItemCategory;
 }
-
