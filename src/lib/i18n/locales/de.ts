@@ -21,6 +21,7 @@ export const de: Partial<Record<TranslationKey, string>> = {
     'nav.bootc': 'Bootc',
     'nav.minikube': 'Minikube',
     'nav.more': 'Mehr',
+    'nav.moreCount': '{count} weitere',
 
     // Context menu - Item actions
     'menu.pinToTop': 'Nach oben anheften',
@@ -37,6 +38,8 @@ export const de: Partial<Record<TranslationKey, string>> = {
     'menu.showHiddenItems': 'Ausgeblendete Elemente anzeigen',
     'menu.noHiddenItems': '(Keine ausgeblendeten Elemente)',
     'menu.resetNavbar': 'Navigationsleiste zurücksetzen',
+    'menu.hiddenItems': 'Ausgeblendete Elemente',
+    'menu.show': 'Anzeigen',
 
     // Context menu - Settings/Account
     'menu.settings': 'Einstellungen',
@@ -44,34 +47,6 @@ export const de: Partial<Record<TranslationKey, string>> = {
     'menu.keyboardShortcuts': 'Tastenkürzel',
     'menu.aboutPodmanDesktop': 'Über Podman Desktop',
     'menu.signOut': 'Abmelden',
-
-    // Modal dialog
-    'modal.hideItem': 'Element ausblenden',
-    'modal.hideItemDescription':
-        'Dieses Element wird ausgeblendet. Sie können es in den Einstellungen wiederherstellen.',
-    'modal.dontShowAgain': 'Nicht mehr anzeigen',
-    'modal.ok': 'OK',
-    'modal.cancel': 'Abbrechen',
-
-    // Controls
-    'controls.itemManagement': 'Elementverwaltung',
-    'controls.addItem': 'Element hinzufügen',
-    'controls.removeLast': 'Letztes entfernen',
-    'controls.removeRandom': 'Zufällig entfernen',
-    'controls.pinning': 'Anheften',
-    'controls.pinRandom': 'Zufällig anheften',
-    'controls.unpinAll': 'Alle lösen',
-    'controls.visibility': 'Sichtbarkeit',
-    'controls.hideRandom': 'Zufällig ausblenden',
-    'controls.unhideAll': 'Alle einblenden',
-    'controls.language': 'Sprache',
-
-    // Locale names
-    'locale.en': 'English',
-    'locale.de': 'Deutsch',
-    'locale.ja': '日本語',
-    'locale.ar': 'العربية',
-    'locale.he': 'עברית',
 
     // Accessibility
     'a11y.navigationBar': 'Navigationsleiste',

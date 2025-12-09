@@ -19,6 +19,7 @@ export const en = {
     'nav.bootc': 'Bootc',
     'nav.minikube': 'Minikube',
     'nav.more': 'More',
+    'nav.moreCount': '{count} more',
 
     // Context menu - Item actions
     'menu.pinToTop': 'Pin to Top',
@@ -35,6 +36,8 @@ export const en = {
     'menu.showHiddenItems': 'Show Hidden Items',
     'menu.noHiddenItems': '(No hidden items)',
     'menu.resetNavbar': 'Reset Navigation Bar',
+    'menu.hiddenItems': 'Hidden Items',
+    'menu.show': 'Show',
 
     // Context menu - Settings/Account
     'menu.settings': 'Settings',
@@ -74,26 +77,6 @@ export const en = {
     'modal.dontShowAgain': "Don't show this again",
     'modal.ok': 'OK',
     'modal.cancel': 'Cancel',
-
-    // Controls
-    'controls.itemManagement': 'Item Management',
-    'controls.addItem': 'Add Item',
-    'controls.removeLast': 'Remove Last',
-    'controls.removeRandom': 'Remove Random',
-    'controls.pinning': 'Pinning',
-    'controls.pinRandom': 'Pin Random',
-    'controls.unpinAll': 'Unpin All',
-    'controls.visibility': 'Visibility',
-    'controls.hideRandom': 'Hide Random',
-    'controls.unhideAll': 'Unhide All',
-    'controls.language': 'Language',
-
-    // Locale names
-    'locale.en': 'English',
-    'locale.de': 'Deutsch',
-    'locale.ja': '日本語',
-    'locale.ar': 'العربية',
-    'locale.he': 'עברית',
 
     // Accessibility
     'a11y.navigationBar': 'Navigation Bar',

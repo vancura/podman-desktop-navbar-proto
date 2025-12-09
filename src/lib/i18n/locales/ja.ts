@@ -21,6 +21,7 @@ export const ja: Partial<Record<TranslationKey, string>> = {
     'nav.bootc': 'Bootc',
     'nav.minikube': 'Minikube',
     'nav.more': 'その他',
+    'nav.moreCount': 'あと{count}件',
 
     // Context menu - Item actions
     'menu.pinToTop': '上部にピン留め',
@@ -37,6 +38,8 @@ export const ja: Partial<Record<TranslationKey, string>> = {
     'menu.showHiddenItems': '非表示の項目を表示',
     'menu.noHiddenItems': '（非表示の項目はありません）',
     'menu.resetNavbar': 'ナビゲーションバーをリセット',
+    'menu.hiddenItems': '非表示の項目',
+    'menu.show': '表示',
 
     // Context menu - Settings/Account
     'menu.settings': '設定',
@@ -44,33 +47,6 @@ export const ja: Partial<Record<TranslationKey, string>> = {
     'menu.keyboardShortcuts': 'キーボードショートカット',
     'menu.aboutPodmanDesktop': 'Podman Desktopについて',
     'menu.signOut': 'ログアウト',
-
-    // Modal dialog
-    'modal.hideItem': '項目を非表示',
-    'modal.hideItemDescription': 'この項目は非表示になります。設定から復元できます。',
-    'modal.dontShowAgain': '今後表示しない',
-    'modal.ok': '確認',
-    'modal.cancel': 'キャンセル',
-
-    // Controls
-    'controls.itemManagement': '項目管理',
-    'controls.addItem': '項目を追加',
-    'controls.removeLast': '最後の項目を削除',
-    'controls.removeRandom': 'ランダムに削除',
-    'controls.pinning': 'ピン留め',
-    'controls.pinRandom': 'ランダムにピン留め',
-    'controls.unpinAll': 'すべてのピン留めを解除',
-    'controls.visibility': '表示設定',
-    'controls.hideRandom': 'ランダムに非表示',
-    'controls.unhideAll': 'すべて表示',
-    'controls.language': '言語',
-
-    // Locale names (intentionally in native scripts for language selector UX)
-    'locale.en': 'English',
-    'locale.de': 'Deutsch',
-    'locale.ja': '日本語',
-    'locale.ar': 'العربية',
-    'locale.he': 'עברית',
 
     // Accessibility
     'a11y.navigationBar': 'ナビゲーションバー',

@@ -21,6 +21,7 @@ export const he: Partial<Record<TranslationKey, string>> = {
     'nav.bootc': 'Bootc',
     'nav.minikube': 'Minikube',
     'nav.more': 'עוד',
+    'nav.moreCount': '{count} עוד',
 
     // Context menu - Item actions
     'menu.pinToTop': 'הצמד לראש',
@@ -37,6 +38,8 @@ export const he: Partial<Record<TranslationKey, string>> = {
     'menu.showHiddenItems': 'הצג פריטים מוסתרים',
     'menu.noHiddenItems': '(אין פריטים מוסתרים)',
     'menu.resetNavbar': 'איפוס שורת ניווט',
+    'menu.hiddenItems': 'פריטים מוסתרים',
+    'menu.show': 'הצג',
 
     // Context menu - Settings/Account
     'menu.settings': 'הגדרות',
@@ -44,33 +47,6 @@ export const he: Partial<Record<TranslationKey, string>> = {
     'menu.keyboardShortcuts': 'קיצורי מקלדת',
     'menu.aboutPodmanDesktop': 'אודות Podman Desktop',
     'menu.signOut': 'התנתק',
-
-    // Modal dialog
-    'modal.hideItem': 'הסתר פריט',
-    'modal.hideItemDescription': 'פריט זה יוסתר. תוכל לשחזר אותו מההגדרות.',
-    'modal.dontShowAgain': 'אל תציג שוב',
-    'modal.ok': 'אישור',
-    'modal.cancel': 'ביטול',
-
-    // Controls
-    'controls.itemManagement': 'ניהול פריטים',
-    'controls.addItem': 'הוסף פריט',
-    'controls.removeLast': 'הסר אחרון',
-    'controls.removeRandom': 'הסר אקראי',
-    'controls.pinning': 'הצמדה',
-    'controls.pinRandom': 'הצמד אקראי',
-    'controls.unpinAll': 'הסר הכל',
-    'controls.visibility': 'נראות',
-    'controls.hideRandom': 'הסתר אקראי',
-    'controls.unhideAll': 'הצג הכל',
-    'controls.language': 'שפה',
-
-    // Locale names
-    'locale.en': 'English',
-    'locale.de': 'Deutsch',
-    'locale.ja': '日本語',
-    'locale.ar': 'العربية',
-    'locale.he': 'עברית',
 
     // Accessibility
     'a11y.navigationBar': 'שורת ניווט',
