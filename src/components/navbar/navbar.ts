@@ -551,11 +551,14 @@ export class NavBar {
         if (this.moreButtonGroup) {
             const transform = this.moreButtonGroup.getAttribute('transform');
             const match = transform?.match(/translate\(([^,]+),\s*([^)]+)\)/);
-            const y = match?.[2] !== undefined ? parseFloat(match[2]) : this.viewportHeight - getMoreButtonHeight();
+            const moreButtonY = match?.[2] !== undefined ? parseFloat(match[2]) : this.viewportHeight;
+            
+            // Position menu above the More button, centered horizontally
+            const menuY = moreButtonY - 4; // Small offset above the button
 
             // Show context menu at More button position
             this.contextMenuManager?.show(
-                { items: menuItems, x: this.config.width / 2, y },
+                { items: menuItems, x: this.config.width / 2, y: menuY },
                 this.config.width,
                 this.config.height,
                 (selectedItemId) => this.handleContextMenuSelect(selectedItemId, null),
@@ -870,8 +873,12 @@ export class NavBar {
 
             if (this.moreButtonGroup) {
                 // Add click handler to show hidden items dropdown
-                this.moreButtonGroup.addEventListener('click', () => {
-                    this.showHiddenItemsMenu();
+                this.moreButtonGroup.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    // Use requestAnimationFrame to ensure menu is created after click event processing
+                    requestAnimationFrame(() => {
+                        this.showHiddenItemsMenu();
+                    });
                 });
 
                 this.contentGroup.insertBefore(this.moreButtonGroup, this.bottomPanel.getGroup());
