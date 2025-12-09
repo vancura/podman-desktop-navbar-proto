@@ -4,7 +4,8 @@
 
 import type { TranslationKey } from './en.js';
 
-export const ar: Record<TranslationKey, string> = {
+export const ar: Partial<Record<TranslationKey, string>> = {
+    // Navigation items
     'nav.containers': 'الحاويات',
     'nav.images': 'الصور',
     'nav.pods': 'البودات',
@@ -21,6 +22,7 @@ export const ar: Record<TranslationKey, string> = {
     'nav.minikube': 'Minikube',
     'nav.more': 'المزيد',
 
+    // Context menu - Item actions
     'menu.pinToTop': 'تثبيت في الأعلى',
     'menu.unpin': 'إلغاء التثبيت',
     'menu.hideFromNavBar': 'إخفاء من شريط التنقل',
@@ -29,48 +31,28 @@ export const ar: Record<TranslationKey, string> = {
     'menu.removeExtension': 'إزالة الإضافة',
     'menu.configureNavbar': 'تكوين شريط التنقل',
 
+    // Context menu - Empty space
     'menu.showIconsAndTitles': 'إظهار الأيقونات والعناوين',
     'menu.showIconsOnly': 'إظهار الأيقونات فقط',
     'menu.showHiddenItems': 'إظهار العناصر المخفية',
     'menu.noHiddenItems': '(لا توجد عناصر مخفية)',
     'menu.resetNavbar': 'إعادة تعيين شريط التنقل',
 
+    // Context menu - Settings/Account
     'menu.settings': 'الإعدادات',
     'menu.extensions': 'الإضافات',
     'menu.keyboardShortcuts': 'اختصارات لوحة المفاتيح',
     'menu.aboutPodmanDesktop': 'حول Podman Desktop',
     'menu.signOut': 'تسجيل الخروج',
 
-    'banner.featureOutOfScope': 'ميزة خارج النطاق',
-    'banner.featureOutOfScopeDesc': 'هذه الميزة خارج نطاق النموذج الأولي.',
-    'banner.keyboardShortcut': 'اختصار لوحة المفاتيح',
-    'banner.keyboardShortcutDesc': 'سيؤدي هذا إلى فتح حوار لتعيين اختصار.',
-    'banner.extensionSettings': 'إعدادات الإضافة',
-    'banner.extensionSettingsDesc': 'سيؤدي هذا إلى فتح إعدادات هذه الإضافة.',
-    'banner.removeExtension': 'إزالة الإضافة',
-    'banner.removeExtensionDesc': 'سيبدأ هذا عملية إلغاء التثبيت.',
-    'banner.configureNavbar': 'تكوين شريط التنقل',
-    'banner.configureNavbarDesc': 'سيؤدي هذا إلى فتح إعدادات شريط التنقل.',
-    'banner.settings': 'الإعدادات',
-    'banner.settingsDesc': 'سيؤدي هذا إلى فتح إعدادات Podman Desktop.',
-    'banner.extensions': 'الإضافات',
-    'banner.extensionsDesc': 'سيؤدي هذا إلى فتح لوحة الإضافات.',
-    'banner.keyboardShortcuts': 'اختصارات لوحة المفاتيح',
-    'banner.keyboardShortcutsDesc': 'سيؤدي هذا إلى فتح إعدادات الاختصارات.',
-    'banner.about': 'حول Podman Desktop',
-    'banner.aboutDesc': 'سيعرض هذا مربع حوار المعلومات.',
-    'banner.signOut': 'تسجيل الخروج',
-    'banner.signOutDesc': 'سيؤدي هذا إلى تسجيل خروجك.',
-    'banner.pinLimitReached': 'تم الوصول إلى حد التثبيت',
-    'banner.pinLimitReachedDesc': 'يمكنك تثبيت ما يصل إلى 10 عناصر.',
-    'banner.clickToDismiss': 'انقر في أي مكان للإغلاق',
-
+    // Modal dialog
     'modal.hideItem': 'إخفاء العنصر',
     'modal.hideItemDescription': 'سيتم إخفاء هذا العنصر. يمكنك استعادته من الإعدادات.',
     'modal.dontShowAgain': 'لا تظهر هذا مرة أخرى',
     'modal.ok': 'موافق',
     'modal.cancel': 'إلغاء',
 
+    // Controls
     'controls.itemManagement': 'إدارة العناصر',
     'controls.addItem': 'إضافة عنصر',
     'controls.removeLast': 'إزالة الأخير',
@@ -83,12 +65,14 @@ export const ar: Record<TranslationKey, string> = {
     'controls.unhideAll': 'إظهار الكل',
     'controls.language': 'اللغة',
 
+    // Locale names
     'locale.en': 'English',
     'locale.de': 'Deutsch',
     'locale.ja': '日本語',
     'locale.ar': 'العربية',
     'locale.he': 'עברית',
 
+    // Accessibility
     'a11y.navigationBar': 'شريط التنقل',
     'a11y.mainNavigation': 'التنقل الرئيسي',
     'a11y.pinnedItems': 'العناصر المثبتة',

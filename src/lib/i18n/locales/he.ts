@@ -4,7 +4,8 @@
 
 import type { TranslationKey } from './en.js';
 
-export const he: Record<TranslationKey, string> = {
+export const he: Partial<Record<TranslationKey, string>> = {
+    // Navigation items
     'nav.containers': 'מכולות',
     'nav.images': 'תמונות',
     'nav.pods': 'פודים',
@@ -21,6 +22,7 @@ export const he: Record<TranslationKey, string> = {
     'nav.minikube': 'Minikube',
     'nav.more': 'עוד',
 
+    // Context menu - Item actions
     'menu.pinToTop': 'הצמד לראש',
     'menu.unpin': 'הסר הצמדה',
     'menu.hideFromNavBar': 'הסתר משורת הניווט',
@@ -29,48 +31,28 @@ export const he: Record<TranslationKey, string> = {
     'menu.removeExtension': 'הסר תוספת',
     'menu.configureNavbar': 'הגדר שורת ניווט',
 
+    // Context menu - Empty space
     'menu.showIconsAndTitles': 'הצג סמלים וכותרות',
     'menu.showIconsOnly': 'הצג סמלים בלבד',
     'menu.showHiddenItems': 'הצג פריטים מוסתרים',
     'menu.noHiddenItems': '(אין פריטים מוסתרים)',
     'menu.resetNavbar': 'איפוס שורת ניווט',
 
+    // Context menu - Settings/Account
     'menu.settings': 'הגדרות',
     'menu.extensions': 'תוספות',
     'menu.keyboardShortcuts': 'קיצורי מקלדת',
     'menu.aboutPodmanDesktop': 'אודות Podman Desktop',
     'menu.signOut': 'התנתק',
 
-    'banner.featureOutOfScope': 'תכונה מחוץ לטווח',
-    'banner.featureOutOfScopeDesc': 'תכונה זו מחוץ לטווח אב הטיפוס.',
-    'banner.keyboardShortcut': 'קיצור מקלדת',
-    'banner.keyboardShortcutDesc': 'פעולה זו תפתח דיאלוג להקצאת קיצור.',
-    'banner.extensionSettings': 'הגדרות תוספת',
-    'banner.extensionSettingsDesc': 'פעולה זו תפתח את הגדרות התוספת.',
-    'banner.removeExtension': 'הסר תוספת',
-    'banner.removeExtensionDesc': 'פעולה זו תתחיל את תהליך ההסרה.',
-    'banner.configureNavbar': 'הגדר שורת ניווט',
-    'banner.configureNavbarDesc': 'פעולה זו תפתח את הגדרות שורת הניווט.',
-    'banner.settings': 'הגדרות',
-    'banner.settingsDesc': 'פעולה זו תפתח את הגדרות Podman Desktop.',
-    'banner.extensions': 'תוספות',
-    'banner.extensionsDesc': 'פעולה זו תפתח את לוח התוספות.',
-    'banner.keyboardShortcuts': 'קיצורי מקלדת',
-    'banner.keyboardShortcutsDesc': 'פעולה זו תפתח את הגדרות הקיצורים.',
-    'banner.about': 'אודות Podman Desktop',
-    'banner.aboutDesc': 'פעולה זו תציג את דיאלוג המידע.',
-    'banner.signOut': 'התנתק',
-    'banner.signOutDesc': 'פעולה זו תנתק אותך.',
-    'banner.pinLimitReached': 'הגעת למגבלת ההצמדה',
-    'banner.pinLimitReachedDesc': 'ניתן להצמיד עד 10 פריטים.',
-    'banner.clickToDismiss': 'לחץ בכל מקום לסגירה',
-
+    // Modal dialog
     'modal.hideItem': 'הסתר פריט',
     'modal.hideItemDescription': 'פריט זה יוסתר. תוכל לשחזר אותו מההגדרות.',
     'modal.dontShowAgain': 'אל תציג שוב',
     'modal.ok': 'אישור',
     'modal.cancel': 'ביטול',
 
+    // Controls
     'controls.itemManagement': 'ניהול פריטים',
     'controls.addItem': 'הוסף פריט',
     'controls.removeLast': 'הסר אחרון',
@@ -83,12 +65,14 @@ export const he: Record<TranslationKey, string> = {
     'controls.unhideAll': 'הצג הכל',
     'controls.language': 'שפה',
 
+    // Locale names
     'locale.en': 'English',
     'locale.de': 'Deutsch',
     'locale.ja': '日本語',
     'locale.ar': 'العربية',
     'locale.he': 'עברית',
 
+    // Accessibility
     'a11y.navigationBar': 'שורת ניווט',
     'a11y.mainNavigation': 'ניווט ראשי',
     'a11y.pinnedItems': 'פריטים מוצמדים',

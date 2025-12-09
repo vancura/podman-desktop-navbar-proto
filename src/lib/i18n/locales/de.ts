@@ -4,7 +4,8 @@
 
 import type { TranslationKey } from './en.js';
 
-export const de: Record<TranslationKey, string> = {
+export const de: Partial<Record<TranslationKey, string>> = {
+    // Navigation items
     'nav.containers': 'Container',
     'nav.images': 'Abbilder',
     'nav.pods': 'Pods',
@@ -21,6 +22,7 @@ export const de: Record<TranslationKey, string> = {
     'nav.minikube': 'Minikube',
     'nav.more': 'Mehr',
 
+    // Context menu - Item actions
     'menu.pinToTop': 'Nach oben anheften',
     'menu.unpin': 'Lösen',
     'menu.hideFromNavBar': 'Aus Navigationsleiste ausblenden',
@@ -29,42 +31,21 @@ export const de: Record<TranslationKey, string> = {
     'menu.removeExtension': 'Erweiterung entfernen',
     'menu.configureNavbar': 'Navigationsleiste konfigurieren',
 
+    // Context menu - Empty space
     'menu.showIconsAndTitles': 'Symbole und Titel anzeigen',
     'menu.showIconsOnly': 'Nur Symbole anzeigen',
     'menu.showHiddenItems': 'Ausgeblendete Elemente anzeigen',
     'menu.noHiddenItems': '(Keine ausgeblendeten Elemente)',
     'menu.resetNavbar': 'Navigationsleiste zurücksetzen',
 
+    // Context menu - Settings/Account
     'menu.settings': 'Einstellungen',
     'menu.extensions': 'Erweiterungen',
     'menu.keyboardShortcuts': 'Tastenkürzel',
     'menu.aboutPodmanDesktop': 'Über Podman Desktop',
     'menu.signOut': 'Abmelden',
 
-    'banner.featureOutOfScope': 'Funktion außerhalb des Umfangs',
-    'banner.featureOutOfScopeDesc': 'Diese Funktion liegt außerhalb des Prototyps.',
-    'banner.keyboardShortcut': 'Tastenkürzel',
-    'banner.keyboardShortcutDesc': 'Dies würde einen Dialog zum Zuweisen eines Tastenkürzels öffnen.',
-    'banner.extensionSettings': 'Erweiterungseinstellungen',
-    'banner.extensionSettingsDesc': 'Dies würde die Einstellungen dieser Erweiterung öffnen.',
-    'banner.removeExtension': 'Erweiterung entfernen',
-    'banner.removeExtensionDesc': 'Dies würde den Deinstallationsprozess starten.',
-    'banner.configureNavbar': 'Navigationsleiste konfigurieren',
-    'banner.configureNavbarDesc': 'Dies würde die Navigationsleisten-Einstellungen öffnen.',
-    'banner.settings': 'Einstellungen',
-    'banner.settingsDesc': 'Dies würde die Podman Desktop Einstellungen öffnen.',
-    'banner.extensions': 'Erweiterungen',
-    'banner.extensionsDesc': 'Dies würde das Erweiterungen-Panel öffnen.',
-    'banner.keyboardShortcuts': 'Tastenkürzel',
-    'banner.keyboardShortcutsDesc': 'Dies würde die Tastenkürzel-Einstellungen öffnen.',
-    'banner.about': 'Über Podman Desktop',
-    'banner.aboutDesc': 'Dies würde den Info-Dialog anzeigen.',
-    'banner.signOut': 'Abmelden',
-    'banner.signOutDesc': 'Dies würde Sie abmelden.',
-    'banner.pinLimitReached': 'Anheft-Limit erreicht',
-    'banner.pinLimitReachedDesc': 'Sie können bis zu 10 Elemente anheften.',
-    'banner.clickToDismiss': 'Klicken Sie irgendwo zum Schließen',
-
+    // Modal dialog
     'modal.hideItem': 'Element ausblenden',
     'modal.hideItemDescription':
         'Dieses Element wird ausgeblendet. Sie können es in den Einstellungen wiederherstellen.',
@@ -72,6 +53,7 @@ export const de: Record<TranslationKey, string> = {
     'modal.ok': 'OK',
     'modal.cancel': 'Abbrechen',
 
+    // Controls
     'controls.itemManagement': 'Elementverwaltung',
     'controls.addItem': 'Element hinzufügen',
     'controls.removeLast': 'Letztes entfernen',
@@ -84,12 +66,14 @@ export const de: Record<TranslationKey, string> = {
     'controls.unhideAll': 'Alle einblenden',
     'controls.language': 'Sprache',
 
+    // Locale names
     'locale.en': 'English',
     'locale.de': 'Deutsch',
     'locale.ja': '日本語',
     'locale.ar': 'العربية',
     'locale.he': 'עברית',
 
+    // Accessibility
     'a11y.navigationBar': 'Navigationsleiste',
     'a11y.mainNavigation': 'Hauptnavigation',
     'a11y.pinnedItems': 'Angeheftete Elemente',
