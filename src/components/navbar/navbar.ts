@@ -4,9 +4,11 @@
  */
 
 import type { NavBarState } from '../../state/navbar-state.js';
+import { stateManager } from '../../state/navbar-state.js';
 import { COLORS, NAVBAR } from '../../utils/design-tokens.js';
 import { createSvgElement } from '../../utils/svg-utils.js';
 import { ContextMenuManager, type MenuItemDef } from '../overlays/context-menu.js';
+import { InfoBannerManager } from '../overlays/info-banner.js';
 import { TooltipManager } from '../overlays/tooltip.js';
 import {
     createFadeGradient,
@@ -24,6 +26,7 @@ import {
 } from '../scrollbar/scrollbar.js';
 import { BottomPanel } from './bottom-panel.js';
 import { EssentialsPanel } from './essentials-panel.js';
+import { createMoreButton, getMoreButtonHeight } from './more-button.js';
 import { createNavBarDivider, getDividerTotalHeight } from './navbar-divider.js';
 import type { ItemDisplayMode } from './navbar-item.js';
 import type { PanelRenderContext } from './navbar-panel.js';
@@ -60,6 +63,10 @@ export class NavBar {
     // Dividers
     private dividers: Map<string, SVGGElement> = new Map();
 
+    // More button
+    private moreButtonGroup: SVGGElement | null = null;
+    private hiddenItemCount = 0;
+
     // Scrollbar and fade gradients
     private scrollbarGroup: SVGGElement | null = null;
     private fadeGradientTop: SVGGElement | null = null;
@@ -69,9 +76,10 @@ export class NavBar {
     private fadeTopGradientId = '';
     private fadeBottomGradientId = '';
 
-    // Tooltip and context menu
+    // Tooltip, context menu, and info banner
     private tooltipManager: TooltipManager | null = null;
     private contextMenuManager: ContextMenuManager | null = null;
+    private infoBannerManager: InfoBannerManager | null = null;
     private overlayGroup: SVGGElement | null = null;
 
     // Configuration
@@ -395,6 +403,24 @@ export class NavBar {
      * Builds context menu for empty navbar space.
      */
     private buildEmptySpaceContextMenu(): MenuItemDef[] {
+        // Get hidden items from state
+        const state = stateManager.getState();
+        const hiddenItems = state.hiddenItems;
+
+        // Build submenu for hidden items
+        let hiddenSubmenu: MenuItemDef[];
+        if (hiddenItems.length === 0) {
+            hiddenSubmenu = [
+                { id: 'noHiddenItems', labelKey: 'menu.noHiddenItems', disabled: true },
+            ];
+        } else {
+            hiddenSubmenu = hiddenItems.map((item) => ({
+                id: `unhide-${item.id}`,
+                labelKey: item.labelKey,
+                icon: item.icon,
+            }));
+        }
+
         return [
             {
                 id: 'toggleIconMode',
@@ -403,9 +429,8 @@ export class NavBar {
             {
                 id: 'showHiddenItems',
                 labelKey: 'menu.showHiddenItems',
-                submenu: [
-                    { id: 'noHiddenItems', labelKey: 'menu.noHiddenItems', disabled: true },
-                ],
+                submenu: hiddenSubmenu,
+                disabled: hiddenItems.length === 0,
             },
             { id: 'sep1', labelKey: '', isSeparator: true },
             {
@@ -424,16 +449,144 @@ export class NavBar {
      */
     private handleContextMenuSelect(
         menuItemId: string,
-        _item: import('../../state/navigation-items.js').NavItem | null,
+        item: import('../../state/navigation-items.js').NavItem | null,
     ): void {
-        // For now, just log the selection
-        // In a real app, these would trigger state changes
-        console.log('Context menu selected:', menuItemId);
+        console.log('Context menu selected:', menuItemId, item?.id);
 
-        // Handle toggle icon mode
-        if (menuItemId === 'toggleIconMode') {
-            const newMode = this.displayMode === 'icons-only' ? 'icons-titles' : 'icons-only';
-            this.setDisplayMode(newMode);
+        switch (menuItemId) {
+            case 'toggleIconMode': {
+                const newMode = this.displayMode === 'icons-only' ? 'icons-titles' : 'icons-only';
+                this.setDisplayMode(newMode);
+                stateManager.setIconMode(newMode);
+                break;
+            }
+
+            case 'pin':
+                if (item) {
+                    stateManager.pinItem(item.id);
+                }
+                break;
+
+            case 'unpin':
+                if (item) {
+                    stateManager.unpinItem(item.id);
+                }
+                break;
+
+            case 'hide':
+                if (item) {
+                    stateManager.hideItem(item.id);
+                }
+                break;
+
+            case 'resetNavbar':
+                stateManager.reset();
+                break;
+
+            case 'shortcut':
+                this.showInfoBanner('banner.keyboardShortcut', 'banner.keyboardShortcutDesc');
+                break;
+
+            case 'extensionSettings':
+                this.showInfoBanner('banner.extensionSettings', 'banner.extensionSettingsDesc');
+                break;
+
+            case 'removeExtension':
+                this.showInfoBanner('banner.removeExtension', 'banner.removeExtensionDesc');
+                break;
+
+            case 'configureNavbar':
+                this.showInfoBanner('banner.configureNavbar', 'banner.configureNavbarDesc');
+                break;
+
+            case 'settings':
+                this.showInfoBanner('banner.settings', 'banner.settingsDesc');
+                break;
+
+            case 'extensions':
+                this.showInfoBanner('banner.extensions', 'banner.extensionsDesc');
+                break;
+
+            case 'keyboardShortcuts':
+                this.showInfoBanner('banner.keyboardShortcuts', 'banner.keyboardShortcutsDesc');
+                break;
+
+            case 'aboutPodman':
+                this.showInfoBanner('banner.about', 'banner.aboutDesc');
+                break;
+
+            case 'signOut':
+                this.showInfoBanner('banner.signOut', 'banner.signOutDesc');
+                break;
+
+            default:
+                // Check if it's a hidden item being restored
+                if (menuItemId.startsWith('unhide-')) {
+                    const itemId = menuItemId.replace('unhide-', '');
+                    stateManager.unhideItem(itemId);
+                }
+                break;
+        }
+    }
+
+    /**
+     * Shows the hidden items menu from the More button.
+     */
+    private showHiddenItemsMenu(): void {
+        const state = stateManager.getState();
+        const hiddenItems = state.hiddenItems;
+
+        if (hiddenItems.length === 0) return;
+
+        // Build menu items for hidden items
+        const menuItems: MenuItemDef[] = hiddenItems.map((item) => ({
+            id: `unhide-${item.id}`,
+            labelKey: item.labelKey,
+            icon: item.icon,
+        }));
+
+        // Get More button position for menu placement
+        if (this.moreButtonGroup) {
+            const transform = this.moreButtonGroup.getAttribute('transform');
+            const match = transform?.match(/translate\(([^,]+),\s*([^)]+)\)/);
+            const y = match?.[2] !== undefined ? parseFloat(match[2]) : this.viewportHeight - getMoreButtonHeight();
+
+            // Show context menu at More button position
+            this.contextMenuManager?.show(
+                { items: menuItems, x: this.config.width / 2, y },
+                this.config.width,
+                this.config.height,
+                (selectedItemId) => this.handleContextMenuSelect(selectedItemId, null),
+                () => {
+                    // Menu closed
+                },
+            );
+        }
+    }
+
+    /**
+     * Shows an info banner.
+     */
+    private showInfoBanner(titleKey: string, descriptionKey: string): void {
+        if (!this.infoBannerManager) {
+            // Initialize info banner manager if not yet done
+            if (this.overlayGroup) {
+                this.infoBannerManager = new InfoBannerManager(this.overlayGroup);
+            }
+        }
+
+        if (this.infoBannerManager) {
+            // Get viewport dimensions from the SVG
+            const svgElement = this.group.ownerSVGElement;
+            const width = svgElement ? parseFloat(svgElement.getAttribute('width') ?? '800') : 800;
+            const height = svgElement ? parseFloat(svgElement.getAttribute('height') ?? '600') : 600;
+
+            this.infoBannerManager.show({
+                titleKey,
+                descriptionKey,
+                width,
+                height,
+            });
         }
     }
 
@@ -611,11 +764,16 @@ export class NavBar {
     private render(): void {
         const { width, height } = this.config;
 
+        // Get hidden items count from state for More button
+        const state = stateManager.getState();
+        this.hiddenItemCount = state.hiddenItems.length;
+        const moreButtonHeight = this.hiddenItemCount > 0 ? getMoreButtonHeight() : 0;
+
         // Calculate bottom panel height (always visible at bottom)
         const bottomPanelHeight = this.bottomPanel.calculateHeight(this.displayMode);
 
-        // Calculate viewport height for scrollable content
-        this.viewportHeight = height - bottomPanelHeight;
+        // Calculate viewport height for scrollable content (minus More button if visible)
+        this.viewportHeight = height - bottomPanelHeight - moreButtonHeight;
 
         // Update clip rect for scrollable area
         this.clipRect.setAttribute('height', String(this.viewportHeight));
@@ -698,15 +856,43 @@ export class NavBar {
         // Update scroll position
         this.updateScrollPosition();
 
+        // Remove old More button if exists
+        if (this.moreButtonGroup) {
+            this.moreButtonGroup.remove();
+            this.moreButtonGroup = null;
+        }
+
+        // Create or update More button (positioned right at the end of viewport)
+        if (this.hiddenItemCount > 0) {
+            // Position More button right after the viewport (before divider and bottom panel)
+            const moreButtonY = this.viewportHeight;
+            this.moreButtonGroup = createMoreButton({
+                x: 0,
+                y: moreButtonY,
+                width,
+                hiddenCount: this.hiddenItemCount,
+            });
+
+            if (this.moreButtonGroup) {
+                // Add click handler to show hidden items dropdown
+                this.moreButtonGroup.addEventListener('click', () => {
+                    this.showHiddenItemsMenu();
+                });
+
+                this.contentGroup.insertBefore(this.moreButtonGroup, this.bottomPanel.getGroup());
+            }
+        }
+
         // Bottom panel (sticky at bottom)
-        // Add divider above bottom panel
-        const bottomDividerY = this.viewportHeight + NAVBAR.divider.marginVertical;
+        // Add divider above bottom panel (accounting for More button)
+        const moreButtonSpace = this.hiddenItemCount > 0 ? moreButtonHeight : 0;
+        const bottomDividerY = this.viewportHeight + moreButtonSpace + NAVBAR.divider.marginVertical;
         const bottomDivider = createNavBarDivider(0, bottomDividerY - getDividerTotalHeight(), width);
         this.contentGroup.insertBefore(bottomDivider, this.bottomPanel.getGroup());
         this.dividers.set('before-bottom', bottomDivider);
 
-        // Position bottom panel
-        context.y = this.viewportHeight;
+        // Position bottom panel (after More button if present)
+        context.y = this.viewportHeight + moreButtonSpace;
         this.bottomPanel.render(context);
 
         // Update scrollbar and fade gradient dimensions

@@ -3,12 +3,21 @@
  * macOS-style window frame with title bar, status bar, navbar, and drop shadow.
  */
 
-import { subscribeToLocale } from '../i18n/i18n.js';
+import { setLocale, subscribeToLocale } from '../i18n/i18n.js';
 import { stateManager, type NavBarState } from '../state/navbar-state.js';
+import type { Locale, NavItem } from '../state/navigation-items.js';
 import { COLORS } from '../utils/design-tokens.js';
 import { createSvgElement } from '../utils/svg-utils.js';
 import { assert } from '../utils/utils.js';
-import { createContentArea, setNavbarWidth, setRtlMode, updateContentArea } from './content-area.js';
+import {
+    createContentArea,
+    getContentAreaBounds,
+    setNavbarWidth,
+    setRtlMode,
+    updateContentArea,
+} from './content-area.js';
+import { createButtonGroup } from './controls/action-button.js';
+import { createLocaleSwitcher } from './controls/locale-switcher.js';
 import { createDropShadowFilter, DROP_SHADOW_FILTER_ID } from './drop-shadow.js';
 import { NavBar } from './navbar/navbar.js';
 import { createResizeHandle, setupResizeDragHandlers, updateResizeHandle } from './navbar/resize-handle.js';
@@ -206,6 +215,7 @@ export class WindowFrame {
     private cleanupResizeHandlers: (() => void) | null = null;
     private unsubscribeState: (() => void) | null = null;
     private unsubscribeLocale: (() => void) | null = null;
+    private controlsGroup: SVGGElement | null = null;
 
     /**
      * Creates a new window frame instance.
@@ -223,6 +233,9 @@ export class WindowFrame {
 
         // Create navbar
         this.createNavbar(width, height);
+
+        // Create content area controls
+        this.createControls();
 
         // Subscribe to state changes
         this.unsubscribeState = stateManager.subscribe(this.handleStateChange.bind(this));
@@ -301,6 +314,124 @@ export class WindowFrame {
             onDragEnd: () => stateManager.endResizeDrag(),
             onDragCancel: () => stateManager.cancelResizeDrag(),
         });
+    }
+
+    /**
+     * Creates content area controls for testing.
+     */
+    private createControls(): void {
+        const bounds = getContentAreaBounds(this.svg);
+        if (!bounds) return;
+
+        const state = stateManager.getState();
+        const controlsX = bounds.x + 20;
+        const controlsY = bounds.y + 20;
+
+        // Create controls group
+        this.controlsGroup = createSvgElement('g', {
+            'data-name': 'controls-group',
+            transform: `translate(${controlsX}, ${controlsY})`,
+        });
+
+        // Item management buttons
+        const itemButtons = createButtonGroup(
+            'Item Management',
+            [
+                { id: 'addItem', label: 'Add Item' },
+                { id: 'removeLastItem', label: 'Remove Last' },
+                { id: 'removeRandomItem', label: 'Remove Random' },
+            ],
+            0,
+            0,
+            (buttonId) => this.handleControlButton(buttonId),
+        );
+        this.controlsGroup.appendChild(itemButtons);
+
+        // Pinning buttons
+        const pinButtons = createButtonGroup(
+            'Pinning',
+            [
+                { id: 'pinRandomItem', label: 'Pin Random' },
+                { id: 'unpinAllItems', label: 'Unpin All' },
+            ],
+            0,
+            130,
+            (buttonId) => this.handleControlButton(buttonId),
+        );
+        this.controlsGroup.appendChild(pinButtons);
+
+        // Visibility buttons
+        const visibilityButtons = createButtonGroup(
+            'Visibility',
+            [
+                { id: 'hideRandomItem', label: 'Hide Random' },
+                { id: 'unhideAllItems', label: 'Unhide All' },
+            ],
+            0,
+            230,
+            (buttonId) => this.handleControlButton(buttonId),
+        );
+        this.controlsGroup.appendChild(visibilityButtons);
+
+        // Locale switcher
+        const localeSwitcher = createLocaleSwitcher(
+            {
+                x: 0,
+                y: 330,
+                currentLocale: state.locale,
+            },
+            (locale: Locale) => {
+                setLocale(locale);
+                stateManager.setLocale(locale);
+            },
+        );
+        this.controlsGroup.appendChild(localeSwitcher);
+
+        // Add controls to content area group
+        const contentAreaGroup = this.svg.querySelector('g[data-name="content-area-group"]');
+        if (contentAreaGroup) {
+            contentAreaGroup.appendChild(this.controlsGroup);
+        }
+    }
+
+    /**
+     * Handles control button clicks.
+     */
+    private handleControlButton(buttonId: string): void {
+        switch (buttonId) {
+            case 'addItem': {
+                // Add a new random extension item
+                const newItem: NavItem = {
+                    id: `ext-${Date.now()}`,
+                    labelKey: 'nav.extensions',
+                    icon: 'plug',
+                    iconVariant: 'outline',
+                    canPin: true,
+                    canHide: true,
+                    originalCategory: 'regular',
+                };
+                stateManager.addItem(newItem);
+                break;
+            }
+            case 'removeLastItem':
+                stateManager.removeLastItem();
+                break;
+            case 'removeRandomItem':
+                stateManager.removeRandomItem();
+                break;
+            case 'pinRandomItem':
+                stateManager.pinRandomItem();
+                break;
+            case 'unpinAllItems':
+                stateManager.unpinAllItems();
+                break;
+            case 'hideRandomItem':
+                stateManager.hideRandomItem();
+                break;
+            case 'unhideAllItems':
+                stateManager.unhideAllItems();
+                break;
+        }
     }
 
     /**

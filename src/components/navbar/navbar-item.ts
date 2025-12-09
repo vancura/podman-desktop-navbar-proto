@@ -72,7 +72,7 @@ export function createNavBarItem(config: NavBarItemConfig): SVGGElement {
         transform: `translate(${x}, ${y})`,
     });
 
-    // Background/hit area
+    // Background/hit area - use 'visible' to capture clicks even when fill is transparent
     const background = createSvgElement('rect', {
         x: '0',
         y: '0',
@@ -83,6 +83,7 @@ export function createNavBarItem(config: NavBarItemConfig): SVGGElement {
         fill: isActive ? COLORS.navbarItemSelected : isHovered ? COLORS.navbarItemHover : 'transparent',
         'data-name': 'item-background',
         cursor: 'pointer',
+        'pointer-events': 'visible',
     });
     group.appendChild(background);
 

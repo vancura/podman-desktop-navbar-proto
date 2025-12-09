@@ -77,6 +77,26 @@ export const en = {
     'banner.shortcutsDescription': 'In the real application, this would open the Keyboard Shortcuts configuration panel.',
     'banner.clickToDismiss': 'Click anywhere to dismiss',
 
+    // Banner keys used by context menu actions
+    'banner.keyboardShortcut': 'Keyboard Shortcut',
+    'banner.keyboardShortcutDesc': 'In the real application, this would open a dialog to assign or change the keyboard shortcut for this item.',
+    'banner.extensionSettings': 'Extension Settings',
+    'banner.extensionSettingsDesc': 'In the real application, this would open the settings panel for this extension.',
+    'banner.removeExtension': 'Remove Extension',
+    'banner.removeExtensionDesc': 'In the real application, this would start the extension uninstall process.',
+    'banner.configureNavbar': 'Configure Navigation Bar',
+    'banner.configureNavbarDesc': 'In the real application, this would open the Navigation Bar configuration in Podman Desktop Settings.',
+    'banner.settings': 'Settings',
+    'banner.settingsDesc': 'In the real application, this would open the Podman Desktop Settings panel.',
+    'banner.extensions': 'Extensions',
+    'banner.extensionsDesc': 'In the real application, this would open the Extensions management panel.',
+    'banner.keyboardShortcuts': 'Keyboard Shortcuts',
+    'banner.keyboardShortcutsDesc': 'In the real application, this would open the Keyboard Shortcuts configuration panel.',
+    'banner.about': 'About Podman Desktop',
+    'banner.aboutDesc': 'In the real application, this would show the About Podman Desktop dialog with version information.',
+    'banner.signOut': 'Sign Out',
+    'banner.signOutDesc': 'In the real application, this would sign you out of your account.',
+
     // Modal dialog
     'modal.hideItem': 'Hide Item',
     'modal.hideItemDescription': 'This item will be hidden from the Navigation Bar. You can restore it in Podman Desktop Settings.',
