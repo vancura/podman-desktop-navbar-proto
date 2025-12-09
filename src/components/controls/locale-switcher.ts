@@ -15,7 +15,7 @@ export interface LocaleSwitcherConfig {
     currentLocale: Locale;
 }
 
-const LOCALES: Locale[] = ['en', 'de', 'ja', 'ar'];
+const LOCALES: Locale[] = ['en', 'de', 'ja', 'ar', 'he'];
 
 const SWITCHER_CONFIG = {
     buttonWidth: 40,

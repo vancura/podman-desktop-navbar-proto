@@ -6,7 +6,7 @@
 import type { IconName, IconVariant } from '../icons/icons.js';
 
 /** Supported locales. */
-export type Locale = 'en' | 'de' | 'ja' | 'ar';
+export type Locale = 'en' | 'de' | 'ja' | 'ar' | 'he';
 
 /** Navigation item category. */
 export type ItemCategory = 'essential' | 'pinned' | 'regular' | 'hidden' | 'bottom';

@@ -7,6 +7,7 @@ import type { Locale } from '../state/navigation-items.js';
 import { ar } from './locales/ar.js';
 import { de } from './locales/de.js';
 import { en, type TranslationKey } from './locales/en.js';
+import { he } from './locales/he.js';
 import { ja } from './locales/ja.js';
 
 /** All available translations. */
@@ -15,6 +16,7 @@ const translations: Record<Locale, Record<string, string>> = {
     de,
     ja,
     ar,
+    he,
 };
 
 /** Current locale. */
@@ -51,7 +53,7 @@ export function getLocale(): Locale {
  * @returns True if the current locale is RTL.
  */
 export function isRtl(): boolean {
-    return currentLocale === 'ar';
+    return currentLocale === 'ar' || currentLocale === 'he';
 }
 
 /**
@@ -108,7 +110,7 @@ export function subscribeToLocale(listener: (locale: Locale) => void): () => voi
  * @returns Array of available locale codes.
  */
 export function getAvailableLocales(): Locale[] {
-    return ['en', 'de', 'ja', 'ar'];
+    return ['en', 'de', 'ja', 'ar', 'he'];
 }
 
 /**

@@ -473,7 +473,7 @@ export class NavBarStateManager {
     setLocale(locale: Locale): void {
         this.dispatch(() => ({
             locale,
-            isRtl: locale === 'ar',
+            isRtl: locale === 'ar' || locale === 'he',
         }));
     }
 

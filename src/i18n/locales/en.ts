@@ -124,6 +124,7 @@ export const en = {
     'locale.de': 'Deutsch',
     'locale.ja': '日本語',
     'locale.ar': 'العربية',
+    'locale.he': 'עברית',
 
     // Accessibility
     'a11y.navigationBar': 'Navigation Bar',
