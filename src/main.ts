@@ -1,113 +1,15 @@
 /**
  * Podman Desktop Navigation Bar Prototype
- * Entry point for the dynamic SVG navigation bar.
+ * Entry point for the Svelte application.
  */
 
-import { SHADOW_PADDING as _SHADOW_PADDING, WindowFrame as _WindowFrame } from './components/window-frame.js';
-import { destroyKeyboardHandling, initKeyboardHandling, registerShortcutHandler } from './utils/keyboard-utils.js';
-import { assert } from './utils/utils.js';
+import { mount } from 'svelte';
 
-let WindowFrame = _WindowFrame;
-let SHADOW_PADDING = _SHADOW_PADDING;
-let windowFrame: InstanceType<typeof WindowFrame> | null = null;
-let resizeHandler: (() => void) | null = null;
-let unregisterShortcutHandler: (() => void) | null = null;
+import App from './App.svelte';
+import './app.css';
 
-/**
- * Updates the info display with the current window dimensions.
- */
-function updateInfo(): void {
-    const svg = assert(windowFrame, 'WindowFrame not initialized').getSvg();
+const app = mount(App, {
+    target: document.getElementById('app')!,
+});
 
-    const svgWidth = parseFloat(assert(svg.getAttribute('width'), 'SVG missing width attribute'));
-    const svgHeight = parseFloat(assert(svg.getAttribute('height'), 'SVG missing height attribute'));
-
-    const width = svgWidth - SHADOW_PADDING * 2;
-    const height = svgHeight - SHADOW_PADDING * 2;
-
-    const info = assert(document.getElementById('info'), 'Info element not found');
-
-    info.textContent = `Podman Desktop Navigation Bar Prototype — Window Frame (${Math.round(width)} × ${Math.round(height)} px)`;
-}
-
-/**
- * Main application entry point.
- * Sets up the SVG window frame prototype.
- */
-function main(): void {
-    const container = assert(document.getElementById('prototype-container'), 'Container element not found');
-
-    // Clean up existing instance if any (for HMR).
-    if (windowFrame) {
-        windowFrame.destroy();
-    }
-
-    // Remove previous resize listener if any (for HMR).
-    if (resizeHandler) {
-        window.removeEventListener('resize', resizeHandler);
-    }
-
-    // Clean up previous keyboard handler.
-    if (unregisterShortcutHandler) {
-        unregisterShortcutHandler();
-    }
-
-    // Clear container for HMR.
-    container.innerHTML = '';
-
-    // Create window frame component.
-    windowFrame = new WindowFrame(container);
-
-    // Initialize keyboard handling.
-    initKeyboardHandling();
-
-    // Register shortcut handler to forward to navbar.
-    unregisterShortcutHandler = registerShortcutHandler((action, _event) => {
-        windowFrame?.getNavbar().handleKeyboardAction(action);
-    });
-
-    // Set up resize handler for info updates.
-    resizeHandler = () => updateInfo();
-    window.addEventListener('resize', resizeHandler);
-
-    // Initial info update.
-    updateInfo();
-}
-
-// Start the application.
-main();
-
-// Handle HMR updates.
-if (import.meta.hot) {
-    import.meta.hot.accept('./components/window-frame.ts', (newModule) => {
-        if (newModule) {
-            WindowFrame = newModule.WindowFrame;
-            SHADOW_PADDING = newModule.SHADOW_PADDING;
-            main();
-        }
-    });
-
-    import.meta.hot.accept();
-
-    import.meta.hot.dispose(() => {
-        if (resizeHandler) {
-            window.removeEventListener('resize', resizeHandler);
-
-            resizeHandler = null;
-        }
-
-        if (unregisterShortcutHandler) {
-            unregisterShortcutHandler();
-
-            unregisterShortcutHandler = null;
-        }
-
-        destroyKeyboardHandling();
-
-        if (windowFrame) {
-            windowFrame.destroy();
-
-            windowFrame = null;
-        }
-    });
-}
+export default app;

@@ -1,34 +1,17 @@
+import { svelte } from '@sveltejs/vite-plugin-svelte';
+import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
-export default defineConfig(({ command }) => {
-    const isProduction = command === 'build';
+export default defineConfig({
+    plugins: [tailwindcss(), svelte()],
 
-    return {
-        build: {
-            target: 'es2022',
-            minify: isProduction ? 'esbuild' : false,
-            sourcemap: !isProduction,
-            emptyOutDir: true,
-            rollupOptions: {
-                output: isProduction
-                    ? {
-                          compact: true,
-                          generatedCode: {
-                              symbols: false,
-                              constBindings: true,
-                          },
-                      }
-                    : undefined,
-            },
-        },
+    build: {
+        target: 'es2022',
+        sourcemap: true,
+        emptyOutDir: true,
+    },
 
-        server: {
-            open: true,
-            hmr: true,
-        },
-
-        preview: {
-            open: true,
-        },
-    };
+    server: {
+        open: true,
+    },
 });

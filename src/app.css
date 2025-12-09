@@ -1,0 +1,175 @@
+@import 'tailwindcss';
+
+/**
+ * Design Tokens
+ * Centralized design constants converted from TypeScript to CSS custom properties.
+ */
+
+@theme {
+    /* Window colors */
+    --color-window-bg: #f5f5f5;
+    --color-window-border: #007aff;
+    --color-content-bg: #e5e5e5;
+
+    /* Title bar */
+    --color-titlebar-bg: #e5e5e5;
+
+    /* Status bar */
+    --color-statusbar-bg: #dbd6ea;
+
+    /* Text colors */
+    --color-text-primary: #222;
+    --color-text-secondary: #666;
+    --color-text-muted: #999;
+
+    /* Traffic lights (macOS window controls) */
+    --color-traffic-close: #ff5f57;
+    --color-traffic-minimize: #ffbd2e;
+    --color-traffic-maximize: #28ca42;
+
+    /* Navbar colors */
+    --color-navbar-bg: #292d3e;
+    --color-navbar-item-hover: rgba(255, 255, 255, 0.08);
+    --color-navbar-item-active: rgba(255, 255, 255, 0.12);
+    --color-navbar-item-selected: rgba(138, 99, 210, 0.25);
+    --color-navbar-text: #a6accd;
+    --color-navbar-text-active: #ffffff;
+    --color-navbar-text-muted: #676e95;
+    --color-navbar-divider: rgba(255, 255, 255, 0.08);
+    --color-navbar-resize: rgba(255, 255, 255, 0.15);
+    --color-navbar-resize-hover: rgba(138, 99, 210, 0.6);
+
+    /* Scrollbar colors */
+    --color-scrollbar-thumb: rgba(255, 255, 255, 0.2);
+    --color-scrollbar-thumb-hover: rgba(255, 255, 255, 0.35);
+
+    /* Tooltip colors */
+    --color-tooltip-bg: #1e2030;
+    --color-tooltip-border: #3b4261;
+    --color-tooltip-text: #c8d3f5;
+    --color-tooltip-shortcut: #7a88cf;
+
+    /* Context menu colors */
+    --color-menu-bg: #1e2030;
+    --color-menu-border: #3b4261;
+    --color-menu-item-hover: rgba(138, 99, 210, 0.3);
+    --color-menu-text: #c8d3f5;
+    --color-menu-text-disabled: #545c7e;
+    --color-menu-separator: #3b4261;
+    --color-menu-arrow: #7a88cf;
+
+    /* Modal and banner colors */
+    --color-overlay-bg: rgba(0, 0, 0, 0.6);
+    --color-banner-bg: #1e2030;
+    --color-banner-border: #3b4261;
+    --color-banner-text: #c8d3f5;
+    --color-banner-text-secondary: #7a88cf;
+
+    /* Focus ring */
+    --color-focus-ring: #8a63d2;
+    --color-focus-offset: #292d3e;
+
+    /* Action buttons */
+    --color-button-bg: #3b4261;
+    --color-button-bg-hover: #4a5380;
+    --color-button-bg-active: #5a63a0;
+    --color-button-text: #c8d3f5;
+    --color-button-border: #545c7e;
+
+    /* Content area */
+    --color-content-border: #3b4261;
+    --color-content-bg-secondary: rgba(59, 66, 97, 0.3);
+
+    /* Keyboard shortcuts */
+    --color-kbd-bg: #3b4261;
+    --color-kbd-text: #c8d3f5;
+
+    /* Context menu z-index */
+    --z-context-menu: 300;
+
+    /* Spacing - navbar specific */
+    --spacing-navbar-min: 80px;
+    --spacing-navbar-max: 300px;
+    --spacing-navbar-default: 200px;
+    --spacing-navbar-threshold: 160px;
+
+    /* Typography */
+    --font-display: 'Innovator Grotesk', system-ui, -apple-system, sans-serif;
+    --font-ui: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+    /* Animation timing */
+    --duration-fast: 100ms;
+    --duration-normal: 200ms;
+    --duration-slow: 300ms;
+
+    /* Easing functions */
+    --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* Z-index layers */
+    --z-navbar: 100;
+    --z-resize: 150;
+    --z-tooltip: 200;
+    --z-menu: 300;
+    --z-submenu: 310;
+    --z-modal: 400;
+    --z-banner: 500;
+}
+
+/* Custom font */
+@font-face {
+    font-family: 'Innovator Grotesk';
+    src: url('https://fonts.vancura.dev/InnovatorGrotesk-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Base styles */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    overflow: hidden;
+    user-select: none;
+}
+
+body {
+    font-family: var(--font-display);
+    background: var(--color-window-bg);
+}
+
+#app {
+    width: 100%;
+    height: 100vh;
+}
+
+/* Custom scrollbar styling for navbar */
+.navbar-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-scrollbar-thumb) transparent;
+}
+
+.navbar-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.navbar-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.navbar-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--color-scrollbar-thumb);
+    border-radius: 3px;
+}
+
+.navbar-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--color-scrollbar-thumb-hover);
+}
+
+/* Focus visible utility */
+.focus-ring:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+}

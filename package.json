@@ -2,80 +2,58 @@
   "name": "podman-desktop-navbar-proto",
   "version": "0.0.1",
   "type": "module",
-  "description": "Podman Desktop Navigation Bar prototype using dynamic SVG and TypeScript.",
+  "description": "Podman Desktop Navigation Bar prototype using Svelte 5 and Tailwind CSS.",
   "author": "Václav Vančura",
   "license": "ISC",
   "keywords": [
     "podman-desktop",
     "navigation",
-    "svg",
+    "svelte",
+    "tailwind",
     "typescript",
     "prototype"
   ],
   "engines": {
     "node": ">=20.0.0"
   },
-  "main": "./dist/podman-desktop-navbar-proto.cjs",
-  "module": "./dist/podman-desktop-navbar-proto.js",
-  "types": "./dist/podman-desktop-navbar-proto.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/podman-desktop-navbar-proto.d.ts",
-      "import": "./dist/podman-desktop-navbar-proto.js",
-      "require": "./dist/podman-desktop-navbar-proto.cjs"
-    }
-  },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
-  "sideEffects": false,
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "build:lib": "vite build --mode lib",
-    "build:deploy": "pnpm build",
+    "build": "vite build",
     "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "biome format --write . && prettier --write \"**/*.{md,mdx,yml,yaml}\"",
     "format:check": "biome check . && prettier --check \"**/*.{md,mdx,yml,yaml}\"",
-    "format:biome": "biome format --write .",
-    "format:prettier": "prettier --write \"**/*.{md,mdx,yml,yaml}\"",
-    "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist node_modules/.vite dist-electron",
-    "changeset": "changeset",
-    "changeset:version": "changeset version",
-    "changeset:publish": "pnpm build:lib && changeset publish",
-    "version:bump": "pnpm changeset:version && pnpm install --no-frozen-lockfile",
-    "release": "pnpm build:lib && pnpm changeset:publish",
-    "prepublishOnly": "pnpm run build:lib",
+    "clean": "rm -rf dist node_modules/.vite",
     "prepare": "husky"
   },
   "packageManager": "pnpm@10.24.0+sha512.01ff8ae71b4419903b65c60fb2dc9d34cf8bb6e06d03bde112ef38f7a34d6904c424ba66bea5cdcf12890230bf39f9580473140ed9c946fef328b6e5238a345a",
+  "dependencies": {
+    "svelte": "^5.33.0"
+  },
   "devDependencies": {
     "@biomejs/biome": "^2.3.8",
-    "@changesets/cli": "^2.29.8",
     "@commitlint/cli": "^20.2.0",
     "@commitlint/config-conventional": "^20.2.0",
     "@eslint/js": "^9.39.1",
+    "@sveltejs/vite-plugin-svelte": "^5.1.0",
+    "@tailwindcss/vite": "^4.1.10",
     "@types/node": "^24.10.1",
     "@typescript-eslint/eslint-plugin": "^8.48.1",
     "@typescript-eslint/parser": "^8.48.1",
+    "autoprefixer": "^10.4.21",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-jsdoc": "^61.5.0",
-    "eslint-plugin-perfectionist": "^4.15.1",
-    "eslint-plugin-promise": "^7.2.1",
-    "eslint-plugin-security": "^3.0.1",
-    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "eslint-plugin-svelte": "^3.9.1",
     "globals": "^16.5.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
+    "prettier-plugin-svelte": "^3.4.0",
+    "svelte-check": "^4.2.1",
+    "tailwindcss": "^4.1.10",
     "typescript": "^5.9.3",
-    "vite": "^7.2.7",
-    "vite-plugin-dts": "^4.5.4"
+    "vite": "^7.2.7"
   }
 }
