@@ -20,6 +20,7 @@ import {
     updateContentArea,
 } from './content-area.js';
 import { createButtonGroup } from './controls/action-button.js';
+import { createKeyboardShortcutsHelp, getKeyboardShortcutsHelpWidth } from './controls/keyboard-shortcuts-help.js';
 import { createLocaleSwitcher, updateLocaleSwitcher } from './controls/locale-switcher.js';
 import { createDropShadowFilter, DROP_SHADOW_FILTER_ID } from './drop-shadow.js';
 import { NavBar } from './navbar/navbar.js';
@@ -221,6 +222,7 @@ export class WindowFrame {
     private unsubscribeState: (() => void) | null = null;
     private unsubscribeLocale: (() => void) | null = null;
     private controlsGroup: SVGGElement | null = null;
+    private helpGroup: SVGGElement | null = null;
     private localeSwitcherGroup: SVGGElement | null = null;
     private overlayGroup: SVGGElement | null = null;
     private infoBannerManager: InfoBannerManager | null = null;
@@ -352,26 +354,40 @@ export class WindowFrame {
         });
     }
 
+    /** Column gap between controls and help. */
+    private readonly COLUMN_GAP = 60;
+
     /**
-     * Calculates the widest control width for centering.
-     * Locale switcher: 4 buttons × 40px + 3 gaps × 4px = 172px
-     * Button groups: 140px
-     * @returns The width of the widest control element.
+     * Gets the total width of both columns.
+     * Left column (buttons): 172px, Right column (help): 180px, Gap: 60px
+     * @returns The total width of both columns.
      */
-    private getWidestControlWidth(): number {
-        return 172; // Locale switcher is the widest
+    private getTotalColumnsWidth(): number {
+        return 172 + this.COLUMN_GAP + getKeyboardShortcutsHelpWidth();
     }
 
     /**
-     * Calculates centered X position for controls.
+     * Calculates X position for the left column (controls).
      * @param bounds - The content area bounds with x and width properties.
      * @param bounds.x
      * @param bounds.width
-     * @returns The centered X position for the controls group.
+     * @returns The X position for the controls group.
      */
     private calculateControlsX(bounds: { x: number; width: number }): number {
-        const widestControlWidth = this.getWidestControlWidth();
-        return bounds.x + (bounds.width - widestControlWidth) / 2;
+        const totalWidth = this.getTotalColumnsWidth();
+        return bounds.x + (bounds.width - totalWidth) / 2;
+    }
+
+    /**
+     * Calculates X position for the right column (keyboard shortcuts help).
+     * @param bounds - The content area bounds with x and width properties.
+     * @param bounds.x
+     * @param bounds.width
+     * @returns The X position for the help group.
+     */
+    private calculateHelpX(bounds: { x: number; width: number }): number {
+        const controlsX = this.calculateControlsX(bounds);
+        return controlsX + 172 + this.COLUMN_GAP; // Left column width + gap
     }
 
     /**
@@ -450,22 +466,36 @@ export class WindowFrame {
         if (contentAreaGroup) {
             contentAreaGroup.appendChild(this.controlsGroup);
         }
+
+        // Create keyboard shortcuts help (right column)
+        const helpX = this.calculateHelpX(bounds);
+        const helpY = bounds.y + 20;
+        this.helpGroup = createKeyboardShortcutsHelp(helpX, helpY);
+
+        if (contentAreaGroup) {
+            contentAreaGroup.appendChild(this.helpGroup);
+        }
     }
 
     /**
      * Updates controls position on resize.
-     * Repositions the controls group to remain centered horizontally.
+     * Repositions the controls group and help group to remain centered horizontally.
      */
     private updateControls(): void {
-        if (!this.controlsGroup) return;
-
         const bounds = getContentAreaBounds(this.svg);
         if (!bounds) return;
 
-        const controlsX = this.calculateControlsX(bounds);
         const controlsY = bounds.y + 20;
 
-        this.controlsGroup.setAttribute('transform', `translate(${controlsX}, ${controlsY})`);
+        if (this.controlsGroup) {
+            const controlsX = this.calculateControlsX(bounds);
+            this.controlsGroup.setAttribute('transform', `translate(${controlsX}, ${controlsY})`);
+        }
+
+        if (this.helpGroup) {
+            const helpX = this.calculateHelpX(bounds);
+            this.helpGroup.setAttribute('transform', `translate(${helpX}, ${controlsY})`);
+        }
     }
 
     /**
