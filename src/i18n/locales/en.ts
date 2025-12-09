@@ -102,6 +102,8 @@ export const en = {
         'In the real application, this would show the About Podman Desktop dialog with version information.',
     'banner.signOut': 'Sign Out',
     'banner.signOutDesc': 'In the real application, this would sign you out of your account.',
+    'banner.pinLimitReached': 'Pinning Limit Reached',
+    'banner.pinLimitReachedDesc': 'You can pin up to 10 items. Please unpin some items to pin more.',
 
     // Modal dialog
     'modal.hideItem': 'Hide Item',

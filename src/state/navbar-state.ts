@@ -214,23 +214,36 @@ export class NavBarStateManager {
 
     /**
      * Pins an item to the pinned section.
+     * @returns true if the item was pinned, false if limit was reached or item not found.
      */
-    pinItem(itemId: string): void {
+    pinItem(itemId: string): boolean {
+        let success = false;
         this.dispatch((state) => {
             if (state.pinnedItems.length >= MAX_PINNED_ITEMS) {
+                success = false;
                 return {};
             }
 
             const item = state.regularItems.find((i) => i.id === itemId);
             if (!item || !item.canPin) {
+                success = false;
                 return {};
             }
 
+            success = true;
             return {
                 regularItems: state.regularItems.filter((i) => i.id !== itemId),
                 pinnedItems: [...state.pinnedItems, { ...item, iconVariant: 'filled' }],
             };
         });
+        return success;
+    }
+
+    /**
+     * Checks if the pinned items limit has been reached.
+     */
+    isPinnedLimitReached(): boolean {
+        return this.state.pinnedItems.length >= MAX_PINNED_ITEMS;
     }
 
     /**

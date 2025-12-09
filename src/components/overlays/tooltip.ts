@@ -198,6 +198,12 @@ export function updateTooltipPosition(group: SVGGElement, config: TooltipConfig)
     group.setAttribute('transform', `translate(${position.x}, ${position.y})`);
 }
 
+/** Offset configuration for external containers. */
+export interface TooltipOffset {
+    x: number;
+    y: number;
+}
+
 /**
  * Tooltip manager for handling show/hide with delays.
  */
@@ -207,9 +213,11 @@ export class TooltipManager {
     private showTimeout: number | null = null;
     private hideTimeout: number | null = null;
     private currentItemId: string | null = null;
+    private offset: TooltipOffset;
 
-    constructor(container: SVGGElement) {
+    constructor(container: SVGGElement, offsetConfig?: { x: number; y: number }) {
         this.container = container;
+        this.offset = offsetConfig ?? { x: 0, y: 0 };
     }
 
     /**
@@ -258,6 +266,21 @@ export class TooltipManager {
         this.hideImmediate();
 
         this.tooltipGroup = createTooltip(config);
+
+        // Apply offset for external containers
+        if (this.offset.x !== 0 || this.offset.y !== 0) {
+            const currentTransform = this.tooltipGroup.getAttribute('transform') ?? '';
+            const match = currentTransform.match(/translate\(([^,]+),\s*([^)]+)\)/);
+            if (match && match[1] !== undefined && match[2] !== undefined) {
+                const currentX = parseFloat(match[1]);
+                const currentY = parseFloat(match[2]);
+                this.tooltipGroup.setAttribute(
+                    'transform',
+                    `translate(${currentX + this.offset.x}, ${currentY + this.offset.y})`,
+                );
+            }
+        }
+
         this.container.appendChild(this.tooltipGroup);
         this.currentItemId = config.item.id;
 

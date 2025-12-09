@@ -3,9 +3,9 @@
  * Dropdown menu with items, separators, and submenus.
  */
 
-import { t } from '../../i18n/i18n.js';
-import { isRtl } from '../../i18n/i18n.js';
+import { isRtl, t } from '../../i18n/i18n.js';
 import { COLORS, TYPOGRAPHY } from '../../utils/design-tokens.js';
+import { disableKeyboardHandling, enableKeyboardHandling } from '../../utils/keyboard-utils.js';
 import { createSvgElement } from '../../utils/svg-utils.js';
 import {
     createMenuItem,
@@ -240,6 +240,7 @@ export class ContextMenuManager {
     private submenuGroup: SVGGElement | null = null;
     private items: MenuItemDef[] = [];
     private hoveredItemId: string | null = null;
+    private hoveredSubmenuItemId: string | null = null;
     private submenuTimeout: number | null = null;
     private onItemSelect: ((itemId: string) => void) | null = null;
     private onClose: (() => void) | null = null;
@@ -248,6 +249,10 @@ export class ContextMenuManager {
     private boundHandleMouseMove: ((e: MouseEvent) => void) | null = null;
     private boundHandleClick: ((e: MouseEvent) => void) | null = null;
     private boundHandleKeyDown: ((e: KeyboardEvent) => void) | null = null;
+    private focusedIndex = -1;
+    private submenuFocusedIndex = -1;
+    private isSubmenuActive = false;
+    private currentSubmenuItems: MenuItemDef[] = [];
 
     constructor(container: SVGGElement) {
         this.container = container;
@@ -275,9 +280,16 @@ export class ContextMenuManager {
         this.viewportHeight = viewportHeight;
         this.onItemSelect = onItemSelect;
         this.onClose = onClose;
+        this.focusedIndex = -1;
+        this.submenuFocusedIndex = -1;
+        this.isSubmenuActive = false;
+        this.currentSubmenuItems = [];
 
         this.menuGroup = createContextMenu(config, viewportWidth, viewportHeight);
         this.container.appendChild(this.menuGroup);
+
+        // Disable navbar keyboard navigation while menu is open
+        disableKeyboardHandling();
 
         // Setup event handlers
         this.setupEventHandlers();
@@ -302,8 +314,16 @@ export class ContextMenuManager {
 
         this.items = [];
         this.hoveredItemId = null;
+        this.hoveredSubmenuItemId = null;
         this.onItemSelect = null;
         this.onClose = null;
+        this.focusedIndex = -1;
+        this.submenuFocusedIndex = -1;
+        this.isSubmenuActive = false;
+        this.currentSubmenuItems = [];
+
+        // Re-enable navbar keyboard navigation
+        enableKeyboardHandling();
     }
 
     /**
@@ -339,6 +359,57 @@ export class ContextMenuManager {
     }
 
     /**
+     * Gets selectable items (non-separator, non-disabled).
+     */
+    private getSelectableItems(items: MenuItemDef[]): MenuItemDef[] {
+        return items.filter((item) => !item.isSeparator && !item.disabled);
+    }
+
+    /**
+     * Updates visual focus on menu items.
+     */
+    private updateVisualFocus(): void {
+        // Clear all hover states in main menu
+        if (this.menuGroup) {
+            const allItems = this.menuGroup.querySelectorAll('[data-name="menu-item"]');
+            for (const item of allItems) {
+                setMenuItemHovered(item as SVGGElement, false);
+            }
+        }
+
+        // Clear all hover states in submenu
+        if (this.submenuGroup) {
+            const allSubItems = this.submenuGroup.querySelectorAll('[data-name="menu-item"]');
+            for (const item of allSubItems) {
+                setMenuItemHovered(item as SVGGElement, false);
+            }
+        }
+
+        // Set focus on current item
+        if (this.isSubmenuActive && this.submenuGroup && this.submenuFocusedIndex >= 0) {
+            const selectableItems = this.getSelectableItems(this.currentSubmenuItems);
+            const item = selectableItems[this.submenuFocusedIndex];
+            if (item) {
+                const itemElement = this.submenuGroup.querySelector(
+                    `[data-item-id="${item.id}"]`,
+                ) as SVGGElement | null;
+                if (itemElement) {
+                    setMenuItemHovered(itemElement, true);
+                }
+            }
+        } else if (this.menuGroup && this.focusedIndex >= 0) {
+            const selectableItems = this.getSelectableItems(this.items);
+            const item = selectableItems[this.focusedIndex];
+            if (item) {
+                const itemElement = this.menuGroup.querySelector(`[data-item-id="${item.id}"]`) as SVGGElement | null;
+                if (itemElement) {
+                    setMenuItemHovered(itemElement, true);
+                }
+            }
+        }
+    }
+
+    /**
      * Handles mouse move for hover states.
      */
     private handleMouseMove(e: MouseEvent): void {
@@ -347,7 +418,11 @@ export class ContextMenuManager {
         const target = e.target as Element;
         const menuItem = target.closest('[data-name="menu-item"]') as SVGGElement | null;
 
-        // Clear previous hover
+        // Reset keyboard focus when mouse moves
+        this.focusedIndex = -1;
+        this.submenuFocusedIndex = -1;
+
+        // Clear previous hover in main menu
         if (this.hoveredItemId) {
             const prevItem = this.menuGroup.querySelector(`[data-item-id="${this.hoveredItemId}"]`) as SVGGElement;
             if (prevItem) {
@@ -355,10 +430,34 @@ export class ContextMenuManager {
             }
         }
 
+        // Clear previous hover in submenu
+        if (this.hoveredSubmenuItemId && this.submenuGroup) {
+            const prevSubItem = this.submenuGroup.querySelector(
+                `[data-item-id="${this.hoveredSubmenuItemId}"]`,
+            ) as SVGGElement;
+            if (prevSubItem) {
+                setMenuItemHovered(prevSubItem, false);
+            }
+        }
+
+        // Check if hovering over submenu
+        if (menuItem && this.submenuGroup?.contains(menuItem)) {
+            const itemId = menuItem.getAttribute('data-item-id');
+            if (itemId) {
+                this.hoveredSubmenuItemId = itemId;
+                this.isSubmenuActive = true;
+                setMenuItemHovered(menuItem, true);
+            }
+            return;
+        }
+
+        // Check if hovering over main menu
         if (menuItem && this.menuGroup.contains(menuItem)) {
             const itemId = menuItem.getAttribute('data-item-id');
             if (itemId) {
                 this.hoveredItemId = itemId;
+                this.hoveredSubmenuItemId = null;
+                this.isSubmenuActive = false;
                 setMenuItemHovered(menuItem, true);
 
                 // Handle submenu
@@ -371,6 +470,8 @@ export class ContextMenuManager {
             }
         } else if (!this.submenuGroup?.contains(target)) {
             this.hoveredItemId = null;
+            this.hoveredSubmenuItemId = null;
+            this.isSubmenuActive = false;
             this.hideSubmenu();
         }
     }
@@ -386,6 +487,20 @@ export class ContextMenuManager {
 
         if (menuItem) {
             const itemId = menuItem.getAttribute('data-item-id');
+
+            // Check if clicking a submenu item
+            if (this.submenuGroup?.contains(menuItem)) {
+                const submenuItemDef = this.currentSubmenuItems.find((i) => i.id === itemId);
+                if (itemId && submenuItemDef && !submenuItemDef.disabled) {
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    this.onItemSelect?.(itemId);
+                    this.close();
+                    return;
+                }
+            }
+
+            // Check if clicking a main menu item
             const itemDef = this.items.find((i) => i.id === itemId);
 
             if (itemId && itemDef && !itemDef.disabled && !itemDef.submenu) {
@@ -408,14 +523,186 @@ export class ContextMenuManager {
     }
 
     /**
-     * Handles keyboard events.
+     * Handles keyboard events for menu navigation.
      */
     private handleKeyDown(e: KeyboardEvent): void {
-        if (e.key === 'Escape') {
-            e.preventDefault();
-            this.onClose?.();
-            this.close();
+        const rtl = isRtl();
+
+        switch (e.key) {
+            case 'Escape':
+                e.preventDefault();
+                if (this.isSubmenuActive && this.submenuGroup) {
+                    // Close submenu, return to main menu
+                    this.isSubmenuActive = false;
+                    this.submenuFocusedIndex = -1;
+                    this.hideSubmenu();
+                    this.updateVisualFocus();
+                } else {
+                    this.onClose?.();
+                    this.close();
+                }
+                break;
+
+            case 'ArrowDown':
+                e.preventDefault();
+                this.navigateDown();
+                break;
+
+            case 'ArrowUp':
+                e.preventDefault();
+                this.navigateUp();
+                break;
+
+            case 'ArrowRight':
+                e.preventDefault();
+                if (rtl) {
+                    this.navigateBack();
+                } else {
+                    this.navigateIntoSubmenu();
+                }
+                break;
+
+            case 'ArrowLeft':
+                e.preventDefault();
+                if (rtl) {
+                    this.navigateIntoSubmenu();
+                } else {
+                    this.navigateBack();
+                }
+                break;
+
+            case 'Enter':
+            case ' ':
+                e.preventDefault();
+                this.selectCurrentItem();
+                break;
+
+            case 'Home':
+                e.preventDefault();
+                this.navigateToFirst();
+                break;
+
+            case 'End':
+                e.preventDefault();
+                this.navigateToLast();
+                break;
         }
+    }
+
+    /**
+     * Navigate down in the menu.
+     */
+    private navigateDown(): void {
+        const items = this.isSubmenuActive ? this.currentSubmenuItems : this.items;
+        const selectableItems = this.getSelectableItems(items);
+        const indexRef = this.isSubmenuActive ? 'submenuFocusedIndex' : 'focusedIndex';
+
+        if (selectableItems.length === 0) return;
+
+        if (this[indexRef] < selectableItems.length - 1) {
+            this[indexRef]++;
+        } else {
+            this[indexRef] = 0; // Wrap to first
+        }
+
+        this.updateVisualFocus();
+    }
+
+    /**
+     * Navigate up in the menu.
+     */
+    private navigateUp(): void {
+        const items = this.isSubmenuActive ? this.currentSubmenuItems : this.items;
+        const selectableItems = this.getSelectableItems(items);
+        const indexRef = this.isSubmenuActive ? 'submenuFocusedIndex' : 'focusedIndex';
+
+        if (selectableItems.length === 0) return;
+
+        if (this[indexRef] > 0) {
+            this[indexRef]--;
+        } else {
+            this[indexRef] = selectableItems.length - 1; // Wrap to last
+        }
+
+        this.updateVisualFocus();
+    }
+
+    /**
+     * Navigate into a submenu.
+     */
+    private navigateIntoSubmenu(): void {
+        if (this.isSubmenuActive) return;
+
+        const selectableItems = this.getSelectableItems(this.items);
+        if (this.focusedIndex < 0 || this.focusedIndex >= selectableItems.length) return;
+
+        const item = selectableItems[this.focusedIndex];
+        if (item && item.submenu && item.submenu.length > 0) {
+            // Find the menu item element to position submenu
+            const itemElement = this.menuGroup?.querySelector(`[data-item-id="${item.id}"]`) as SVGGElement | null;
+            if (itemElement) {
+                this.showSubmenu(item, itemElement);
+                this.isSubmenuActive = true;
+                this.submenuFocusedIndex = 0;
+                this.updateVisualFocus();
+            }
+        }
+    }
+
+    /**
+     * Navigate back from submenu to main menu.
+     */
+    private navigateBack(): void {
+        if (!this.isSubmenuActive) return;
+
+        this.isSubmenuActive = false;
+        this.submenuFocusedIndex = -1;
+        this.hideSubmenu();
+        this.updateVisualFocus();
+    }
+
+    /**
+     * Navigate to first item.
+     */
+    private navigateToFirst(): void {
+        const indexRef = this.isSubmenuActive ? 'submenuFocusedIndex' : 'focusedIndex';
+        this[indexRef] = 0;
+        this.updateVisualFocus();
+    }
+
+    /**
+     * Navigate to last item.
+     */
+    private navigateToLast(): void {
+        const items = this.isSubmenuActive ? this.currentSubmenuItems : this.items;
+        const selectableItems = this.getSelectableItems(items);
+        const indexRef = this.isSubmenuActive ? 'submenuFocusedIndex' : 'focusedIndex';
+        this[indexRef] = selectableItems.length - 1;
+        this.updateVisualFocus();
+    }
+
+    /**
+     * Select the currently focused item.
+     */
+    private selectCurrentItem(): void {
+        const items = this.isSubmenuActive ? this.currentSubmenuItems : this.items;
+        const selectableItems = this.getSelectableItems(items);
+        const index = this.isSubmenuActive ? this.submenuFocusedIndex : this.focusedIndex;
+
+        if (index < 0 || index >= selectableItems.length) return;
+
+        const item = selectableItems[index];
+        if (!item) return;
+
+        // If item has submenu, open it
+        if (item.submenu && item.submenu.length > 0) {
+            this.navigateIntoSubmenu();
+            return;
+        }
+
+        // Otherwise select the item
+        this.onItemSelect?.(item.id);
+        this.close();
     }
 
     /**
@@ -437,6 +724,9 @@ export class ContextMenuManager {
 
         this.hideSubmenu();
 
+        // Store submenu items for keyboard navigation
+        this.currentSubmenuItems = itemDef.submenu;
+
         // Get menu item position
         const menuTransform = this.menuGroup.getAttribute('transform') ?? '';
         const menuMatch = menuTransform.match(/translate\(([^,]+),\s*([^)]+)\)/);
@@ -450,8 +740,15 @@ export class ContextMenuManager {
         const menuBackground = this.menuGroup.querySelector('[data-name="menu-background"]');
         const menuWidth = menuBackground ? parseFloat(menuBackground.getAttribute('width') ?? '0') : 180;
 
-        // Calculate submenu position
-        const submenuX = menuX + menuWidth + MENU_CONFIG.submenuOffset;
+        // Calculate submenu position (RTL aware)
+        const rtl = isRtl();
+        let submenuX: number;
+        if (rtl) {
+            const submenuWidth = calculateMenuWidth(itemDef.submenu, MENU_CONFIG.minWidth);
+            submenuX = menuX - submenuWidth - MENU_CONFIG.submenuOffset;
+        } else {
+            submenuX = menuX + menuWidth + MENU_CONFIG.submenuOffset;
+        }
         const submenuY = menuY + itemY;
 
         const submenuConfig: ContextMenuConfig = {
@@ -473,6 +770,7 @@ export class ContextMenuManager {
             this.submenuGroup.remove();
             this.submenuGroup = null;
         }
+        this.currentSubmenuItems = [];
     }
 
     /**

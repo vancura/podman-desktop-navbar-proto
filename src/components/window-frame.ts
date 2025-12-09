@@ -224,6 +224,7 @@ export class WindowFrame {
     private controlsGroup: SVGGElement | null = null;
     private helpGroup: SVGGElement | null = null;
     private localeSwitcherGroup: SVGGElement | null = null;
+    private tooltipOverlayGroup: SVGGElement | null = null;
     private overlayGroup: SVGGElement | null = null;
     private infoBannerManager: InfoBannerManager | null = null;
     private modalDialogManager: ModalDialogManager | null = null;
@@ -241,6 +242,12 @@ export class WindowFrame {
         setRtlMode(state.isRtl);
 
         this.svg = createWindowFrame(container, width, height);
+
+        // Create tooltip overlay group (rendered after content area, before info banners)
+        this.tooltipOverlayGroup = createSvgElement('g', {
+            'data-name': 'tooltip-overlays',
+        });
+        this.svg.appendChild(this.tooltipOverlayGroup);
 
         // Create overlay group for top-level overlays (info banners, etc.)
         this.overlayGroup = createSvgElement('g', {
@@ -311,6 +318,7 @@ export class WindowFrame {
             },
             width: state.navbarWidth,
             height: navbarHeight,
+            tooltipOverlayGroup: this.tooltipOverlayGroup ?? undefined,
         });
 
         this.navbar.updateFromState(state);

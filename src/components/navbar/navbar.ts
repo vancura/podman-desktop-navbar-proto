@@ -5,6 +5,7 @@
 
 import type { NavBarState } from '../../state/navbar-state.js';
 import { stateManager } from '../../state/navbar-state.js';
+import type { NavItem } from '../../state/navigation-items.js';
 import { COLORS, NAVBAR } from '../../utils/design-tokens.js';
 import { createSvgElement } from '../../utils/svg-utils.js';
 import { ContextMenuManager, type MenuItemDef } from '../overlays/context-menu.js';
@@ -42,6 +43,8 @@ export interface NavBarConfig {
     height: number;
     onShowInfoBanner?: (config: InfoBannerConfig) => void;
     onShowModal?: (config: ModalDialogConfig) => Promise<ModalDialogResult>;
+    /** External overlay group for tooltips (rendered above other content). */
+    tooltipOverlayGroup?: SVGGElement | undefined;
 }
 
 /**
@@ -220,14 +223,16 @@ export class NavBar {
         // Setup wheel event handling
         this.setupWheelHandler();
 
-        // Create overlay group for tooltips and menus
+        // Create overlay group for context menus (inside navbar group)
         this.overlayGroup = createSvgElement('g', {
             'data-name': 'navbar-overlays',
         });
         this.group.appendChild(this.overlayGroup);
 
-        // Create tooltip manager
-        this.tooltipManager = new TooltipManager(this.overlayGroup);
+        // Create tooltip manager (use external overlay if provided for proper z-ordering)
+        const tooltipContainer = config.tooltipOverlayGroup ?? this.overlayGroup;
+        const tooltipOffset = config.tooltipOverlayGroup ? { x: config.x, y: config.y } : undefined;
+        this.tooltipManager = new TooltipManager(tooltipContainer, tooltipOffset);
 
         // Create context menu manager
         this.contextMenuManager = new ContextMenuManager(this.overlayGroup);
@@ -257,12 +262,6 @@ export class NavBar {
      * Handles mouse move events for tooltip display.
      */
     private handleMouseMove(e: MouseEvent): void {
-        // Only show tooltips in icon-only mode
-        if (this.displayMode !== 'icons-only') {
-            this.tooltipManager?.cancel();
-            return;
-        }
-
         // Get mouse position relative to navbar
         const rect = (this.group as unknown as SVGGraphicsElement).getBoundingClientRect?.();
         if (!rect) return;
@@ -279,18 +278,53 @@ export class NavBar {
             const bounds = this.getItemBounds(itemId);
 
             if (item && bounds) {
-                this.tooltipManager?.scheduleShow({
-                    item,
-                    anchorX: bounds.x,
-                    anchorY: bounds.y,
-                    anchorWidth: bounds.width,
-                    anchorHeight: bounds.height,
-                    navbarWidth: this.config.width,
-                });
+                // Determine if we should show tooltip
+                let shouldShowTooltip = false;
+
+                if (this.displayMode === 'icons-only') {
+                    // Always show tooltip in icon-only mode
+                    shouldShowTooltip = true;
+                } else {
+                    // In icons-titles mode, only show tooltip if text is truncated
+                    const isTruncated = this.isItemTextTruncated(itemId);
+                    shouldShowTooltip = isTruncated;
+                }
+
+                if (shouldShowTooltip) {
+                    this.tooltipManager?.scheduleShow({
+                        item,
+                        anchorX: bounds.x,
+                        anchorY: bounds.y,
+                        anchorWidth: bounds.width,
+                        anchorHeight: bounds.height,
+                        navbarWidth: this.config.width,
+                    });
+                } else {
+                    this.tooltipManager?.scheduleHide();
+                }
             }
         } else {
             this.tooltipManager?.scheduleHide();
         }
+    }
+
+    /**
+     * Checks if an item's text is truncated.
+     * @param itemId - The item ID.
+     * @returns True if the text is truncated.
+     */
+    private isItemTextTruncated(itemId: string): boolean {
+        // Check each panel for the item
+        for (const panel of [this.essentialsPanel, this.pinnedPanel, this.regularPanel, this.bottomPanel]) {
+            const itemGroup = panel.getGroup().querySelector(`[data-item-id="${itemId}"]`);
+            if (itemGroup) {
+                const titleElement = itemGroup.querySelector('[data-name="item-title"]');
+                if (titleElement) {
+                    return titleElement.getAttribute('data-truncated') === 'true';
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -384,7 +418,7 @@ export class NavBar {
     /**
      * Builds context menu for a navbar item.
      */
-    private buildItemContextMenu(item: import('../../state/navigation-items.js').NavItem): MenuItemDef[] {
+    private buildItemContextMenu(item: NavItem): MenuItemDef[] {
         const items: MenuItemDef[] = [];
 
         // Pin/Unpin action
@@ -543,10 +577,7 @@ export class NavBar {
     /**
      * Handles context menu item selection.
      */
-    private handleContextMenuSelect(
-        menuItemId: string,
-        item: import('../../state/navigation-items.js').NavItem | null,
-    ): void {
+    private handleContextMenuSelect(menuItemId: string, item: NavItem | null): void {
         console.log('Context menu selected:', menuItemId, item?.id);
 
         switch (menuItemId) {
@@ -559,7 +590,10 @@ export class NavBar {
 
             case 'pin':
                 if (item) {
-                    stateManager.pinItem(item.id);
+                    const success = stateManager.pinItem(item.id);
+                    if (!success && stateManager.isPinnedLimitReached()) {
+                        this.showInfoBanner('banner.pinLimitReached', 'banner.pinLimitReachedDesc');
+                    }
                 }
                 break;
 
@@ -731,7 +765,7 @@ export class NavBar {
     /**
      * Finds an item by ID across all panels.
      */
-    private findItemById(itemId: string): import('../../state/navigation-items.js').NavItem | null {
+    private findItemById(itemId: string): NavItem | null {
         for (const panel of [this.essentialsPanel, this.pinnedPanel, this.regularPanel, this.bottomPanel]) {
             const item = panel.getItems().find((i) => i.id === itemId);
             if (item) return item;
@@ -953,7 +987,9 @@ export class NavBar {
         };
 
         // Clear existing dividers
-        this.dividers.forEach((div) => div.remove());
+        this.dividers.forEach((div) => {
+            div.remove();
+        });
         this.dividers.clear();
 
         // Layout scrollable panels
@@ -1418,7 +1454,9 @@ export class NavBar {
         this.pinnedPanel.destroy();
         this.regularPanel.destroy();
         this.bottomPanel.destroy();
-        this.dividers.forEach((div) => div.remove());
+        this.dividers.forEach((div) => {
+            div.remove();
+        });
         this.group.remove();
     }
 }
