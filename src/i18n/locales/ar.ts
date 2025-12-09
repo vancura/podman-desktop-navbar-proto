@@ -71,6 +71,8 @@ export const ar = {
     'banner.shortcutsWouldOpen': 'ستفتح لوحة اختصارات لوحة المفاتيح',
     'banner.shortcutsDescription': 'في التطبيق الحقيقي، سيفتح هذا لوحة تكوين اختصارات لوحة المفاتيح.',
     'banner.clickToDismiss': 'انقر في أي مكان للإغلاق',
+    'banner.featureOutOfScope': 'الميزة خارج النطاق',
+    'banner.featureOutOfScopeDesc': 'هذه الميزة خارج نطاق هذا النموذج الأولي. في التطبيق الحقيقي، سيؤدي النقر على عنصر التنقل هذا إلى الانتقال إلى العرض المقابل.',
 
     // Modal dialog
     'modal.hideItem': 'إخفاء العنصر',

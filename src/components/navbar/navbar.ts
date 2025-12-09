@@ -247,6 +247,7 @@ export class NavBar {
         this.group.addEventListener('mousemove', this.handleMouseMove.bind(this));
         this.group.addEventListener('mouseleave', this.handleMouseLeave.bind(this));
         this.group.addEventListener('contextmenu', this.handleContextMenu.bind(this));
+        this.group.addEventListener('click', this.handleItemClick.bind(this));
     }
 
     /**
@@ -294,6 +295,31 @@ export class NavBar {
      */
     private handleMouseLeave(): void {
         this.tooltipManager?.scheduleHide();
+    }
+
+    /**
+     * Handles item click events.
+     */
+    private handleItemClick(e: MouseEvent): void {
+        // Don't handle clicks on the More button (it has its own handler)
+        const target = e.target as Element;
+        if (target.closest('[data-name="more-button"]')) {
+            return;
+        }
+
+        // Get mouse position relative to navbar
+        const rect = (this.group as unknown as SVGGraphicsElement).getBoundingClientRect?.();
+        if (!rect) return;
+
+        const x = e.clientX - rect.x;
+        const y = e.clientY - rect.y;
+
+        // Find item at position
+        const itemId = this.findItemAtPoint(x, y);
+        if (!itemId) return;
+
+        // Show info banner indicating feature is out of scope
+        this.showInfoBanner('banner.featureOutOfScope', 'banner.featureOutOfScopeDesc');
     }
 
     /**

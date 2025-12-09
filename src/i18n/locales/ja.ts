@@ -72,6 +72,8 @@ export const ja = {
     'banner.shortcutsWouldOpen': 'キーボードショートカットパネルが開きます',
     'banner.shortcutsDescription': '実際のアプリケーションでは、キーボードショートカット設定パネルが開きます。',
     'banner.clickToDismiss': 'クリックして閉じる',
+    'banner.featureOutOfScope': '機能は範囲外',
+    'banner.featureOutOfScopeDesc': 'この機能はこのプロトタイプの範囲外です。実際のアプリケーションでは、このナビゲーション項目をクリックすると対応するビューに移動します。',
 
     // Modal dialog
     'modal.hideItem': '項目を非表示',

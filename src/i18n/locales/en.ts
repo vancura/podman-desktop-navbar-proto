@@ -76,6 +76,8 @@ export const en = {
     'banner.shortcutsWouldOpen': 'Keyboard Shortcuts panel would open',
     'banner.shortcutsDescription': 'In the real application, this would open the Keyboard Shortcuts configuration panel.',
     'banner.clickToDismiss': 'Click anywhere to dismiss',
+    'banner.featureOutOfScope': 'Feature Out of Scope',
+    'banner.featureOutOfScopeDesc': 'This feature is out of scope for this prototype. In the real application, clicking this navigation item would navigate to the corresponding view.',
 
     // Banner keys used by context menu actions
     'banner.keyboardShortcut': 'Keyboard Shortcut',

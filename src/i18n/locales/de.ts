@@ -72,6 +72,8 @@ export const de = {
     'banner.shortcutsWouldOpen': 'Tastenkürzel-Panel würde geöffnet',
     'banner.shortcutsDescription': 'In der echten Anwendung würde dies das Tastenkürzel-Konfigurationspanel öffnen.',
     'banner.clickToDismiss': 'Klicken Sie irgendwo, um zu schließen',
+    'banner.featureOutOfScope': 'Funktion außerhalb des Geltungsbereichs',
+    'banner.featureOutOfScopeDesc': 'Diese Funktion liegt außerhalb des Geltungsbereichs dieses Prototyps. In der echten Anwendung würde das Klicken auf dieses Navigationselement zur entsprechenden Ansicht navigieren.',
 
     // Modal dialog
     'modal.hideItem': 'Element ausblenden',
