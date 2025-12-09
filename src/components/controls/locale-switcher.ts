@@ -115,20 +115,10 @@ function createLocaleButton(
         'font-weight': isActive ? '600' : TYPOGRAPHY.buttonFontWeight,
         'text-anchor': 'middle',
         'pointer-events': 'none',
+        'data-name': 'button-label',
     });
     label.textContent = locale.toUpperCase();
     group.appendChild(label);
-
-    // Hover effect (only if not active)
-    if (!isActive) {
-        group.addEventListener('mouseenter', () => {
-            background.setAttribute('fill', COLORS.buttonBackgroundHover);
-        });
-
-        group.addEventListener('mouseleave', () => {
-            background.setAttribute('fill', COLORS.buttonBackground);
-        });
-    }
 
     // Click handler
     group.addEventListener('click', onClick);
@@ -149,7 +139,7 @@ export function updateLocaleSwitcher(group: SVGGElement, currentLocale: Locale):
         const isActive = locale === currentLocale;
 
         const background = button.querySelector('[data-name="button-background"]');
-        const label = button.querySelector('text');
+        const label = button.querySelector('[data-name="button-label"]');
 
         if (background) {
             background.setAttribute('fill', isActive ? COLORS.focusRing : COLORS.buttonBackground);

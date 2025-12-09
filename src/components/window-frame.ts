@@ -4,7 +4,7 @@
  */
 
 import { setLocale, subscribeToLocale } from '../i18n/i18n.js';
-import { type NavBarState,stateManager } from '../state/navbar-state.js';
+import { type NavBarState, stateManager } from '../state/navbar-state.js';
 import type { Locale, NavItem } from '../state/navigation-items.js';
 import { COLORS } from '../utils/design-tokens.js';
 import { createSvgElement } from '../utils/svg-utils.js';
@@ -17,7 +17,7 @@ import {
     updateContentArea,
 } from './content-area.js';
 import { createButtonGroup } from './controls/action-button.js';
-import { createLocaleSwitcher } from './controls/locale-switcher.js';
+import { createLocaleSwitcher, updateLocaleSwitcher } from './controls/locale-switcher.js';
 import { createDropShadowFilter, DROP_SHADOW_FILTER_ID } from './drop-shadow.js';
 import { InfoBannerManager, type InfoBannerConfig } from './overlays/info-banner.js';
 import { NavBar } from './navbar/navbar.js';
@@ -217,6 +217,7 @@ export class WindowFrame {
     private unsubscribeState: (() => void) | null = null;
     private unsubscribeLocale: (() => void) | null = null;
     private controlsGroup: SVGGElement | null = null;
+    private localeSwitcherGroup: SVGGElement | null = null;
     private overlayGroup: SVGGElement | null = null;
     private infoBannerManager: InfoBannerManager | null = null;
 
@@ -255,6 +256,10 @@ export class WindowFrame {
         // Subscribe to locale changes
         this.unsubscribeLocale = subscribeToLocale((locale) => {
             stateManager.setLocale(locale);
+            // Update locale switcher to reflect the new active locale
+            if (this.localeSwitcherGroup) {
+                updateLocaleSwitcher(this.localeSwitcherGroup, locale);
+            }
         });
 
         this.resizeHandler = (): void => {
@@ -413,7 +418,7 @@ export class WindowFrame {
         this.controlsGroup.appendChild(visibilityButtons);
 
         // Locale switcher
-        const localeSwitcher = createLocaleSwitcher(
+        this.localeSwitcherGroup = createLocaleSwitcher(
             {
                 x: 0,
                 y: 330,
@@ -424,7 +429,7 @@ export class WindowFrame {
                 stateManager.setLocale(locale);
             },
         );
-        this.controlsGroup.appendChild(localeSwitcher);
+        this.controlsGroup.appendChild(this.localeSwitcherGroup);
 
         // Add controls to content area group
         const contentAreaGroup = this.svg.querySelector('g[data-name="content-area-group"]');
@@ -498,6 +503,11 @@ export class WindowFrame {
     private handleStateChange(state: NavBarState, prevState: NavBarState): void {
         const { width, height } = calculateWindowDimensions();
         const borderPadding = WINDOW_CONFIG.borderWidth;
+
+        // Update locale switcher if locale changed
+        if (state.locale !== prevState.locale && this.localeSwitcherGroup) {
+            updateLocaleSwitcher(this.localeSwitcherGroup, state.locale);
+        }
 
         // Update content area if navbar width or RTL changed
         if (state.navbarWidth !== prevState.navbarWidth || state.isRtl !== prevState.isRtl) {
