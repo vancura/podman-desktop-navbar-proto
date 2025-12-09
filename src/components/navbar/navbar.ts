@@ -140,16 +140,16 @@ export class NavBar {
 
         this.group.appendChild(defs);
 
-        // Create content group
+        // Create content group (no clip path - bottom panel needs to be visible)
         this.contentGroup = createSvgElement('g', {
             'data-name': 'navbar-content',
-            'clip-path': `url(#${clipId})`,
         });
         this.group.appendChild(this.contentGroup);
 
-        // Create scrollable group for Essentials, Pinned, and Regular panels
+        // Create scrollable group for Essentials, Pinned, and Regular panels (with clip path)
         this.scrollableGroup = createSvgElement('g', {
             'data-name': 'navbar-scrollable',
+            'clip-path': `url(#${clipId})`,
         });
         this.contentGroup.appendChild(this.scrollableGroup);
 
