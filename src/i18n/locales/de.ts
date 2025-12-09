@@ -52,32 +52,10 @@ export const de = {
     // Tooltips
     'tooltip.shortcut': 'Tastenkürzel',
 
-    // Info banner
-    'banner.settingsWouldOpen': 'Einstellungen würden geöffnet',
-    'banner.settingsDescription': 'In der echten Anwendung würde dies das Podman Desktop Einstellungspanel öffnen.',
-    'banner.extensionSettingsWouldOpen': 'Erweiterungseinstellungen würden geöffnet',
-    'banner.extensionSettingsDescription': 'In der echten Anwendung würde dies die Einstellungen für diese Erweiterung öffnen.',
-    'banner.removeExtensionWouldStart': 'Erweiterung-Entfernen-Prozess würde starten',
-    'banner.removeExtensionDescription': 'In der echten Anwendung würde dies den Deinstallationsprozess der Erweiterung starten.',
-    'banner.navBarSettingsWouldOpen': 'Navigationsleisten-Einstellungen würden geöffnet',
-    'banner.navBarSettingsDescription': 'In der echten Anwendung würde dies die Navigationsleisten-Konfiguration in den Einstellungen öffnen.',
-    'banner.keyboardShortcutWouldOpen': 'Tastenkürzel-Dialog würde geöffnet',
-    'banner.keyboardShortcutDescription': 'In der echten Anwendung würde dies einen Dialog zum Zuweisen oder Ändern des Tastenkürzels öffnen.',
-    'banner.signOutWouldStart': 'Abmeldeprozess würde starten',
-    'banner.signOutDescription': 'In der echten Anwendung würde dies Sie von Ihrem Konto abmelden.',
-    'banner.aboutWouldOpen': 'Über-Dialog würde geöffnet',
-    'banner.aboutDescription': 'In der echten Anwendung würde dies den Über Podman Desktop Dialog anzeigen.',
-    'banner.extensionsWouldOpen': 'Erweiterungspanel würde geöffnet',
-    'banner.extensionsDescription': 'In der echten Anwendung würde dies das Erweiterungsverwaltungspanel öffnen.',
-    'banner.shortcutsWouldOpen': 'Tastenkürzel-Panel würde geöffnet',
-    'banner.shortcutsDescription': 'In der echten Anwendung würde dies das Tastenkürzel-Konfigurationspanel öffnen.',
-    'banner.clickToDismiss': 'Klicken Sie irgendwo, um zu schließen',
-    'banner.featureOutOfScope': 'Funktion außerhalb des Geltungsbereichs',
-    'banner.featureOutOfScopeDesc': 'Diese Funktion liegt außerhalb des Geltungsbereichs dieses Prototyps. In der echten Anwendung würde das Klicken auf dieses Navigationselement zur entsprechenden Ansicht navigieren.',
-
     // Modal dialog
     'modal.hideItem': 'Element ausblenden',
-    'modal.hideItemDescription': 'Dieses Element wird aus der Navigationsleiste ausgeblendet. Sie können es in den Podman Desktop Einstellungen wiederherstellen.',
+    'modal.hideItemDescription':
+        'Dieses Element wird aus der Navigationsleiste ausgeblendet. Sie können es in den Podman Desktop Einstellungen wiederherstellen.',
     'modal.dontShowAgain': 'Nicht mehr anzeigen',
     'modal.ok': 'OK',
     'modal.cancel': 'Abbrechen',

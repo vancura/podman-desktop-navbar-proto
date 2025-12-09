@@ -51,29 +51,6 @@ export const ar = {
     // Tooltips
     'tooltip.shortcut': 'الاختصار',
 
-    // Info banner
-    'banner.settingsWouldOpen': 'ستفتح الإعدادات',
-    'banner.settingsDescription': 'في التطبيق الحقيقي، سيفتح هذا لوحة إعدادات Podman Desktop.',
-    'banner.extensionSettingsWouldOpen': 'ستفتح إعدادات الإضافة',
-    'banner.extensionSettingsDescription': 'في التطبيق الحقيقي، سيفتح هذا إعدادات هذه الإضافة.',
-    'banner.removeExtensionWouldStart': 'ستبدأ عملية إزالة الإضافة',
-    'banner.removeExtensionDescription': 'في التطبيق الحقيقي، سيبدأ هذا عملية إلغاء تثبيت الإضافة.',
-    'banner.navBarSettingsWouldOpen': 'ستفتح إعدادات شريط التنقل',
-    'banner.navBarSettingsDescription': 'في التطبيق الحقيقي، سيفتح هذا تكوين شريط التنقل في الإعدادات.',
-    'banner.keyboardShortcutWouldOpen': 'سيفتح مربع حوار اختصار لوحة المفاتيح',
-    'banner.keyboardShortcutDescription': 'في التطبيق الحقيقي، سيفتح هذا مربع حوار لتعيين أو تغيير اختصار لوحة المفاتيح.',
-    'banner.signOutWouldStart': 'ستبدأ عملية تسجيل الخروج',
-    'banner.signOutDescription': 'في التطبيق الحقيقي، سيؤدي هذا إلى تسجيل خروجك من حسابك.',
-    'banner.aboutWouldOpen': 'سيفتح مربع حوار حول',
-    'banner.aboutDescription': 'في التطبيق الحقيقي، سيعرض هذا مربع حوار حول Podman Desktop.',
-    'banner.extensionsWouldOpen': 'ستفتح لوحة الإضافات',
-    'banner.extensionsDescription': 'في التطبيق الحقيقي، سيفتح هذا لوحة إدارة الإضافات.',
-    'banner.shortcutsWouldOpen': 'ستفتح لوحة اختصارات لوحة المفاتيح',
-    'banner.shortcutsDescription': 'في التطبيق الحقيقي، سيفتح هذا لوحة تكوين اختصارات لوحة المفاتيح.',
-    'banner.clickToDismiss': 'انقر في أي مكان للإغلاق',
-    'banner.featureOutOfScope': 'الميزة خارج النطاق',
-    'banner.featureOutOfScopeDesc': 'هذه الميزة خارج نطاق هذا النموذج الأولي. في التطبيق الحقيقي، سيؤدي النقر على عنصر التنقل هذا إلى الانتقال إلى العرض المقابل.',
-
     // Modal dialog
     'modal.hideItem': 'إخفاء العنصر',
     'modal.hideItemDescription': 'سيتم إخفاء هذا العنصر من شريط التنقل. يمكنك استعادته من إعدادات Podman Desktop.',

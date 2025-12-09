@@ -52,29 +52,6 @@ export const ja = {
     // Tooltips
     'tooltip.shortcut': 'ショートカット',
 
-    // Info banner
-    'banner.settingsWouldOpen': '設定が開きます',
-    'banner.settingsDescription': '実際のアプリケーションでは、Podman Desktop設定パネルが開きます。',
-    'banner.extensionSettingsWouldOpen': '拡張機能の設定が開きます',
-    'banner.extensionSettingsDescription': '実際のアプリケーションでは、この拡張機能の設定が開きます。',
-    'banner.removeExtensionWouldStart': '拡張機能の削除が開始されます',
-    'banner.removeExtensionDescription': '実際のアプリケーションでは、拡張機能のアンインストールフローが開始されます。',
-    'banner.navBarSettingsWouldOpen': 'ナビバーの設定が開きます',
-    'banner.navBarSettingsDescription': '実際のアプリケーションでは、設定内のナビバー設定が開きます。',
-    'banner.keyboardShortcutWouldOpen': 'キーボードショートカットダイアログが開きます',
-    'banner.keyboardShortcutDescription': '実際のアプリケーションでは、ショートカットを割り当てるダイアログが開きます。',
-    'banner.signOutWouldStart': 'サインアウトが開始されます',
-    'banner.signOutDescription': '実際のアプリケーションでは、アカウントからサインアウトされます。',
-    'banner.aboutWouldOpen': 'Aboutダイアログが開きます',
-    'banner.aboutDescription': '実際のアプリケーションでは、Podman Desktopについてダイアログが表示されます。',
-    'banner.extensionsWouldOpen': '拡張機能パネルが開きます',
-    'banner.extensionsDescription': '実際のアプリケーションでは、拡張機能管理パネルが開きます。',
-    'banner.shortcutsWouldOpen': 'キーボードショートカットパネルが開きます',
-    'banner.shortcutsDescription': '実際のアプリケーションでは、キーボードショートカット設定パネルが開きます。',
-    'banner.clickToDismiss': 'クリックして閉じる',
-    'banner.featureOutOfScope': '機能は範囲外',
-    'banner.featureOutOfScopeDesc': 'この機能はこのプロトタイプの範囲外です。実際のアプリケーションでは、このナビゲーション項目をクリックすると対応するビューに移動します。',
-
     // Modal dialog
     'modal.hideItem': '項目を非表示',
     'modal.hideItemDescription': 'この項目はナビバーから非表示になります。Podman Desktop設定で復元できます。',
