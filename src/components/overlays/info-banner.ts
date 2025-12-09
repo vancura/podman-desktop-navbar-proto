@@ -59,30 +59,42 @@ export function createInfoBanner(config: InfoBannerConfig, onDismiss: () => void
     const bannerWidth = Math.min(BANNER_CONFIG.maxWidth, width - 80);
     const bannerX = (width - bannerWidth) / 2;
 
-    // We'll calculate height after measuring text, but estimate for now
-    const estimatedHeight = 150;
-    const bannerY = (height - estimatedHeight) / 2;
+    // Calculate text layout first to determine banner height
+    const maxCharsPerLine = Math.floor((bannerWidth - BANNER_CONFIG.paddingHorizontal * 2) / 7);
+    const lines = wrapText(description, maxCharsPerLine);
+
+    // Calculate positions
+    const titleY = BANNER_CONFIG.paddingVertical + TYPOGRAPHY.bannerTitleFontSize;
+    const descY = titleY + BANNER_CONFIG.titleMarginBottom + TYPOGRAPHY.bannerTextFontSize;
+    const dismissY =
+        descY +
+        lines.length * TYPOGRAPHY.bannerTextFontSize * BANNER_CONFIG.descriptionLineHeight +
+        BANNER_CONFIG.dismissMarginTop;
+
+    // Calculate actual banner height
+    const actualHeight = dismissY + BANNER_CONFIG.paddingVertical;
+    const bannerY = (height - actualHeight) / 2;
 
     // Banner background
     const bannerBg = createSvgElement('rect', {
         x: String(bannerX),
         y: String(bannerY),
         width: String(bannerWidth),
-        height: String(estimatedHeight),
+        height: String(actualHeight),
         fill: COLORS.bannerBackground,
         stroke: COLORS.bannerBorder,
         'stroke-width': '1',
         rx: String(BANNER_CONFIG.borderRadius),
         ry: String(BANNER_CONFIG.borderRadius),
         'data-name': 'banner-background',
+        'pointer-events': 'none',
     });
     group.appendChild(bannerBg);
 
     // Title
-    const titleY = bannerY + BANNER_CONFIG.paddingVertical + TYPOGRAPHY.bannerTitleFontSize;
     const titleText = createSvgElement('text', {
         x: String(bannerX + BANNER_CONFIG.paddingHorizontal),
-        y: String(titleY),
+        y: String(bannerY + titleY),
         fill: COLORS.bannerText,
         'font-family': TYPOGRAPHY.tooltipFontFamily,
         'font-size': String(TYPOGRAPHY.bannerTitleFontSize),
@@ -93,14 +105,10 @@ export function createInfoBanner(config: InfoBannerConfig, onDismiss: () => void
     group.appendChild(titleText);
 
     // Description (wrapped text)
-    const descY = titleY + BANNER_CONFIG.titleMarginBottom + TYPOGRAPHY.bannerTextFontSize;
-    const maxCharsPerLine = Math.floor((bannerWidth - BANNER_CONFIG.paddingHorizontal * 2) / 7);
-    const lines = wrapText(description, maxCharsPerLine);
-
     lines.forEach((line, index) => {
         const lineText = createSvgElement('text', {
             x: String(bannerX + BANNER_CONFIG.paddingHorizontal),
-            y: String(descY + index * TYPOGRAPHY.bannerTextFontSize * BANNER_CONFIG.descriptionLineHeight),
+            y: String(bannerY + descY + index * TYPOGRAPHY.bannerTextFontSize * BANNER_CONFIG.descriptionLineHeight),
             fill: COLORS.bannerTextSecondary,
             'font-family': TYPOGRAPHY.tooltipFontFamily,
             'font-size': String(TYPOGRAPHY.bannerTextFontSize),
@@ -112,14 +120,9 @@ export function createInfoBanner(config: InfoBannerConfig, onDismiss: () => void
     });
 
     // Dismiss text
-    const dismissY =
-        descY +
-        lines.length * TYPOGRAPHY.bannerTextFontSize * BANNER_CONFIG.descriptionLineHeight +
-        BANNER_CONFIG.dismissMarginTop;
-
     const dismissTextEl = createSvgElement('text', {
         x: String(bannerX + bannerWidth / 2),
-        y: String(dismissY),
+        y: String(bannerY + dismissY),
         fill: COLORS.bannerTextSecondary,
         'font-family': TYPOGRAPHY.tooltipFontFamily,
         'font-size': String(TYPOGRAPHY.shortcutFontSize),
@@ -130,23 +133,6 @@ export function createInfoBanner(config: InfoBannerConfig, onDismiss: () => void
     });
     dismissTextEl.textContent = dismissText;
     group.appendChild(dismissTextEl);
-
-    // Update banner height
-    const actualHeight = dismissY - bannerY + BANNER_CONFIG.paddingVertical;
-    bannerBg.setAttribute('height', String(actualHeight));
-    bannerBg.setAttribute('y', String((height - actualHeight) / 2));
-
-    // Reposition all content based on new Y
-    const newBannerY = (height - actualHeight) / 2;
-    const yOffset = newBannerY - bannerY;
-
-    titleText.setAttribute('y', String(titleY + yOffset));
-    group.querySelectorAll('text').forEach((text) => {
-        const currentY = parseFloat(text.getAttribute('y') ?? '0');
-        if (currentY !== titleY + yOffset) {
-            text.setAttribute('y', String(currentY + yOffset));
-        }
-    });
 
     // Click handler
     const handleClick = (): void => {

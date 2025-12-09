@@ -8,7 +8,7 @@ import { stateManager } from '../../state/navbar-state.js';
 import { COLORS, NAVBAR } from '../../utils/design-tokens.js';
 import { createSvgElement } from '../../utils/svg-utils.js';
 import { ContextMenuManager, type MenuItemDef } from '../overlays/context-menu.js';
-import { InfoBannerManager } from '../overlays/info-banner.js';
+import type { InfoBannerConfig } from '../overlays/info-banner.js';
 import { TooltipManager } from '../overlays/tooltip.js';
 import {
     createFadeGradient,
@@ -39,6 +39,7 @@ export interface NavBarConfig {
     y: number;
     width: number;
     height: number;
+    onShowInfoBanner?: (config: InfoBannerConfig) => void;
 }
 
 
@@ -79,7 +80,7 @@ export class NavBar {
     // Tooltip, context menu, and info banner
     private tooltipManager: TooltipManager | null = null;
     private contextMenuManager: ContextMenuManager | null = null;
-    private infoBannerManager: InfoBannerManager | null = null;
+    private onShowInfoBanner: ((config: InfoBannerConfig) => void) | null = null;
     private overlayGroup: SVGGElement | null = null;
 
     // Configuration
@@ -97,6 +98,7 @@ export class NavBar {
 
     constructor(config: NavBarConfig) {
         this.config = config;
+        this.onShowInfoBanner = config.onShowInfoBanner ?? null;
 
         // Create main group
         this.group = createSvgElement('g', {
@@ -568,26 +570,19 @@ export class NavBar {
      * Shows an info banner.
      */
     private showInfoBanner(titleKey: string, descriptionKey: string): void {
-        if (!this.infoBannerManager) {
-            // Initialize info banner manager if not yet done
-            if (this.overlayGroup) {
-                this.infoBannerManager = new InfoBannerManager(this.overlayGroup);
-            }
-        }
+        if (!this.onShowInfoBanner) return;
 
-        if (this.infoBannerManager) {
-            // Get viewport dimensions from the SVG
-            const svgElement = this.group.ownerSVGElement;
-            const width = svgElement ? parseFloat(svgElement.getAttribute('width') ?? '800') : 800;
-            const height = svgElement ? parseFloat(svgElement.getAttribute('height') ?? '600') : 600;
+        // Get viewport dimensions from the SVG
+        const svgElement = this.group.ownerSVGElement;
+        const width = svgElement ? parseFloat(svgElement.getAttribute('width') ?? '800') : 800;
+        const height = svgElement ? parseFloat(svgElement.getAttribute('height') ?? '600') : 600;
 
-            this.infoBannerManager.show({
-                titleKey,
-                descriptionKey,
-                width,
-                height,
-            });
-        }
+        this.onShowInfoBanner({
+            titleKey,
+            descriptionKey,
+            width,
+            height,
+        });
     }
 
     /**

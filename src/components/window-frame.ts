@@ -19,6 +19,7 @@ import {
 import { createButtonGroup } from './controls/action-button.js';
 import { createLocaleSwitcher } from './controls/locale-switcher.js';
 import { createDropShadowFilter, DROP_SHADOW_FILTER_ID } from './drop-shadow.js';
+import { InfoBannerManager, type InfoBannerConfig } from './overlays/info-banner.js';
 import { NavBar } from './navbar/navbar.js';
 import { createResizeHandle, setupResizeDragHandlers, updateResizeHandle } from './navbar/resize-handle.js';
 import { createStatusBar, updateStatusBar } from './status-bar.js';
@@ -216,6 +217,8 @@ export class WindowFrame {
     private unsubscribeState: (() => void) | null = null;
     private unsubscribeLocale: (() => void) | null = null;
     private controlsGroup: SVGGElement | null = null;
+    private overlayGroup: SVGGElement | null = null;
+    private infoBannerManager: InfoBannerManager | null = null;
 
     /**
      * Creates a new window frame instance.
@@ -230,6 +233,15 @@ export class WindowFrame {
         setRtlMode(state.isRtl);
 
         this.svg = createWindowFrame(container, width, height);
+
+        // Create overlay group for top-level overlays (info banners, etc.)
+        this.overlayGroup = createSvgElement('g', {
+            'data-name': 'overlays',
+        });
+        this.svg.appendChild(this.overlayGroup);
+
+        // Create info banner manager
+        this.infoBannerManager = new InfoBannerManager(this.overlayGroup);
 
         // Create navbar
         this.createNavbar(width, height);
@@ -267,10 +279,15 @@ export class WindowFrame {
         const navbarY = borderPadding + 32; // Below title bar
         const navbarHeight = windowHeight - navbarY - 32 - borderPadding; // Above status bar
 
-        // Create navbar
+        // Create navbar with info banner callback
         this.navbar = new NavBar({
             x: navbarX,
             y: navbarY,
+            onShowInfoBanner: (config: InfoBannerConfig) => {
+                if (this.infoBannerManager) {
+                    this.infoBannerManager.show(config);
+                }
+            },
             width: state.navbarWidth,
             height: navbarHeight,
         });
