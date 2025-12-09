@@ -61,7 +61,7 @@
 
 <svelte:window onkeydown={handleKeyDown} />
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div
     class="group absolute top-0 z-[var(--z-resize)] h-full w-3 cursor-col-resize
         {isRtl ? 'left-0 -translate-x-1/2' : 'right-0 translate-x-1/2'}"

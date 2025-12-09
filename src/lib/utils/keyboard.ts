@@ -1,47 +1,68 @@
 /**
  * Keyboard Utilities
- * Handles keyboard shortcuts and navigation.
+ * Global keyboard shortcut handling for the application.
+ * Individual overlay components handle their own keyboard navigation.
  */
 
 import { actions, appState } from '../state/app-state.svelte.js';
 
+// ============================================================================
+// Types
+// ============================================================================
+
 /** Keyboard shortcut definition. */
 interface KeyboardShortcut {
+    /** The key to match (e.g., '1', 'ArrowUp'). */
     key: string;
-    code?: string; // Alternative key code
+    /** Alternative key code for reliable matching. */
+    code?: string;
+    /** Requires Cmd (Mac) or Ctrl (Windows/Linux). */
     cmd?: boolean;
+    /** Requires Shift modifier. */
     shift?: boolean;
+    /** Requires Alt/Option modifier. */
     alt?: boolean;
+    /** Action identifier to execute. */
     action: string;
     /** Only active when no overlay is open. */
     navbarOnly?: boolean;
 }
 
+// ============================================================================
+// Platform Detection
+// ============================================================================
+
 /** Check if running on macOS. */
-function isMac(): boolean {
-    return typeof navigator !== 'undefined' && navigator.platform.toLowerCase().includes('mac');
-}
+const IS_MAC = typeof navigator !== 'undefined' && navigator.platform.toLowerCase().includes('mac');
+
+// ============================================================================
+// Shortcut Definitions
+// ============================================================================
 
 /** All registered keyboard shortcuts. */
 const SHORTCUTS: KeyboardShortcut[] = [
-    // Navigation switching (always active)
+    // Quick navigation: Cmd+1-5 for main items
     { key: '1', cmd: true, action: 'navigate-0' },
     { key: '2', cmd: true, action: 'navigate-1' },
     { key: '3', cmd: true, action: 'navigate-2' },
     { key: '4', cmd: true, action: 'navigate-3' },
     { key: '5', cmd: true, action: 'navigate-4' },
+
+    // Pinned items: Cmd+6-9
     { key: '6', cmd: true, action: 'pinned-0' },
     { key: '7', cmd: true, action: 'pinned-1' },
     { key: '8', cmd: true, action: 'pinned-2' },
     { key: '9', cmd: true, action: 'pinned-3' },
+
+    // Settings: Cmd+0
     { key: '0', cmd: true, action: 'navigate-settings' },
 
-    // Navbar management (always active)
+    // Navbar management
     { key: 'b', cmd: true, action: 'toggle-navbar' },
     { key: 'p', cmd: true, shift: true, action: 'pin-current' },
     { key: 'k', cmd: true, shift: true, action: 'show-hidden' },
 
-    // Focus navigation (only when no overlay is open)
+    // Arrow key navigation (only when no overlay is open)
     { key: 'ArrowUp', code: 'ArrowUp', action: 'navigate-up', navbarOnly: true },
     { key: 'ArrowDown', code: 'ArrowDown', action: 'navigate-down', navbarOnly: true },
     { key: 'Enter', code: 'Enter', action: 'activate', navbarOnly: true },
@@ -49,90 +70,103 @@ const SHORTCUTS: KeyboardShortcut[] = [
     { key: 'Home', code: 'Home', action: 'navigate-first', navbarOnly: true },
     { key: 'End', code: 'End', action: 'navigate-last', navbarOnly: true },
 
-    // Close overlay (always active)
+    // Close any overlay
     { key: 'Escape', code: 'Escape', action: 'close-overlay' },
 ];
 
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
 /** Check if any overlay is currently open. */
 function isOverlayOpen(): boolean {
-    const ui = appState.ui;
-    return !!(ui.contextMenu || ui.moreMenu || ui.banner || ui.modalConfig);
+    const { contextMenu, moreMenu, banner, modalConfig } = appState.ui;
+    return !!(contextMenu || moreMenu || banner || modalConfig);
 }
 
-/** Get all visible items in order. */
-function getAllItems() {
-    return [
-        ...appState.items.essential,
-        ...appState.items.pinned,
-        ...appState.items.regular,
-        ...appState.items.bottom,
-    ];
+/** Get all visible navigation items in display order. */
+function getAllVisibleItems() {
+    const { essential, pinned, regular, bottom } = appState.items;
+    return [...essential, ...pinned, ...regular, ...bottom];
 }
 
-/** Handle keyboard shortcut action. */
-function handleAction(action: string): void {
-    const items = getAllItems();
+/** Activate a navigation item and show prototype banner. */
+function activateItem(itemId: string): void {
+    actions.setActiveItem(itemId);
+    actions.setFocusedItem(itemId);
+    actions.showBanner('banner.featureOutOfScope', 'banner.featureOutOfScopeDesc');
+}
 
-    // Handle navigation by index (Cmd+1-5)
-    if (action.startsWith('navigate-') && action !== 'navigate-up' && action !== 'navigate-down' && action !== 'navigate-first' && action !== 'navigate-last') {
-        const index = parseInt(action.replace('navigate-', ''), 10);
-        if (!isNaN(index) && index < items.length) {
-            const item = items[index];
-            if (item) {
-                actions.setActiveItem(item.id);
-                actions.setFocusedItem(item.id);
-                actions.showBanner('banner.featureOutOfScope', 'banner.featureOutOfScopeDesc');
-            }
-        } else if (action === 'navigate-settings') {
+/** Navigate focus to a specific item by index with wrapping. */
+function navigateFocusByDelta(delta: number): void {
+    const items = getAllVisibleItems();
+    if (items.length === 0) return;
+
+    const currentIndex = items.findIndex(i => i.id === appState.ui.focusedItemId);
+
+    let newIndex: number;
+    if (currentIndex === -1) {
+        // No item focused - start from beginning or end based on direction
+        newIndex = delta > 0 ? 0 : items.length - 1;
+    } else {
+        // Wrap around navigation
+        newIndex = (currentIndex + delta + items.length) % items.length;
+    }
+
+    actions.setFocusedItem(items[newIndex]!.id);
+}
+
+/** Execute a keyboard shortcut action. */
+function executeAction(action: string): void {
+    const items = getAllVisibleItems();
+
+    // Quick navigation by index (Cmd+1-5)
+    if (action.startsWith('navigate-') && !['navigate-up', 'navigate-down', 'navigate-first', 'navigate-last'].includes(action)) {
+        if (action === 'navigate-settings') {
             const settings = appState.items.bottom.find(i => i.id === 'settings');
-            if (settings) {
-                actions.setActiveItem(settings.id);
-                actions.setFocusedItem(settings.id);
-                actions.showBanner('banner.featureOutOfScope', 'banner.featureOutOfScopeDesc');
+            if (settings) activateItem(settings.id);
+        } else {
+            const index = parseInt(action.replace('navigate-', ''), 10);
+            if (!isNaN(index) && index < items.length) {
+                activateItem(items[index]!.id);
             }
         }
         return;
     }
 
-    // Handle pinned items (Cmd+6-9)
+    // Pinned items navigation (Cmd+6-9)
     if (action.startsWith('pinned-')) {
         const index = parseInt(action.replace('pinned-', ''), 10);
-        if (!isNaN(index) && index < appState.items.pinned.length) {
-            const item = appState.items.pinned[index];
-            if (item) {
-                actions.setActiveItem(item.id);
-                actions.setFocusedItem(item.id);
-                actions.showBanner('banner.featureOutOfScope', 'banner.featureOutOfScopeDesc');
-            }
+        const pinnedItem = appState.items.pinned[index];
+        if (pinnedItem) {
+            activateItem(pinnedItem.id);
         }
         return;
     }
 
-    // Handle other actions
+    // Other actions
     switch (action) {
         case 'toggle-navbar':
-            if (appState.isExpanded) {
-                actions.setNavbarWidth(80);
-            } else {
-                actions.setNavbarWidth(200);
-            }
+            actions.setNavbarWidth(appState.isExpanded ? 80 : 200);
             break;
 
-        case 'pin-current':
-            if (appState.ui.activeItemId) {
-                const item = actions.findItem(appState.ui.activeItemId);
-                if (item?.canPin) {
-                    const isPinned = appState.items.pinned.some(p => p.id === item.id);
-                    if (isPinned) {
-                        actions.unpinItem(item.id);
-                    } else if (appState.canPinMore) {
-                        actions.pinItem(item.id);
-                    } else {
-                        actions.showBanner('banner.pinLimitReached', 'banner.pinLimitReachedDesc');
-                    }
-                }
+        case 'pin-current': {
+            const activeId = appState.ui.activeItemId;
+            if (!activeId) break;
+
+            const item = actions.findItem(activeId);
+            if (!item?.canPin) break;
+
+            const isPinned = appState.items.pinned.some(p => p.id === item.id);
+            if (isPinned) {
+                actions.unpinItem(item.id);
+            } else if (appState.canPinMore) {
+                actions.pinItem(item.id);
+            } else {
+                actions.showBanner('banner.pinLimitReached', 'banner.pinLimitReachedDesc');
             }
             break;
+        }
 
         case 'show-hidden':
             if (appState.hasHiddenItems) {
@@ -140,33 +174,13 @@ function handleAction(action: string): void {
             }
             break;
 
-        case 'navigate-up': {
-            const currentIndex = items.findIndex(i => i.id === appState.ui.focusedItemId);
-            if (currentIndex > 0) {
-                actions.setFocusedItem(items[currentIndex - 1]!.id);
-            } else if (currentIndex === -1 && items.length > 0) {
-                // No item focused, start from bottom
-                actions.setFocusedItem(items[items.length - 1]!.id);
-            } else if (currentIndex === 0) {
-                // Wrap to bottom
-                actions.setFocusedItem(items[items.length - 1]!.id);
-            }
+        case 'navigate-up':
+            navigateFocusByDelta(-1);
             break;
-        }
 
-        case 'navigate-down': {
-            const currentIndex = items.findIndex(i => i.id === appState.ui.focusedItemId);
-            if (currentIndex >= 0 && currentIndex < items.length - 1) {
-                actions.setFocusedItem(items[currentIndex + 1]!.id);
-            } else if (currentIndex === -1 && items.length > 0) {
-                // No item focused, start from top
-                actions.setFocusedItem(items[0]!.id);
-            } else if (currentIndex === items.length - 1) {
-                // Wrap to top
-                actions.setFocusedItem(items[0]!.id);
-            }
+        case 'navigate-down':
+            navigateFocusByDelta(1);
             break;
-        }
 
         case 'navigate-first':
             if (items.length > 0) {
@@ -182,8 +196,7 @@ function handleAction(action: string): void {
 
         case 'activate':
             if (appState.ui.focusedItemId) {
-                actions.setActiveItem(appState.ui.focusedItemId);
-                actions.showBanner('banner.featureOutOfScope', 'banner.featureOutOfScopeDesc');
+                activateItem(appState.ui.focusedItemId);
             }
             break;
 
@@ -196,57 +209,71 @@ function handleAction(action: string): void {
     }
 }
 
-/** Check if event matches shortcut. */
-function matchesShortcut(event: KeyboardEvent, shortcut: KeyboardShortcut): boolean {
-    // Check key or code match
-    const keyMatches = event.key === shortcut.key || 
-                       (shortcut.code && event.code === shortcut.code);
+// ============================================================================
+// Shortcut Matching
+// ============================================================================
 
+/** Check if a keyboard event matches a shortcut definition. */
+function matchesShortcut(event: KeyboardEvent, shortcut: KeyboardShortcut): boolean {
+    // Match by key or code (code is more reliable for physical keys)
+    const keyMatches = event.key === shortcut.key || (shortcut.code && event.code === shortcut.code);
     if (!keyMatches) return false;
 
-    // Check modifier keys
-    const cmdKey = isMac() ? event.metaKey : event.ctrlKey;
+    // Check modifier keys - Cmd on Mac, Ctrl on other platforms
+    const cmdPressed = IS_MAC ? event.metaKey : event.ctrlKey;
     const cmdRequired = shortcut.cmd ?? false;
     const shiftRequired = shortcut.shift ?? false;
     const altRequired = shortcut.alt ?? false;
 
-    return cmdKey === cmdRequired && event.shiftKey === shiftRequired && event.altKey === altRequired;
+    return cmdPressed === cmdRequired && event.shiftKey === shiftRequired && event.altKey === altRequired;
 }
 
-/** Handle keydown event. */
+// ============================================================================
+// Event Handler
+// ============================================================================
+
+/** Global keydown event handler. */
 function handleKeyDown(event: KeyboardEvent): void {
-    // Don't handle if typing in an input
+    // Ignore keyboard events when user is typing in form fields
     const target = event.target as HTMLElement;
     if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
         return;
     }
 
-    const overlayOpen = isOverlayOpen();
-
-    // If an overlay is open, only handle Escape and let the overlay handle the rest
-    if (overlayOpen) {
+    // When an overlay is open, only handle Escape globally
+    // Other keys are handled by individual overlay components
+    if (isOverlayOpen()) {
         if (event.key === 'Escape') {
             event.preventDefault();
-            handleAction('close-overlay');
+            executeAction('close-overlay');
         }
-        // Let overlay components handle other keys
         return;
     }
 
-    // No overlay open - handle all shortcuts
+    // Try to match against all registered shortcuts
     for (const shortcut of SHORTCUTS) {
         if (matchesShortcut(event, shortcut)) {
             event.preventDefault();
             event.stopPropagation();
-            handleAction(shortcut.action);
+            executeAction(shortcut.action);
             return;
         }
     }
 }
 
-/** Initialize keyboard handling. */
+// ============================================================================
+// Public API
+// ============================================================================
+
+/**
+ * Initialize global keyboard shortcut handling.
+ * @returns Cleanup function to remove event listener.
+ */
 export function initKeyboardHandling(): () => void {
-    // Use capture phase to handle events before other handlers
+    // Use capture phase to intercept events before other handlers
     document.addEventListener('keydown', handleKeyDown, true);
-    return () => document.removeEventListener('keydown', handleKeyDown, true);
+
+    return () => {
+        document.removeEventListener('keydown', handleKeyDown, true);
+    };
 }

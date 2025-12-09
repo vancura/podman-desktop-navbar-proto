@@ -3,6 +3,7 @@
  * Reactive state management using Svelte 5 runes.
  */
 
+import { setLocale as setI18nLocale } from '../i18n/index.js';
 import { NAVBAR } from '../utils/constants.js';
 import { DEFAULT_BOTTOM_ITEMS, DEFAULT_ESSENTIAL_ITEMS, DEFAULT_REGULAR_ITEMS } from './nav-items.js';
 import type { Locale, NavItem } from './types.js';
@@ -174,9 +175,10 @@ export const actions = {
         isExpanded = !isExpanded;
     },
 
-    /** Set the current locale. */
+    /** Set the current locale (updates both app state and i18n module). */
     setLocale(newLocale: Locale): void {
         locale = newLocale;
+        setI18nLocale(newLocale);
     },
 
     /** Pin an item (moves from regular to pinned). */

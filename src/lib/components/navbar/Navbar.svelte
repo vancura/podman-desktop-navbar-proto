@@ -70,14 +70,14 @@
 
         <!-- Essential items (always visible) -->
         <div class="flex flex-col gap-1">
-            {#each items.essential as item (item.id)}
+            {#each items.essential as navItem (navItem.id)}
                 <NavbarItem
-                    {item}
+                    {navItem}
                     {isExpanded}
-                    isActive={activeItemId === item.id}
-                    isFocused={focusedItemId === item.id}
-                    onclick={() => handleItemClick(item.id)}
-                    oncontextmenu={(e) => handleItemContextMenu(e, item.id)}
+                    isActive={activeItemId === navItem.id}
+                    isFocused={focusedItemId === navItem.id}
+                    onclick={() => handleItemClick(navItem.id)}
+                    oncontextmenu={(e) => handleItemContextMenu(e, navItem.id)}
                 />
             {/each}
         </div>
@@ -86,14 +86,14 @@
         {#if hasPinnedItems}
             <NavbarDivider />
             <div class="flex flex-col gap-1">
-                {#each items.pinned as item (item.id)}
+                {#each items.pinned as navItem (navItem.id)}
                     <NavbarItem
-                        {item}
+                        {navItem}
                         {isExpanded}
-                        isActive={activeItemId === item.id}
-                        isFocused={focusedItemId === item.id}
-                        onclick={() => handleItemClick(item.id)}
-                        oncontextmenu={(e) => handleItemContextMenu(e, item.id)}
+                        isActive={activeItemId === navItem.id}
+                        isFocused={focusedItemId === navItem.id}
+                        onclick={() => handleItemClick(navItem.id)}
+                        oncontextmenu={(e) => handleItemContextMenu(e, navItem.id)}
                     />
                 {/each}
             </div>
@@ -103,14 +103,14 @@
         {#if items.regular.length > 0}
             <NavbarDivider />
             <div class="flex flex-col gap-1">
-                {#each items.regular as item (item.id)}
+                {#each items.regular as navItem (navItem.id)}
                     <NavbarItem
-                        {item}
+                        {navItem}
                         {isExpanded}
-                        isActive={activeItemId === item.id}
-                        isFocused={focusedItemId === item.id}
-                        onclick={() => handleItemClick(item.id)}
-                        oncontextmenu={(e) => handleItemContextMenu(e, item.id)}
+                        isActive={activeItemId === navItem.id}
+                        isFocused={focusedItemId === navItem.id}
+                        onclick={() => handleItemClick(navItem.id)}
+                        oncontextmenu={(e) => handleItemContextMenu(e, navItem.id)}
                     />
                 {/each}
             </div>
@@ -142,14 +142,14 @@
     <!-- Bottom panel (Settings, Account) -->
     <NavbarDivider />
     <div class="flex flex-col gap-1 p-2 pt-0">
-        {#each items.bottom as item (item.id)}
+        {#each items.bottom as navItem (navItem.id)}
             <NavbarItem
-                {item}
+                {navItem}
                 {isExpanded}
-                isActive={activeItemId === item.id}
-                isFocused={focusedItemId === item.id}
-                onclick={() => handleItemClick(item.id)}
-                oncontextmenu={(e) => handleItemContextMenu(e, item.id)}
+                isActive={activeItemId === navItem.id}
+                isFocused={focusedItemId === navItem.id}
+                onclick={() => handleItemClick(navItem.id)}
+                oncontextmenu={(e) => handleItemContextMenu(e, navItem.id)}
             />
         {/each}
     </div>

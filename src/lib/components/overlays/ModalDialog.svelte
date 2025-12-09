@@ -5,6 +5,7 @@
 <script lang="ts">
     import { t, type TranslationKey } from '../../i18n/index.js';
     import { actions, appState } from '../../state/app-state.svelte.js';
+    import Backdrop from './Backdrop.svelte';
 
     const modalConfig = $derived(appState.ui.modalConfig);
     const checkboxChecked = $derived(appState.ui.modalCheckboxChecked);
@@ -20,13 +21,9 @@
         actions.hideModal();
     }
 
-    function handleCancel() {
-        actions.hideModal();
-    }
-
     function handleKeyDown(e: KeyboardEvent) {
         if (e.key === 'Escape' && modalConfig) {
-            handleCancel();
+            actions.hideModal();
         }
     }
 </script>
@@ -34,17 +31,17 @@
 <svelte:window onkeydown={handleKeyDown} />
 
 {#if modalConfig}
-    <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-    <div
-        class="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center bg-[var(--color-overlay-bg)]"
-        onclick={handleCancel}
-    >
-        <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+    <Backdrop zIndex="z-modal" showOverlay onClose={() => actions.hideModal()}>
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
         <div
             class="mx-4 w-full max-w-sm rounded-lg border border-[var(--color-banner-border)] bg-[var(--color-banner-bg)] p-6 shadow-2xl"
             onclick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+            tabindex="-1"
         >
-            <h2 class="text-lg font-semibold text-[var(--color-banner-text)]">{title}</h2>
+            <h2 id="modal-title" class="text-lg font-semibold text-[var(--color-banner-text)]">{title}</h2>
             <p class="mt-2 text-sm text-[var(--color-banner-text-secondary)]">{description}</p>
 
             {#if checkboxLabel}
@@ -63,7 +60,7 @@
                 <button
                     type="button"
                     class="rounded-md bg-[var(--color-button-bg)] px-4 py-2 text-sm font-medium text-[var(--color-button-text)] transition-colors hover:bg-[var(--color-button-bg-hover)]"
-                    onclick={handleCancel}
+                    onclick={() => actions.hideModal()}
                 >
                     {t('modal.cancel' as TranslationKey)}
                 </button>
@@ -76,5 +73,5 @@
                 </button>
             </div>
         </div>
-    </div>
+    </Backdrop>
 {/if}

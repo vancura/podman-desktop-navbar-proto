@@ -5,9 +5,11 @@
 <script lang="ts">
     import { t, type TranslationKey } from '../../i18n/index.js';
     import { actions, appState } from '../../state/app-state.svelte.js';
+    import { getMenuKeyAction, navigateActionable } from '../../utils/menu-navigation.js';
+    import Backdrop from './Backdrop.svelte';
 
-    /** Menu item definition. */
-    interface MenuItem {
+    /** Context menu item definition. */
+    interface ContextMenuItem {
         labelKey: string;
         action: string;
         disabled?: boolean;
@@ -15,28 +17,27 @@
     }
 
     const contextMenu = $derived(appState.ui.contextMenu);
-    const item = $derived(contextMenu?.itemId ? actions.findItem(contextMenu.itemId) : null);
+    const targetItem = $derived(contextMenu?.itemId ? actions.findItem(contextMenu.itemId) : null);
     const isExpanded = $derived(appState.isExpanded);
 
-    // Keyboard navigation state
-    let focusedIndex = $state(-1);
+    let focusedIndex = $state(0);
 
     // Reset focus when menu opens
     $effect(() => {
         if (contextMenu) {
-            focusedIndex = 0; // Focus first item when menu opens
+            focusedIndex = 0;
         }
     });
 
-    // Determine item category
-    const isEssential = $derived(item ? appState.items.essential.some(i => i.id === item.id) : false);
-    const isPinned = $derived(item ? appState.items.pinned.some(i => i.id === item.id) : false);
-    const isRegular = $derived(item ? appState.items.regular.some(i => i.id === item.id) : false);
-    const isSettings = $derived(item?.id === 'settings');
-    const isAccount = $derived(item?.id === 'account');
+    // Determine item category for menu building
+    const isEssential = $derived(targetItem ? appState.items.essential.some(i => i.id === targetItem.id) : false);
+    const isPinned = $derived(targetItem ? appState.items.pinned.some(i => i.id === targetItem.id) : false);
+    const isRegular = $derived(targetItem ? appState.items.regular.some(i => i.id === targetItem.id) : false);
+    const isSettings = $derived(targetItem?.id === 'settings');
+    const isAccount = $derived(targetItem?.id === 'account');
 
-    // Build menu items reactively based on item type
-    const menuItems = $derived.by((): MenuItem[] => {
+    /** Build menu items based on context. */
+    const menuItems = $derived.by((): ContextMenuItem[] => {
         if (!contextMenu) return [];
 
         // Settings item menu
@@ -70,10 +71,10 @@
         }
 
         // Pinned items
-        if (isPinned && item) {
+        if (isPinned && targetItem) {
             return [
                 { labelKey: 'menu.unpin', action: 'unpin' },
-                { labelKey: 'menu.hideFromNavBar', action: 'hide', disabled: !item.canHide },
+                { labelKey: 'menu.hideFromNavBar', action: 'hide', disabled: !targetItem.canHide },
                 { labelKey: '', action: '', separator: true },
                 { labelKey: 'menu.keyboardShortcut', action: 'shortcut' },
                 { labelKey: 'menu.extensionSettings', action: 'extensionSettings' },
@@ -84,11 +85,11 @@
         }
 
         // Regular items
-        if (isRegular && item) {
-            const canPin = item.canPin && appState.canPinMore;
+        if (isRegular && targetItem) {
+            const canPin = targetItem.canPin && appState.canPinMore;
             return [
                 { labelKey: 'menu.pinToTop', action: 'pin', disabled: !canPin },
-                { labelKey: 'menu.hideFromNavBar', action: 'hide', disabled: !item.canHide },
+                { labelKey: 'menu.hideFromNavBar', action: 'hide', disabled: !targetItem.canHide },
                 { labelKey: '', action: '', separator: true },
                 { labelKey: 'menu.keyboardShortcut', action: 'shortcut' },
                 { labelKey: 'menu.extensionSettings', action: 'extensionSettings' },
@@ -98,12 +99,13 @@
             ];
         }
 
-        // Empty space menu
+        // Empty space menu - toggle between expanded/collapsed
+        const toggleItem = isExpanded
+            ? { labelKey: 'menu.showIconsOnly', action: 'showIconsOnly' }
+            : { labelKey: 'menu.showIconsAndTitles', action: 'showIconsAndTitles' };
+
         return [
-            // Toggle between modes - show the opposite action
-            isExpanded
-                ? { labelKey: 'menu.showIconsOnly', action: 'showIconsOnly' }
-                : { labelKey: 'menu.showIconsAndTitles', action: 'showIconsAndTitles' },
+            toggleItem,
             { labelKey: 'menu.showHiddenItems', action: 'showHidden', disabled: !appState.hasHiddenItems },
             { labelKey: '', action: '', separator: true },
             { labelKey: 'menu.configureNavbar', action: 'configureNavbar' },
@@ -111,152 +113,95 @@
         ];
     });
 
-    // Get actionable (non-separator, non-disabled) item indices
+    // Indices of actionable (non-separator, non-disabled) items for keyboard navigation
     const actionableIndices = $derived(
         menuItems
-            .map((item, index) => ({ item, index }))
-            .filter(({ item }) => !item.separator && !item.disabled)
+            .map((entry, index) => ({ entry, index }))
+            .filter(({ entry }) => !entry.separator && !entry.disabled)
             .map(({ index }) => index)
     );
 
-    function handleAction(action: string) {
+    /** Execute menu action. */
+    function executeAction(action: string) {
         if (!contextMenu) return;
 
-        switch (action) {
-            case 'pin':
-                if (item) actions.pinItem(item.id);
-                break;
-            case 'unpin':
-                if (item) actions.unpinItem(item.id);
-                break;
-            case 'hide':
-                if (item) {
-                    const itemIdToHide = item.id;
-                    if (!appState.ui.hideWarningDismissed) {
-                        actions.showModal({
-                            titleKey: 'modal.hideItem',
-                            descriptionKey: 'modal.hideItemDescription',
-                            checkboxKey: 'modal.dontShowAgain',
-                            onConfirm: (checked) => {
-                                if (checked) actions.dismissHideWarning();
-                                actions.hideItem(itemIdToHide);
-                            },
-                        });
-                    } else {
-                        actions.hideItem(itemIdToHide);
-                    }
-                }
-                break;
-            case 'showIconsOnly':
-                actions.setNavbarWidth(80);
-                break;
-            case 'showIconsAndTitles':
-                actions.setNavbarWidth(200);
-                break;
-            case 'showHidden':
-                // Show the more menu at the context menu position
-                actions.showMoreMenu(contextMenu.x, contextMenu.y);
-                break;
-            case 'reset':
-                actions.reset();
-                break;
-            // All these show banners explaining what would happen
-            case 'shortcut':
-                actions.showBanner('banner.keyboardShortcut', 'banner.keyboardShortcutDesc');
-                break;
-            case 'extensionSettings':
-                actions.showBanner('banner.extensionSettings', 'banner.extensionSettingsDesc');
-                break;
-            case 'removeExtension':
-                actions.showBanner('banner.removeExtension', 'banner.removeExtensionDesc');
-                break;
-            case 'configureNavbar':
-                actions.showBanner('banner.configureNavbar', 'banner.configureNavbarDesc');
-                break;
-            case 'settings':
-                actions.showBanner('banner.settings', 'banner.settingsDesc');
-                break;
-            case 'extensions':
-                actions.showBanner('banner.extensions', 'banner.extensionsDesc');
-                break;
-            case 'keyboardShortcuts':
-                actions.showBanner('banner.keyboardShortcuts', 'banner.keyboardShortcutsDesc');
-                break;
-            case 'about':
-                actions.showBanner('banner.about', 'banner.aboutDesc');
-                break;
-            case 'signOut':
-                actions.showBanner('banner.signOut', 'banner.signOutDesc');
-                break;
-            default:
-                actions.showBanner('banner.featureOutOfScope', 'banner.featureOutOfScopeDesc');
+        // Map action strings to their handlers
+        const actionHandlers: Record<string, () => void> = {
+            pin: () => targetItem && actions.pinItem(targetItem.id),
+            unpin: () => targetItem && actions.unpinItem(targetItem.id),
+            hide: () => handleHideAction(),
+            showIconsOnly: () => actions.setNavbarWidth(80),
+            showIconsAndTitles: () => actions.setNavbarWidth(200),
+            showHidden: () => actions.showMoreMenu(contextMenu.x, contextMenu.y),
+            reset: () => actions.reset(),
+            // Banner notifications for prototype features
+            shortcut: () => actions.showBanner('banner.keyboardShortcut', 'banner.keyboardShortcutDesc'),
+            extensionSettings: () => actions.showBanner('banner.extensionSettings', 'banner.extensionSettingsDesc'),
+            removeExtension: () => actions.showBanner('banner.removeExtension', 'banner.removeExtensionDesc'),
+            configureNavbar: () => actions.showBanner('banner.configureNavbar', 'banner.configureNavbarDesc'),
+            settings: () => actions.showBanner('banner.settings', 'banner.settingsDesc'),
+            extensions: () => actions.showBanner('banner.extensions', 'banner.extensionsDesc'),
+            keyboardShortcuts: () => actions.showBanner('banner.keyboardShortcuts', 'banner.keyboardShortcutsDesc'),
+            about: () => actions.showBanner('banner.about', 'banner.aboutDesc'),
+            signOut: () => actions.showBanner('banner.signOut', 'banner.signOutDesc'),
+        };
+
+        const handler = actionHandlers[action];
+        if (handler) {
+            handler();
+        } else {
+            actions.showBanner('banner.featureOutOfScope', 'banner.featureOutOfScopeDesc');
         }
 
         actions.hideContextMenu();
     }
 
-    function handleBackdropClick() {
-        actions.hideContextMenu();
-    }
+    /** Handle hide action with optional confirmation modal. */
+    function handleHideAction() {
+        if (!targetItem) return;
 
-    function navigateUp() {
-        if (actionableIndices.length === 0) return;
-        const currentPos = actionableIndices.indexOf(focusedIndex);
-        if (currentPos > 0) {
-            focusedIndex = actionableIndices[currentPos - 1]!;
-        } else {
-            // Wrap to bottom
-            focusedIndex = actionableIndices[actionableIndices.length - 1]!;
-        }
-    }
+        const itemIdToHide = targetItem.id;
 
-    function navigateDown() {
-        if (actionableIndices.length === 0) return;
-        const currentPos = actionableIndices.indexOf(focusedIndex);
-        if (currentPos < actionableIndices.length - 1) {
-            focusedIndex = actionableIndices[currentPos + 1]!;
+        if (!appState.ui.hideWarningDismissed) {
+            actions.showModal({
+                titleKey: 'modal.hideItem',
+                descriptionKey: 'modal.hideItemDescription',
+                checkboxKey: 'modal.dontShowAgain',
+                onConfirm: (checked) => {
+                    if (checked) actions.dismissHideWarning();
+                    actions.hideItem(itemIdToHide);
+                },
+            });
         } else {
-            // Wrap to top
-            focusedIndex = actionableIndices[0]!;
+            actions.hideItem(itemIdToHide);
         }
     }
 
     function handleKeyDown(e: KeyboardEvent) {
         if (!contextMenu) return;
 
-        switch (e.key) {
-            case 'Escape':
-                e.preventDefault();
+        const action = getMenuKeyAction(e.key);
+        if (action === 'none') return;
+
+        e.preventDefault();
+
+        switch (action) {
+            case 'close':
                 actions.hideContextMenu();
                 break;
-            case 'ArrowUp':
-                e.preventDefault();
-                navigateUp();
+            case 'up':
+            case 'down':
+            case 'first':
+            case 'last':
+                focusedIndex = navigateActionable(action, focusedIndex, actionableIndices);
                 break;
-            case 'ArrowDown':
-                e.preventDefault();
-                navigateDown();
-                break;
-            case 'Home':
-                e.preventDefault();
-                if (actionableIndices.length > 0) {
-                    focusedIndex = actionableIndices[0]!;
-                }
-                break;
-            case 'End':
-                e.preventDefault();
-                if (actionableIndices.length > 0) {
-                    focusedIndex = actionableIndices[actionableIndices.length - 1]!;
-                }
-                break;
-            case 'Enter':
-            case ' ':
-                e.preventDefault();
+            case 'select': {
                 const focusedItem = menuItems[focusedIndex];
                 if (focusedItem && !focusedItem.separator && !focusedItem.disabled) {
-                    handleAction(focusedItem.action);
+                    executeAction(focusedItem.action);
                 }
                 break;
+            }
         }
     }
 </script>
@@ -264,11 +209,8 @@
 <svelte:window onkeydown={handleKeyDown} />
 
 {#if contextMenu}
-    <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-    <div
-        class="fixed inset-0 z-[var(--z-context-menu)]"
-        onclick={handleBackdropClick}
-    >
+    <Backdrop zIndex="z-context-menu" onClose={() => actions.hideContextMenu()}>
+        <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
         <div
             class="absolute min-w-52 rounded-lg border border-[var(--color-menu-border)] bg-[var(--color-menu-bg)] py-1 shadow-xl"
             style="left: {contextMenu.x}px; top: {contextMenu.y}px;"
@@ -276,25 +218,25 @@
             tabindex="-1"
             onclick={(e) => e.stopPropagation()}
         >
-            {#each menuItems as menuItem, index (index)}
-                {#if menuItem.separator}
+            {#each menuItems as entry, index (index)}
+                {#if entry.separator}
                     <div class="my-1 h-px bg-[var(--color-menu-separator)]"></div>
                 {:else}
                     <button
                         type="button"
                         class="flex w-full px-3 py-1.5 text-left text-sm transition-colors
-                            {menuItem.disabled ? 'cursor-not-allowed text-[var(--color-menu-text-disabled)]' : 'text-[var(--color-menu-text)] hover:bg-[var(--color-menu-item-hover)]'}
-                            {focusedIndex === index && !menuItem.disabled ? 'bg-[var(--color-menu-item-hover)]' : ''}"
+                            {entry.disabled ? 'cursor-not-allowed text-[var(--color-menu-text-disabled)]' : 'text-[var(--color-menu-text)] hover:bg-[var(--color-menu-item-hover)]'}
+                            {focusedIndex === index && !entry.disabled ? 'bg-[var(--color-menu-item-hover)]' : ''}"
                         role="menuitem"
-                        disabled={menuItem.disabled}
+                        disabled={entry.disabled}
                         tabindex="-1"
-                        onclick={() => !menuItem.disabled && handleAction(menuItem.action)}
-                        onmouseenter={() => { if (!menuItem.disabled) focusedIndex = index; }}
+                        onclick={() => !entry.disabled && executeAction(entry.action)}
+                        onmouseenter={() => { if (!entry.disabled) focusedIndex = index; }}
                     >
-                        {t(menuItem.labelKey as TranslationKey)}
+                        {t(entry.labelKey as TranslationKey)}
                     </button>
                 {/if}
             {/each}
         </div>
-    </div>
+    </Backdrop>
 {/if}

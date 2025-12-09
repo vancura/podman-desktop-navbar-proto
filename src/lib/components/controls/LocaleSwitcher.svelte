@@ -3,17 +3,15 @@
   Language selector buttons.
 -->
 <script lang="ts">
-    import { AVAILABLE_LOCALES, setLocale } from '../../i18n/index.js';
+    import { AVAILABLE_LOCALES } from '../../i18n/index.js';
     import { actions, appState } from '../../state/app-state.svelte.js';
     import type { Locale } from '../../state/types.js';
 
-    function handleLocaleChange(locale: Locale) {
-        setLocale(locale);
-        actions.setLocale(locale);
-    }
-
-    // Get locale from reactive app state
     const currentLocale = $derived(appState.locale);
+
+    function handleLocaleChange(newLocale: Locale) {
+        actions.setLocale(newLocale);
+    }
 </script>
 
 <div class="flex flex-wrap gap-2">

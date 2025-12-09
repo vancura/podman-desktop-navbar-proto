@@ -5,13 +5,14 @@
 <script lang="ts">
     import { t, type TranslationKey } from '../../i18n/index.js';
     import { actions, appState } from '../../state/app-state.svelte.js';
+    import { getMenuKeyAction, navigateNext, navigatePrevious } from '../../utils/menu-navigation.js';
     import Icon from '../Icon.svelte';
+    import Backdrop from './Backdrop.svelte';
 
     const moreMenu = $derived(appState.ui.moreMenu);
     const hiddenItems = $derived(appState.items.hidden);
     const locale = $derived(appState.locale);
 
-    // Keyboard navigation state
     let focusedIndex = $state(0);
 
     // Reset focus when menu opens
@@ -29,42 +30,37 @@
         }
     }
 
-    function handleBackdropClick() {
-        actions.hideMoreMenu();
-    }
-
     function handleKeyDown(e: KeyboardEvent) {
         if (!moreMenu || hiddenItems.length === 0) return;
 
-        switch (e.key) {
-            case 'Escape':
-                e.preventDefault();
+        const action = getMenuKeyAction(e.key);
+        if (action === 'none') return;
+
+        e.preventDefault();
+
+        switch (action) {
+            case 'close':
                 actions.hideMoreMenu();
                 break;
-            case 'ArrowUp':
-                e.preventDefault();
-                focusedIndex = focusedIndex > 0 ? focusedIndex - 1 : hiddenItems.length - 1;
+            case 'up':
+                focusedIndex = navigatePrevious(focusedIndex, hiddenItems.length);
                 break;
-            case 'ArrowDown':
-                e.preventDefault();
-                focusedIndex = focusedIndex < hiddenItems.length - 1 ? focusedIndex + 1 : 0;
+            case 'down':
+                focusedIndex = navigateNext(focusedIndex, hiddenItems.length);
                 break;
-            case 'Home':
-                e.preventDefault();
+            case 'first':
                 focusedIndex = 0;
                 break;
-            case 'End':
-                e.preventDefault();
+            case 'last':
                 focusedIndex = hiddenItems.length - 1;
                 break;
-            case 'Enter':
-            case ' ':
-                e.preventDefault();
+            case 'select': {
                 const focusedItem = hiddenItems[focusedIndex];
                 if (focusedItem) {
                     handleUnhide(focusedItem.id);
                 }
                 break;
+            }
         }
     }
 </script>
@@ -72,12 +68,9 @@
 <svelte:window onkeydown={handleKeyDown} />
 
 {#if moreMenu && hiddenItems.length > 0}
-    <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-    <div
-        class="fixed inset-0 z-[var(--z-context-menu)]"
-        onclick={handleBackdropClick}
-    >
+    <Backdrop zIndex="z-context-menu" onClose={() => actions.hideMoreMenu()}>
         {#key locale}
+        <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
         <div
             class="absolute min-w-56 rounded-lg border border-[var(--color-menu-border)] bg-[var(--color-menu-bg)] py-1 shadow-xl"
             style="left: {moreMenu.x}px; bottom: calc(100vh - {moreMenu.y}px);"
@@ -105,5 +98,5 @@
             {/each}
         </div>
         {/key}
-    </div>
+    </Backdrop>
 {/if}

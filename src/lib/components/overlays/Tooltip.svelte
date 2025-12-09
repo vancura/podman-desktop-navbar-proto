@@ -10,24 +10,21 @@
         item: NavItem;
         x: number;
         y: number;
-        visible?: boolean;
     }
 
-    const { item, x, y, visible = true }: Props = $props();
+    const { item, x, y }: Props = $props();
 
     const label = $derived(t(item.labelKey as TranslationKey));
     const shortcut = $derived(item.shortcut ? formatShortcut(item.shortcut) : null);
 </script>
 
-{#if visible}
-    <div
-        class="pointer-events-none fixed z-[var(--z-tooltip)] rounded-md border border-[var(--color-tooltip-border)] bg-[var(--color-tooltip-bg)] px-2.5 py-1.5 text-sm shadow-lg"
-        style="left: {x}px; top: {y}px;"
-    >
-        <span class="text-[var(--color-tooltip-text)]">{label}</span>
-        {#if shortcut}
-            <span class="ml-2 text-[var(--color-tooltip-shortcut)]">{shortcut}</span>
-        {/if}
-    </div>
-{/if}
+<div
+    class="pointer-events-none fixed z-[var(--z-tooltip)] rounded-md border border-[var(--color-tooltip-border)] bg-[var(--color-tooltip-bg)] px-2.5 py-1.5 text-sm shadow-lg"
+    style="left: {x}px; top: {y}px;"
+>
+    <span class="text-[var(--color-tooltip-text)]">{label}</span>
+    {#if shortcut}
+        <span class="ml-2 text-[var(--color-tooltip-shortcut)]">{shortcut}</span>
+    {/if}
+</div>
 

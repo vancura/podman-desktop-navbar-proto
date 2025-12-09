@@ -53,27 +53,3 @@ export interface NavItem {
     originalCategory: ItemCategory;
 }
 
-/** Context menu item definition. */
-export interface MenuItem {
-    /** Unique identifier. */
-    id: string;
-
-    /** Translation key for the label. */
-    labelKey: string;
-
-    /** Optional keyboard shortcut to display. */
-    shortcut?: string;
-
-    /** Optional icon name. */
-    icon?: IconName;
-
-    /** Whether the item is disabled. */
-    disabled?: boolean;
-
-    /** Whether this is a destructive action (shows in red). */
-    destructive?: boolean;
-
-    /** Nested submenu items. */
-    submenu?: MenuItem[];
-}
-

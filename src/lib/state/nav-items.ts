@@ -104,34 +104,3 @@ export const DEFAULT_BOTTOM_ITEMS: NavItem[] = [
     },
 ];
 
-/** Sample extension items for testing. */
-export const SAMPLE_EXTENSION_ITEMS: NavItem[] = [
-    {
-        id: 'ext-docker-compose',
-        labelKey: 'nav.dockerCompose',
-        icon: 'widget',
-        iconVariant: 'outline',
-        canHide: true,
-        canPin: true,
-        originalCategory: 'regular',
-    },
-    {
-        id: 'ext-kind',
-        labelKey: 'nav.kind',
-        icon: 'server',
-        iconVariant: 'outline',
-        canHide: true,
-        canPin: true,
-        originalCategory: 'regular',
-    },
-    {
-        id: 'ext-lima',
-        labelKey: 'nav.lima',
-        icon: 'box',
-        iconVariant: 'outline',
-        canHide: true,
-        canPin: true,
-        originalCategory: 'regular',
-    },
-];
-

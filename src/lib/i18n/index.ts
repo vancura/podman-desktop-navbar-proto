@@ -1,6 +1,10 @@
 /**
  * Internationalization Module
- * Simple i18n implementation without runes (module-level state).
+ * Provides translation functions and locale management.
+ *
+ * Note: This module uses module-level state for the current locale.
+ * The app state (app-state.svelte.ts) also tracks locale for reactivity.
+ * Always use actions.setLocale() to change the locale - it updates both.
  */
 
 import type { Locale } from '../state/types.js';
@@ -10,8 +14,12 @@ import { en, type TranslationKey } from './locales/en.js';
 import { he } from './locales/he.js';
 import { ja } from './locales/ja.js';
 
-/** All available translations indexed by locale. */
-const translations: Record<Locale, Record<TranslationKey, string>> = {
+// ============================================================================
+// Configuration
+// ============================================================================
+
+/** All available translations indexed by locale code. */
+const TRANSLATIONS: Record<Locale, Record<TranslationKey, string>> = {
     en,
     de,
     ja,
@@ -19,64 +27,68 @@ const translations: Record<Locale, Record<TranslationKey, string>> = {
     he,
 };
 
-/** RTL locales. */
+/** Locales that use right-to-left text direction. */
 const RTL_LOCALES: Locale[] = ['ar', 'he'];
 
-/** Current locale - simple module-level variable. */
+/** Platform detection for keyboard shortcut formatting. */
+const IS_MAC = typeof navigator !== 'undefined' && navigator.platform.includes('Mac');
+
+// ============================================================================
+// State
+// ============================================================================
+
+/** Current locale (module-level, synchronized with app state). */
 let currentLocale: Locale = 'en';
 
-/**
- * Get the current locale.
- */
+// ============================================================================
+// Public API
+// ============================================================================
+
+/** Get the current locale code. */
 export function getLocale(): Locale {
     return currentLocale;
 }
 
 /**
- * Set the current locale.
+ * Set the current locale and update document attributes.
+ * Note: Prefer using actions.setLocale() for reactivity.
  */
 export function setLocale(locale: Locale): void {
     currentLocale = locale;
-
-    // Update document direction for RTL support
     document.documentElement.dir = RTL_LOCALES.includes(locale) ? 'rtl' : 'ltr';
     document.documentElement.lang = locale;
 }
 
-/**
- * Check if current locale is RTL.
- */
+/** Check if current locale uses right-to-left text direction. */
 export function isRtl(): boolean {
     return RTL_LOCALES.includes(currentLocale);
 }
 
 /**
  * Translate a key to the current locale.
- * @param key - Translation key
+ * @param key - Translation key from the English translations
  * @returns Translated string
  */
 export function t(key: TranslationKey): string {
-    return translations[currentLocale][key];
+    return TRANSLATIONS[currentLocale][key];
 }
 
 /**
- * Format a keyboard shortcut for display.
- * Converts 'cmd+1' to '⌘1' on Mac or 'Ctrl+1' on other platforms.
+ * Format a keyboard shortcut for display based on platform.
+ * @param shortcut - Shortcut string (e.g., 'cmd+1', 'shift+cmd+p')
+ * @returns Formatted shortcut (e.g., '⌘1' on Mac, 'Ctrl+1' on Windows)
  */
 export function formatShortcut(shortcut: string): string {
-    const isMac = navigator.platform.includes('Mac');
-    const modifier = isMac ? '⌘' : 'Ctrl+';
-
     return shortcut
-        .replace(/cmd\+/gi, modifier)
-        .replace(/alt\+/gi, isMac ? '⌥' : 'Alt+')
-        .replace(/shift\+/gi, isMac ? '⇧' : 'Shift+')
-        .replace(/ctrl\+/gi, isMac ? '⌃' : 'Ctrl+')
+        .replace(/cmd\+/gi, IS_MAC ? '⌘' : 'Ctrl+')
+        .replace(/alt\+/gi, IS_MAC ? '⌥' : 'Alt+')
+        .replace(/shift\+/gi, IS_MAC ? '⇧' : 'Shift+')
+        .replace(/ctrl\+/gi, IS_MAC ? '⌃' : 'Ctrl+')
         .toUpperCase();
 }
 
-/** Available locales with display names. */
-export const AVAILABLE_LOCALES: { code: Locale; name: string }[] = [
+/** Available locales with their native display names. */
+export const AVAILABLE_LOCALES: ReadonlyArray<{ code: Locale; name: string }> = [
     { code: 'en', name: 'English' },
     { code: 'de', name: 'Deutsch' },
     { code: 'ja', name: '日本語' },
@@ -84,5 +96,5 @@ export const AVAILABLE_LOCALES: { code: Locale; name: string }[] = [
     { code: 'he', name: 'עברית' },
 ];
 
-// Re-export types
+// Re-export types for consumers
 export type { TranslationKey };
