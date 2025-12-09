@@ -4,7 +4,7 @@
  */
 
 import { setLocale, subscribeToLocale } from '../i18n/i18n.js';
-import { stateManager, type NavBarState } from '../state/navbar-state.js';
+import { type NavBarState,stateManager } from '../state/navbar-state.js';
 import type { Locale, NavItem } from '../state/navigation-items.js';
 import { COLORS } from '../utils/design-tokens.js';
 import { createSvgElement } from '../utils/svg-utils.js';
@@ -255,15 +255,15 @@ export class WindowFrame {
 
     /**
      * Creates the navbar and resize handle.
+     * @param windowWidth
+     * @param windowHeight
      */
     private createNavbar(windowWidth: number, windowHeight: number): void {
         const state = stateManager.getState();
         const borderPadding = WINDOW_CONFIG.borderWidth;
 
         // Calculate navbar dimensions
-        const navbarX = state.isRtl
-            ? windowWidth - state.navbarWidth - borderPadding
-            : borderPadding;
+        const navbarX = state.isRtl ? windowWidth - state.navbarWidth - borderPadding : borderPadding;
         const navbarY = borderPadding + 32; // Below title bar
         const navbarHeight = windowHeight - navbarY - 32 - borderPadding; // Above status bar
 
@@ -317,6 +317,28 @@ export class WindowFrame {
     }
 
     /**
+     * Calculates the widest control width for centering.
+     * Locale switcher: 4 buttons × 40px + 3 gaps × 4px = 172px
+     * Button groups: 140px
+     * @returns The width of the widest control element.
+     */
+    private getWidestControlWidth(): number {
+        return 172; // Locale switcher is the widest
+    }
+
+    /**
+     * Calculates centered X position for controls.
+     * @param bounds - The content area bounds with x and width properties.
+     * @param bounds.x
+     * @param bounds.width
+     * @returns The centered X position for the controls group.
+     */
+    private calculateControlsX(bounds: { x: number; width: number }): number {
+        const widestControlWidth = this.getWidestControlWidth();
+        return bounds.x + (bounds.width - widestControlWidth) / 2;
+    }
+
+    /**
      * Creates content area controls for testing.
      */
     private createControls(): void {
@@ -324,7 +346,7 @@ export class WindowFrame {
         if (!bounds) return;
 
         const state = stateManager.getState();
-        const controlsX = bounds.x + 20;
+        const controlsX = this.calculateControlsX(bounds);
         const controlsY = bounds.y + 20;
 
         // Create controls group
@@ -395,7 +417,24 @@ export class WindowFrame {
     }
 
     /**
+     * Updates controls position on resize.
+     * Repositions the controls group to remain centered horizontally.
+     */
+    private updateControls(): void {
+        if (!this.controlsGroup) return;
+
+        const bounds = getContentAreaBounds(this.svg);
+        if (!bounds) return;
+
+        const controlsX = this.calculateControlsX(bounds);
+        const controlsY = bounds.y + 20;
+
+        this.controlsGroup.setAttribute('transform', `translate(${controlsX}, ${controlsY})`);
+    }
+
+    /**
      * Handles control button clicks.
+     * @param buttonId
      */
     private handleControlButton(buttonId: string): void {
         switch (buttonId) {
@@ -436,6 +475,8 @@ export class WindowFrame {
 
     /**
      * Handles state changes from the state manager.
+     * @param state
+     * @param prevState
      */
     private handleStateChange(state: NavBarState, prevState: NavBarState): void {
         const { width, height } = calculateWindowDimensions();
@@ -446,12 +487,11 @@ export class WindowFrame {
             setNavbarWidth(state.navbarWidth);
             setRtlMode(state.isRtl);
             updateContentArea(this.svg, borderPadding, width, height);
+            this.updateControls();
 
             // Update navbar dimensions
             if (this.navbar) {
-                const navbarX = state.isRtl
-                    ? width - state.navbarWidth - borderPadding
-                    : borderPadding;
+                const navbarX = state.isRtl ? width - state.navbarWidth - borderPadding : borderPadding;
                 const navbarY = borderPadding + 32;
                 const navbarHeight = height - navbarY - 32 - borderPadding;
 
@@ -501,12 +541,11 @@ export class WindowFrame {
         updateTitleBar(this.svg, borderPadding, width);
         updateStatusBar(this.svg, borderPadding, width, height);
         updateContentArea(this.svg, borderPadding, width, height);
+        this.updateControls();
 
         // Update navbar dimensions
         if (this.navbar) {
-            const navbarX = state.isRtl
-                ? width - state.navbarWidth - borderPadding
-                : borderPadding;
+            const navbarX = state.isRtl ? width - state.navbarWidth - borderPadding : borderPadding;
             const navbarY = borderPadding + 32;
             const navbarHeight = height - navbarY - 32 - borderPadding;
 
@@ -520,9 +559,7 @@ export class WindowFrame {
 
         // Update resize handle
         if (this.resizeHandleGroup) {
-            const handleX = state.isRtl
-                ? width - state.navbarWidth - borderPadding
-                : borderPadding + state.navbarWidth;
+            const handleX = state.isRtl ? width - state.navbarWidth - borderPadding : borderPadding + state.navbarWidth;
             const navbarY = borderPadding + 32;
             const navbarHeight = height - navbarY - 32 - borderPadding;
 
