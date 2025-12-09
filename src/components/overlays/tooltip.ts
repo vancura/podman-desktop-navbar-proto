@@ -62,11 +62,7 @@ function measureTextWidth(text: string, fontSize: number, fontFamily: string): n
 /**
  * Calculates tooltip position.
  */
-function calculateTooltipPosition(
-    config: TooltipConfig,
-    tooltipWidth: number,
-    tooltipHeight: number,
-): TooltipPosition {
+function calculateTooltipPosition(config: TooltipConfig, tooltipWidth: number, tooltipHeight: number): TooltipPosition {
     const { anchorX, anchorY, anchorHeight, navbarWidth } = config;
     const gap = TOOLTIP_CONFIG.gap;
 
@@ -100,11 +96,7 @@ export function createTooltip(config: TooltipConfig): SVGGElement {
     const shortcut = item.shortcut ? formatShortcut(item.shortcut) : null;
 
     // Measure text widths
-    const labelWidth = measureTextWidth(
-        translatedLabel,
-        TYPOGRAPHY.tooltipFontSize,
-        TYPOGRAPHY.tooltipFontFamily,
-    );
+    const labelWidth = measureTextWidth(translatedLabel, TYPOGRAPHY.tooltipFontSize, TYPOGRAPHY.tooltipFontFamily);
     const shortcutWidth = shortcut
         ? measureTextWidth(shortcut, TYPOGRAPHY.shortcutFontSize, TYPOGRAPHY.shortcutFontFamily)
         : 0;
@@ -116,10 +108,7 @@ export function createTooltip(config: TooltipConfig): SVGGElement {
     }
 
     // Calculate tooltip dimensions
-    const tooltipWidth = Math.min(
-        contentWidth + TOOLTIP_CONFIG.paddingHorizontal * 2,
-        TOOLTIP_CONFIG.maxWidth,
-    );
+    const tooltipWidth = Math.min(contentWidth + TOOLTIP_CONFIG.paddingHorizontal * 2, TOOLTIP_CONFIG.maxWidth);
     const tooltipHeight = TYPOGRAPHY.tooltipFontSize + TOOLTIP_CONFIG.paddingVertical * 2;
 
     // Calculate position

@@ -25,16 +25,13 @@ export const en = {
     'nav.more': 'More',
 
     // Context menu - Item
-    'menu.pin': 'Pin to Top',
     'menu.pinToTop': 'Pin to Top',
     'menu.unpin': 'Unpin',
-    'menu.hide': 'Hide From Navigation Bar',
     'menu.hideFromNavBar': 'Hide From Navigation Bar',
     'menu.keyboardShortcut': 'Keyboard Shortcut...',
     'menu.extensionSettings': 'Extension Settings',
     'menu.removeExtension': 'Remove Extension',
     'menu.configureNavbar': 'Configure Navigation Bar',
-    'menu.configureNavBar': 'Configure Navigation Bar',
 
     // Context menu - Empty space
     'menu.showIconsAndTitles': 'Show Icons and Titles',
@@ -42,7 +39,6 @@ export const en = {
     'menu.showHiddenItems': 'Show Hidden Items',
     'menu.noHiddenItems': '(No hidden items)',
     'menu.resetNavbar': 'Reset Navigation Bar',
-    'menu.resetNavBar': 'Reset Navigation Bar',
 
     // Context menu - Settings
     'menu.settings': 'Settings',
@@ -64,9 +60,11 @@ export const en = {
     'banner.removeExtensionWouldStart': 'Remove Extension flow would start',
     'banner.removeExtensionDescription': 'In the real application, this would start the extension uninstall flow.',
     'banner.navBarSettingsWouldOpen': 'Navigation Bar Settings would open',
-    'banner.navBarSettingsDescription': 'In the real application, this would open the Navigation Bar configuration in Settings.',
+    'banner.navBarSettingsDescription':
+        'In the real application, this would open the Navigation Bar configuration in Settings.',
     'banner.keyboardShortcutWouldOpen': 'Keyboard Shortcut dialog would open',
-    'banner.keyboardShortcutDescription': 'In the real application, this would open a dialog to assign or change the keyboard shortcut.',
+    'banner.keyboardShortcutDescription':
+        'In the real application, this would open a dialog to assign or change the keyboard shortcut.',
     'banner.signOutWouldStart': 'Sign Out flow would start',
     'banner.signOutDescription': 'In the real application, this would sign you out of your account.',
     'banner.aboutWouldOpen': 'About dialog would open',
@@ -74,34 +72,41 @@ export const en = {
     'banner.extensionsWouldOpen': 'Extensions panel would open',
     'banner.extensionsDescription': 'In the real application, this would open the Extensions management panel.',
     'banner.shortcutsWouldOpen': 'Keyboard Shortcuts panel would open',
-    'banner.shortcutsDescription': 'In the real application, this would open the Keyboard Shortcuts configuration panel.',
-    'banner.clickToDismiss': 'Click anywhere to dismiss',
+    'banner.shortcutsDescription':
+        'In the real application, this would open the Keyboard Shortcuts configuration panel.',
+    'banner.clickToDismiss': 'Click anywhere or press Esc to dismiss',
     'banner.featureOutOfScope': 'Feature Out of Scope',
-    'banner.featureOutOfScopeDesc': 'This feature is out of scope for this prototype. In the real application, clicking this navigation item would navigate to the corresponding view.',
+    'banner.featureOutOfScopeDesc':
+        'This feature is out of scope for this prototype. In the real application, clicking this navigation item would navigate to the corresponding view.',
 
     // Banner keys used by context menu actions
     'banner.keyboardShortcut': 'Keyboard Shortcut',
-    'banner.keyboardShortcutDesc': 'In the real application, this would open a dialog to assign or change the keyboard shortcut for this item.',
+    'banner.keyboardShortcutDesc':
+        'In the real application, this would open a dialog to assign or change the keyboard shortcut for this item.',
     'banner.extensionSettings': 'Extension Settings',
     'banner.extensionSettingsDesc': 'In the real application, this would open the settings panel for this extension.',
     'banner.removeExtension': 'Remove Extension',
     'banner.removeExtensionDesc': 'In the real application, this would start the extension uninstall process.',
     'banner.configureNavbar': 'Configure Navigation Bar',
-    'banner.configureNavbarDesc': 'In the real application, this would open the Navigation Bar configuration in Podman Desktop Settings.',
+    'banner.configureNavbarDesc':
+        'In the real application, this would open the Navigation Bar configuration in Podman Desktop Settings.',
     'banner.settings': 'Settings',
     'banner.settingsDesc': 'In the real application, this would open the Podman Desktop Settings panel.',
     'banner.extensions': 'Extensions',
     'banner.extensionsDesc': 'In the real application, this would open the Extensions management panel.',
     'banner.keyboardShortcuts': 'Keyboard Shortcuts',
-    'banner.keyboardShortcutsDesc': 'In the real application, this would open the Keyboard Shortcuts configuration panel.',
+    'banner.keyboardShortcutsDesc':
+        'In the real application, this would open the Keyboard Shortcuts configuration panel.',
     'banner.about': 'About Podman Desktop',
-    'banner.aboutDesc': 'In the real application, this would show the About Podman Desktop dialog with version information.',
+    'banner.aboutDesc':
+        'In the real application, this would show the About Podman Desktop dialog with version information.',
     'banner.signOut': 'Sign Out',
     'banner.signOutDesc': 'In the real application, this would sign you out of your account.',
 
     // Modal dialog
     'modal.hideItem': 'Hide Item',
-    'modal.hideItemDescription': 'This item will be hidden from the Navigation Bar. You can restore it in Podman Desktop Settings.',
+    'modal.hideItemDescription':
+        'This item will be hidden from the Navigation Bar. You can restore it in Podman Desktop Settings.',
     'modal.dontShowAgain': "Don't show this again",
     'modal.ok': 'OK',
     'modal.cancel': 'Cancel',

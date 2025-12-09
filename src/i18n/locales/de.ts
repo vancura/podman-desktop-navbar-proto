@@ -32,13 +32,14 @@ export const de = {
     'menu.keyboardShortcut': 'Tastenkürzel...',
     'menu.extensionSettings': 'Erweiterungseinstellungen',
     'menu.removeExtension': 'Erweiterung entfernen',
-    'menu.configureNavBar': 'Navigationsleiste konfigurieren',
+    'menu.configureNavbar': 'Navigationsleiste konfigurieren',
 
     // Context menu - Empty space
     'menu.showIconsAndTitles': 'Symbole und Titel anzeigen',
     'menu.showIconsOnly': 'Nur Symbole anzeigen',
     'menu.showHiddenItems': 'Ausgeblendete Elemente anzeigen',
-    'menu.resetNavBar': 'Navigationsleiste zurücksetzen',
+    'menu.noHiddenItems': '(Keine ausgeblendeten Elemente)',
+    'menu.resetNavbar': 'Navigationsleiste zurücksetzen',
 
     // Context menu - Settings
     'menu.settings': 'Einstellungen',

@@ -4,12 +4,14 @@
  */
 
 import { SHADOW_PADDING as _SHADOW_PADDING, WindowFrame as _WindowFrame } from './components/window-frame.js';
+import { destroyKeyboardHandling, initKeyboardHandling, registerShortcutHandler } from './utils/keyboard-utils.js';
 import { assert } from './utils/utils.js';
 
 let WindowFrame = _WindowFrame;
 let SHADOW_PADDING = _SHADOW_PADDING;
 let windowFrame: InstanceType<typeof WindowFrame> | null = null;
 let resizeHandler: (() => void) | null = null;
+let unregisterShortcutHandler: (() => void) | null = null;
 
 /**
  * Updates the info display with the current window dimensions.
@@ -45,11 +47,27 @@ function main(): void {
         window.removeEventListener('resize', resizeHandler);
     }
 
+    // Clean up previous keyboard handler.
+    if (unregisterShortcutHandler) {
+        unregisterShortcutHandler();
+    }
+
     // Clear container for HMR.
     container.innerHTML = '';
 
     // Create window frame component.
     windowFrame = new WindowFrame(container);
+
+    // Initialize keyboard handling.
+    initKeyboardHandling();
+
+    // Register shortcut handler to forward to navbar.
+    unregisterShortcutHandler = registerShortcutHandler((action, _event) => {
+        const navbar = windowFrame?.getNavbar();
+        if (navbar) {
+            navbar.handleKeyboardAction(action);
+        }
+    });
 
     // Set up resize handler for info updates.
     resizeHandler = () => updateInfo();
@@ -80,6 +98,14 @@ if (import.meta.hot) {
 
             resizeHandler = null;
         }
+
+        if (unregisterShortcutHandler) {
+            unregisterShortcutHandler();
+
+            unregisterShortcutHandler = null;
+        }
+
+        destroyKeyboardHandling();
 
         if (windowFrame) {
             windowFrame.destroy();

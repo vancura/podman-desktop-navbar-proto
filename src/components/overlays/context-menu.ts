@@ -393,7 +393,7 @@ export class ContextMenuManager {
                 // We're in capture phase, so this stops it before it reaches navbar handler
                 e.stopPropagation();
                 e.stopImmediatePropagation();
-                
+
                 this.onItemSelect?.(itemId);
                 this.close();
                 return;

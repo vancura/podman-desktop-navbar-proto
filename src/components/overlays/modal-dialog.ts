@@ -228,14 +228,7 @@ export function createModalDialog(
     const confirmWidth = measureTextWidth(confirmText) + MODAL_CONFIG.buttonPaddingHorizontal * 2;
     const confirmX = buttonsX - confirmWidth;
 
-    const confirmButton = createButton(
-        confirmX,
-        currentY,
-        confirmWidth,
-        MODAL_CONFIG.buttonHeight,
-        confirmText,
-        true,
-    );
+    const confirmButton = createButton(confirmX, currentY, confirmWidth, MODAL_CONFIG.buttonHeight, confirmText, true);
     confirmButton.addEventListener('click', () => {
         onResult({ confirmed: true, checkboxChecked });
     });
@@ -246,14 +239,7 @@ export function createModalDialog(
         const cancelWidth = measureTextWidth(cancelText) + MODAL_CONFIG.buttonPaddingHorizontal * 2;
         const cancelX = confirmX - MODAL_CONFIG.buttonGap - cancelWidth;
 
-        const cancelButton = createButton(
-            cancelX,
-            currentY,
-            cancelWidth,
-            MODAL_CONFIG.buttonHeight,
-            cancelText,
-            false,
-        );
+        const cancelButton = createButton(cancelX, currentY, cancelWidth, MODAL_CONFIG.buttonHeight, cancelText, false);
         cancelButton.addEventListener('click', () => {
             onResult({ confirmed: false, checkboxChecked });
         });

@@ -605,12 +605,7 @@ export class NavBarStateManager {
     /**
      * Shows a modal dialog.
      */
-    showModalDialog(
-        titleKey: string,
-        messageKey: string,
-        checkboxKey?: string,
-        onConfirm?: () => void,
-    ): void {
+    showModalDialog(titleKey: string, messageKey: string, checkboxKey?: string, onConfirm?: () => void): void {
         this.dispatch(() => ({
             modalDialog: {
                 visible: true,
@@ -718,12 +713,7 @@ export class NavBarStateManager {
      */
     getAllVisibleItems(): NavItem[] {
         const state = this.state;
-        return [
-            ...state.essentialItems,
-            ...state.pinnedItems,
-            ...state.regularItems,
-            ...state.bottomItems,
-        ];
+        return [...state.essentialItems, ...state.pinnedItems, ...state.regularItems, ...state.bottomItems];
     }
 
     /**

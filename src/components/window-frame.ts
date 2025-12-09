@@ -3,9 +3,12 @@
  * macOS-style window frame with title bar, status bar, navbar, and drop shadow.
  */
 
+import type { Locale, NavItem } from '../state/navigation-items.js';
+import type { InfoBannerConfig } from './overlays/info-banner.js';
+import type { ModalDialogConfig, ModalDialogResult } from './overlays/modal-dialog.js';
+
 import { setLocale, subscribeToLocale } from '../i18n/i18n.js';
 import { type NavBarState, stateManager } from '../state/navbar-state.js';
-import type { Locale, NavItem } from '../state/navigation-items.js';
 import { COLORS } from '../utils/design-tokens.js';
 import { createSvgElement } from '../utils/svg-utils.js';
 import { assert } from '../utils/utils.js';
@@ -19,9 +22,10 @@ import {
 import { createButtonGroup } from './controls/action-button.js';
 import { createLocaleSwitcher, updateLocaleSwitcher } from './controls/locale-switcher.js';
 import { createDropShadowFilter, DROP_SHADOW_FILTER_ID } from './drop-shadow.js';
-import { InfoBannerManager, type InfoBannerConfig } from './overlays/info-banner.js';
 import { NavBar } from './navbar/navbar.js';
 import { createResizeHandle, setupResizeDragHandlers, updateResizeHandle } from './navbar/resize-handle.js';
+import { InfoBannerManager } from './overlays/info-banner.js';
+import { ModalDialogManager } from './overlays/modal-dialog.js';
 import { createStatusBar, updateStatusBar } from './status-bar.js';
 import { createTitleBar, updateTitleBar } from './title-bar.js';
 
@@ -220,6 +224,7 @@ export class WindowFrame {
     private localeSwitcherGroup: SVGGElement | null = null;
     private overlayGroup: SVGGElement | null = null;
     private infoBannerManager: InfoBannerManager | null = null;
+    private modalDialogManager: ModalDialogManager | null = null;
 
     /**
      * Creates a new window frame instance.
@@ -243,6 +248,9 @@ export class WindowFrame {
 
         // Create info banner manager
         this.infoBannerManager = new InfoBannerManager(this.overlayGroup);
+
+        // Create modal dialog manager
+        this.modalDialogManager = new ModalDialogManager(this.overlayGroup);
 
         // Create navbar
         this.createNavbar(width, height);
@@ -284,7 +292,7 @@ export class WindowFrame {
         const navbarY = borderPadding + 32; // Below title bar
         const navbarHeight = windowHeight - navbarY - 32 - borderPadding; // Above status bar
 
-        // Create navbar with info banner callback
+        // Create navbar with info banner and modal callbacks
         this.navbar = new NavBar({
             x: navbarX,
             y: navbarY,
@@ -292,6 +300,12 @@ export class WindowFrame {
                 if (this.infoBannerManager) {
                     this.infoBannerManager.show(config);
                 }
+            },
+            onShowModal: (config: ModalDialogConfig): Promise<ModalDialogResult> => {
+                if (this.modalDialogManager) {
+                    return this.modalDialogManager.show(config);
+                }
+                return Promise.resolve({ confirmed: true, checkboxChecked: false });
             },
             width: state.navbarWidth,
             height: navbarHeight,

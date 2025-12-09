@@ -5,6 +5,7 @@
 
 import { t } from '../../i18n/i18n.js';
 import { COLORS, TYPOGRAPHY } from '../../utils/design-tokens.js';
+import { disableKeyboardHandling, enableKeyboardHandling } from '../../utils/keyboard-utils.js';
 import { createSvgElement } from '../../utils/svg-utils.js';
 
 /** Banner configuration. */
@@ -173,6 +174,7 @@ function wrapText(text: string, maxCharsPerLine: number): string[] {
 export class InfoBannerManager {
     private container: SVGGElement;
     private currentBanner: SVGGElement | null = null;
+    private boundHandleKeyDown: ((e: KeyboardEvent) => void) | null = null;
 
     constructor(container: SVGGElement) {
         this.container = container;
@@ -184,20 +186,41 @@ export class InfoBannerManager {
     show(config: InfoBannerConfig): void {
         this.hide();
 
+        // Disable keyboard navigation while banner is shown
+        disableKeyboardHandling();
+
         this.currentBanner = createInfoBanner(config, () => {
             this.hide();
         });
 
         this.container.appendChild(this.currentBanner);
+
+        // Add keyboard handler for Escape key only
+        this.boundHandleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                this.hide();
+            }
+        };
+        document.addEventListener('keydown', this.boundHandleKeyDown);
     }
 
     /**
      * Hides the current banner.
      */
     hide(): void {
+        // Remove keyboard handler
+        if (this.boundHandleKeyDown) {
+            document.removeEventListener('keydown', this.boundHandleKeyDown);
+            this.boundHandleKeyDown = null;
+        }
+
         if (this.currentBanner) {
             this.currentBanner.remove();
             this.currentBanner = null;
+
+            // Re-enable keyboard navigation after banner is dismissed
+            enableKeyboardHandling();
         }
     }
 

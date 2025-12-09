@@ -9,6 +9,7 @@ import { COLORS, NAVBAR } from '../../utils/design-tokens.js';
 import { createSvgElement } from '../../utils/svg-utils.js';
 import { ContextMenuManager, type MenuItemDef } from '../overlays/context-menu.js';
 import type { InfoBannerConfig } from '../overlays/info-banner.js';
+import type { ModalDialogConfig, ModalDialogResult } from '../overlays/modal-dialog.js';
 import { TooltipManager } from '../overlays/tooltip.js';
 import {
     createFadeGradient,
@@ -40,8 +41,8 @@ export interface NavBarConfig {
     width: number;
     height: number;
     onShowInfoBanner?: (config: InfoBannerConfig) => void;
+    onShowModal?: (config: ModalDialogConfig) => Promise<ModalDialogResult>;
 }
-
 
 /**
  * Main NavBar component.
@@ -77,10 +78,11 @@ export class NavBar {
     private fadeTopGradientId = '';
     private fadeBottomGradientId = '';
 
-    // Tooltip, context menu, and info banner
+    // Tooltip, context menu, info banner, and modal
     private tooltipManager: TooltipManager | null = null;
     private contextMenuManager: ContextMenuManager | null = null;
     private onShowInfoBanner: ((config: InfoBannerConfig) => void) | null = null;
+    private onShowModal: ((config: ModalDialogConfig) => Promise<ModalDialogResult>) | null = null;
     private overlayGroup: SVGGElement | null = null;
 
     // Configuration
@@ -99,6 +101,7 @@ export class NavBar {
     constructor(config: NavBarConfig) {
         this.config = config;
         this.onShowInfoBanner = config.onShowInfoBanner ?? null;
+        this.onShowModal = config.onShowModal ?? null;
 
         // Create main group
         this.group = createSvgElement('g', {
@@ -348,9 +351,19 @@ export class NavBar {
         const item = itemId ? this.findItemById(itemId) : null;
 
         // Build menu items based on context
-        const menuItems = item
-            ? this.buildItemContextMenu(item)
-            : this.buildEmptySpaceContextMenu();
+        let menuItems: MenuItemDef[];
+        if (item) {
+            // Check for special items (Settings, Account)
+            if (item.id === 'settings') {
+                menuItems = this.buildSettingsContextMenu();
+            } else if (item.id === 'account') {
+                menuItems = this.buildAccountContextMenu();
+            } else {
+                menuItems = this.buildItemContextMenu(item);
+            }
+        } else {
+            menuItems = this.buildEmptySpaceContextMenu();
+        }
 
         // Get viewport dimensions
         const viewportWidth = this.config.width;
@@ -379,7 +392,7 @@ export class NavBar {
             const isPinned = item.iconVariant === 'filled';
             items.push({
                 id: isPinned ? 'unpin' : 'pin',
-                labelKey: isPinned ? 'menu.unpin' : 'menu.pin',
+                labelKey: isPinned ? 'menu.unpin' : 'menu.pinToTop',
                 icon: 'pin',
             });
         }
@@ -388,7 +401,7 @@ export class NavBar {
         if (item.canHide) {
             items.push({
                 id: 'hide',
-                labelKey: 'menu.hide',
+                labelKey: 'menu.hideFromNavBar',
                 icon: 'eyeOff',
             });
         }
@@ -443,9 +456,7 @@ export class NavBar {
         // Build submenu for hidden items
         let hiddenSubmenu: MenuItemDef[];
         if (hiddenItems.length === 0) {
-            hiddenSubmenu = [
-                { id: 'noHiddenItems', labelKey: 'menu.noHiddenItems', disabled: true },
-            ];
+            hiddenSubmenu = [{ id: 'noHiddenItems', labelKey: 'menu.noHiddenItems', disabled: true }];
         } else {
             hiddenSubmenu = hiddenItems.map((item) => ({
                 id: `unhide-${item.id}`,
@@ -473,6 +484,58 @@ export class NavBar {
             {
                 id: 'resetNavbar',
                 labelKey: 'menu.resetNavbar',
+            },
+        ];
+    }
+
+    /**
+     * Builds context menu for the Settings item.
+     */
+    private buildSettingsContextMenu(): MenuItemDef[] {
+        return [
+            {
+                id: 'settings',
+                labelKey: 'menu.settings',
+                icon: 'settings',
+            },
+            {
+                id: 'extensions',
+                labelKey: 'menu.extensions',
+                icon: 'plug',
+            },
+            { id: 'sep1', labelKey: '', isSeparator: true },
+            {
+                id: 'configureNavbar',
+                labelKey: 'menu.configureNavbar',
+            },
+            {
+                id: 'keyboardShortcuts',
+                labelKey: 'menu.keyboardShortcuts',
+                icon: 'keyboard',
+            },
+            { id: 'sep2', labelKey: '', isSeparator: true },
+            {
+                id: 'aboutPodman',
+                labelKey: 'menu.aboutPodmanDesktop',
+                icon: 'info',
+            },
+        ];
+    }
+
+    /**
+     * Builds context menu for the Account item.
+     */
+    private buildAccountContextMenu(): MenuItemDef[] {
+        return [
+            {
+                id: 'signOut',
+                labelKey: 'menu.signOut',
+                icon: 'logout',
+            },
+            { id: 'sep1', labelKey: '', isSeparator: true },
+            {
+                id: 'configureNavbar',
+                labelKey: 'menu.configureNavbar',
             },
         ];
     }
@@ -508,7 +571,7 @@ export class NavBar {
 
             case 'hide':
                 if (item) {
-                    stateManager.hideItem(item.id);
+                    this.handleHideItem(item.id);
                 }
                 break;
 
@@ -583,7 +646,7 @@ export class NavBar {
             const transform = this.moreButtonGroup.getAttribute('transform');
             const match = transform?.match(/translate\(([^,]+),\s*([^)]+)\)/);
             const moreButtonY = match?.[2] !== undefined ? parseFloat(match[2]) : this.viewportHeight;
-            
+
             // Position menu above the More button, centered horizontally
             const menuY = moreButtonY - 4; // Small offset above the button
 
@@ -616,6 +679,52 @@ export class NavBar {
             descriptionKey,
             width,
             height,
+        });
+    }
+
+    /**
+     * Handles hiding an item with optional confirmation modal.
+     */
+    private handleHideItem(itemId: string): void {
+        const state = stateManager.getState();
+
+        // If warning was already dismissed, hide immediately
+        if (state.hideWarningDismissed) {
+            stateManager.hideItem(itemId);
+            return;
+        }
+
+        // If no modal handler, hide immediately
+        if (!this.onShowModal) {
+            stateManager.hideItem(itemId);
+            return;
+        }
+
+        // Get viewport dimensions from the SVG
+        const svgElement = this.group.ownerSVGElement;
+        const width = svgElement ? parseFloat(svgElement.getAttribute('width') ?? '800') : 800;
+        const height = svgElement ? parseFloat(svgElement.getAttribute('height') ?? '600') : 600;
+
+        // Show confirmation modal
+        this.onShowModal({
+            titleKey: 'modal.hideItem',
+            descriptionKey: 'modal.hideItemDescription',
+            showCheckbox: true,
+            checkboxLabelKey: 'modal.dontShowAgain',
+            confirmButtonKey: 'modal.ok',
+            cancelButtonKey: 'modal.cancel',
+            width,
+            height,
+        }).then((result) => {
+            if (result.confirmed) {
+                // Hide the item
+                stateManager.hideItem(itemId);
+
+                // Remember if user chose "don't show again"
+                if (result.checkboxChecked) {
+                    stateManager.dismissHideWarning();
+                }
+            }
         });
     }
 
@@ -1089,6 +1198,199 @@ export class NavBar {
             ...this.regularPanel.getItems().map((i) => i.id),
             ...this.bottomPanel.getItems().map((i) => i.id),
         ];
+    }
+
+    /**
+     * Handles keyboard navigation actions.
+     * @param action - The action identifier from keyboard shortcuts.
+     */
+    handleKeyboardAction(action: string): void {
+        const allItems = this.getAllItems();
+        if (allItems.length === 0) return;
+
+        const currentIndex = this.focusedItemId ? allItems.indexOf(this.focusedItemId) : -1;
+
+        switch (action) {
+            case 'navigate-up': {
+                // Move focus up
+                const newIndex = currentIndex <= 0 ? allItems.length - 1 : currentIndex - 1;
+                const newItemId = allItems[newIndex];
+                if (newItemId) {
+                    this.focusedItemId = newItemId;
+                    stateManager.setFocusedItem(newItemId);
+                    this.scrollToItem(newItemId);
+                }
+                break;
+            }
+
+            case 'navigate-down': {
+                // Move focus down
+                const newIndex = currentIndex < 0 || currentIndex >= allItems.length - 1 ? 0 : currentIndex + 1;
+                const newItemId = allItems[newIndex];
+                if (newItemId) {
+                    this.focusedItemId = newItemId;
+                    stateManager.setFocusedItem(newItemId);
+                    this.scrollToItem(newItemId);
+                }
+                break;
+            }
+
+            case 'navigate-first': {
+                // Go to first item
+                const firstItemId = allItems[0];
+                if (firstItemId) {
+                    this.focusedItemId = firstItemId;
+                    stateManager.setFocusedItem(firstItemId);
+                    this.setScrollTop(0);
+                }
+                break;
+            }
+
+            case 'navigate-last': {
+                // Go to last item
+                const lastItemId = allItems[allItems.length - 1];
+                if (lastItemId) {
+                    this.focusedItemId = lastItemId;
+                    stateManager.setFocusedItem(lastItemId);
+                    this.setScrollTop(this.maxScrollTop);
+                }
+                break;
+            }
+
+            case 'activate': {
+                // Activate the focused item
+                if (this.focusedItemId) {
+                    this.showInfoBanner('banner.featureOutOfScope', 'banner.featureOutOfScopeDesc');
+                }
+                break;
+            }
+
+            case 'focus-next': {
+                // Tab to next item
+                const newIndex = currentIndex < 0 || currentIndex >= allItems.length - 1 ? 0 : currentIndex + 1;
+                const newItemId = allItems[newIndex];
+                if (newItemId) {
+                    this.focusedItemId = newItemId;
+                    stateManager.setFocusedItem(newItemId);
+                    this.scrollToItem(newItemId);
+                }
+                break;
+            }
+
+            case 'focus-prev': {
+                // Shift+Tab to previous item
+                const newIndex = currentIndex <= 0 ? allItems.length - 1 : currentIndex - 1;
+                const newItemId = allItems[newIndex];
+                if (newItemId) {
+                    this.focusedItemId = newItemId;
+                    stateManager.setFocusedItem(newItemId);
+                    this.scrollToItem(newItemId);
+                }
+                break;
+            }
+
+            case 'close-overlay': {
+                // Close any open menu/tooltip
+                this.contextMenuManager?.close();
+                this.tooltipManager?.cancel();
+                // Clear focus
+                this.focusedItemId = null;
+                stateManager.setFocusedItem(null);
+                break;
+            }
+
+            case 'navigate-containers': {
+                this.focusAndActivateItem('containers');
+                break;
+            }
+
+            case 'navigate-images': {
+                this.focusAndActivateItem('images');
+                break;
+            }
+
+            case 'navigate-volumes': {
+                this.focusAndActivateItem('volumes');
+                break;
+            }
+
+            case 'navigate-extensions': {
+                this.focusAndActivateItem('extensions');
+                break;
+            }
+
+            case 'navigate-terminal': {
+                this.focusAndActivateItem('terminal');
+                break;
+            }
+
+            case 'navigate-settings': {
+                this.focusAndActivateItem('settings');
+                break;
+            }
+
+            case 'toggle-navbar': {
+                stateManager.toggleNavbarVisibility();
+                break;
+            }
+
+            default:
+                // Handle pinned item shortcuts (navigate-pinned-1 through navigate-pinned-5)
+                if (action.startsWith('navigate-pinned-')) {
+                    const pinnedIndex = parseInt(action.replace('navigate-pinned-', ''), 10) - 1;
+                    const pinnedItems = this.pinnedPanel.getItems();
+                    if (pinnedIndex >= 0 && pinnedIndex < pinnedItems.length) {
+                        const pinnedItem = pinnedItems[pinnedIndex];
+                        if (pinnedItem) {
+                            this.focusAndActivateItem(pinnedItem.id);
+                        }
+                    }
+                }
+                break;
+        }
+    }
+
+    /**
+     * Focuses and activates an item by ID.
+     * @param itemId - The item ID.
+     */
+    private focusAndActivateItem(itemId: string): void {
+        const allItems = this.getAllItems();
+        if (allItems.includes(itemId)) {
+            this.focusedItemId = itemId;
+            stateManager.setFocusedItem(itemId);
+            this.scrollToItem(itemId);
+            this.showInfoBanner('banner.featureOutOfScope', 'banner.featureOutOfScopeDesc');
+        }
+    }
+
+    /**
+     * Scrolls to ensure an item is visible.
+     * @param itemId - The item ID.
+     */
+    private scrollToItem(itemId: string): void {
+        const bounds = this.getItemBounds(itemId);
+        if (!bounds) return;
+
+        // Check if item is in scrollable area (not bottom panel)
+        const bottomItems = this.bottomPanel.getItems().map((i) => i.id);
+        if (bottomItems.includes(itemId)) {
+            return; // Bottom panel items don't need scrolling
+        }
+
+        // Adjust for current scroll
+        const actualY = bounds.y + this.scrollTop;
+
+        // Check if item is above viewport
+        if (actualY < this.scrollTop) {
+            this.setScrollTop(actualY);
+            this.updateScrollVisuals();
+        }
+        // Check if item is below viewport
+        else if (actualY + bounds.height > this.scrollTop + this.viewportHeight) {
+            this.setScrollTop(actualY + bounds.height - this.viewportHeight);
+            this.updateScrollVisuals();
+        }
     }
 
     /**

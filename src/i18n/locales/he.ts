@@ -31,13 +31,14 @@ export const he = {
     'menu.keyboardShortcut': 'קיצור מקלדת...',
     'menu.extensionSettings': 'הגדרות תוספת',
     'menu.removeExtension': 'הסר תוספת',
-    'menu.configureNavBar': 'הגדר שורת ניווט',
+    'menu.configureNavbar': 'הגדר שורת ניווט',
 
     // Context menu - Empty space
     'menu.showIconsAndTitles': 'הצג סמלים וכותרות',
     'menu.showIconsOnly': 'הצג סמלים בלבד',
     'menu.showHiddenItems': 'הצג פריטים מוסתרים',
-    'menu.resetNavBar': 'איפוס שורת ניווט',
+    'menu.noHiddenItems': '(אין פריטים מוסתרים)',
+    'menu.resetNavbar': 'איפוס שורת ניווט',
 
     // Context menu - Settings
     'menu.settings': 'הגדרות',
@@ -85,4 +86,3 @@ export const he = {
     'a11y.moreOptions': 'אפשרויות נוספות',
     'a11y.closeMenu': 'סגור תפריט',
 } as const;
-

@@ -93,10 +93,7 @@ export function setResizeHandleHover(group: SVGGElement, isHovered: boolean): vo
     const line = group.querySelector('[data-name="handle-line"]');
     if (line) {
         line.setAttribute('fill', isHovered ? COLORS.navbarResizeHandleHover : COLORS.navbarResizeHandle);
-        line.setAttribute(
-            'width',
-            String(isHovered ? NAVBAR.resizeHandle.hoverWidth : NAVBAR.resizeHandle.width),
-        );
+        line.setAttribute('width', String(isHovered ? NAVBAR.resizeHandle.hoverWidth : NAVBAR.resizeHandle.width));
         line.setAttribute(
             'x',
             String(isHovered ? -NAVBAR.resizeHandle.hoverWidth / 2 : -NAVBAR.resizeHandle.width / 2),
@@ -147,10 +144,7 @@ export function setupResizeDragHandlers(
 
         const deltaX = options.isRtl() ? startX - event.clientX : event.clientX - startX;
 
-        const newWidth = Math.max(
-            NAVBAR.width.min,
-            Math.min(NAVBAR.width.max, startWidth + deltaX),
-        );
+        const newWidth = Math.max(NAVBAR.width.min, Math.min(NAVBAR.width.max, startWidth + deltaX));
 
         options.onDrag(newWidth);
     };

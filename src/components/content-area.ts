@@ -58,9 +58,7 @@ function calculateContentAreaDimensions(
     const y = borderPadding + CONTENT_AREA_CONFIG.padding.top;
 
     // In RTL mode, content area is on the left, navbar on the right
-    const x = isRtl
-        ? borderPadding + CONTENT_AREA_CONFIG.padding.right
-        : borderPadding + navbarWidth;
+    const x = isRtl ? borderPadding + CONTENT_AREA_CONFIG.padding.right : borderPadding + navbarWidth;
 
     const availableWidth = windowWidth - navbarWidth - CONTENT_AREA_CONFIG.padding.right - borderPadding * 2;
 
@@ -84,13 +82,7 @@ export function createContentArea(borderPadding: number, width: number, height: 
         'data-name': 'content-area-group',
     });
 
-    const dimensions = calculateContentAreaDimensions(
-        borderPadding,
-        width,
-        height,
-        currentNavbarWidth,
-        isRtlMode,
-    );
+    const dimensions = calculateContentAreaDimensions(borderPadding, width, height, currentNavbarWidth, isRtlMode);
 
     // Content area background.
     const background = createSvgElement('rect', {
@@ -125,13 +117,7 @@ export function updateContentArea(svg: SVGSVGElement, borderPadding: number, wid
     const background = group.querySelector<SVGRectElement>('rect[data-name="content-area"]');
 
     if (background) {
-        const dimensions = calculateContentAreaDimensions(
-            borderPadding,
-            width,
-            height,
-            currentNavbarWidth,
-            isRtlMode,
-        );
+        const dimensions = calculateContentAreaDimensions(borderPadding, width, height, currentNavbarWidth, isRtlMode);
 
         background.setAttribute('x', String(dimensions.x));
         background.setAttribute('y', String(dimensions.y));

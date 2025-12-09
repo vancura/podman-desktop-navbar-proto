@@ -31,13 +31,14 @@ export const ar = {
     'menu.keyboardShortcut': 'اختصار لوحة المفاتيح...',
     'menu.extensionSettings': 'إعدادات الإضافة',
     'menu.removeExtension': 'إزالة الإضافة',
-    'menu.configureNavBar': 'تكوين شريط التنقل',
+    'menu.configureNavbar': 'تكوين شريط التنقل',
 
     // Context menu - Empty space
     'menu.showIconsAndTitles': 'إظهار الأيقونات والعناوين',
     'menu.showIconsOnly': 'إظهار الأيقونات فقط',
     'menu.showHiddenItems': 'إظهار العناصر المخفية',
-    'menu.resetNavBar': 'إعادة تعيين شريط التنقل',
+    'menu.noHiddenItems': '(لا توجد عناصر مخفية)',
+    'menu.resetNavbar': 'إعادة تعيين شريط التنقل',
 
     // Context menu - Settings
     'menu.settings': 'الإعدادات',

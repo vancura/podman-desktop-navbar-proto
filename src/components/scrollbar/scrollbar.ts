@@ -15,7 +15,6 @@ export interface ScrollbarConfig {
     scrollTop: number;
 }
 
-
 /**
  * Creates a scrollbar component.
  * @param config - The scrollbar configuration.

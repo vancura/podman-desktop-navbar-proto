@@ -78,13 +78,7 @@ export function createLocaleSwitcher(
 /**
  * Creates a single locale button.
  */
-function createLocaleButton(
-    locale: Locale,
-    x: number,
-    y: number,
-    isActive: boolean,
-    onClick: () => void,
-): SVGGElement {
+function createLocaleButton(locale: Locale, x: number, y: number, isActive: boolean, onClick: () => void): SVGGElement {
     const group = createSvgElement('g', {
         'data-name': `locale-button-${locale}`,
         'data-locale': locale,

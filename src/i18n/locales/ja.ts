@@ -32,13 +32,14 @@ export const ja = {
     'menu.keyboardShortcut': 'キーボードショートカット...',
     'menu.extensionSettings': '拡張機能の設定',
     'menu.removeExtension': '拡張機能を削除',
-    'menu.configureNavBar': 'ナビバーの設定',
+    'menu.configureNavbar': 'ナビバーの設定',
 
     // Context menu - Empty space
     'menu.showIconsAndTitles': 'アイコンとタイトルを表示',
     'menu.showIconsOnly': 'アイコンのみ表示',
     'menu.showHiddenItems': '非表示の項目を表示',
-    'menu.resetNavBar': 'ナビバーをリセット',
+    'menu.noHiddenItems': '（非表示の項目はありません）',
+    'menu.resetNavbar': 'ナビバーをリセット',
 
     // Context menu - Settings
     'menu.settings': '設定',
