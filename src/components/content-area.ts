@@ -1,11 +1,12 @@
 /**
  * Content Area Component
- * Main content area within the window frame.
+ * Main content area within the window frame, positioned next to the navbar.
  */
 
-import { COLORS, NAVBAR } from '../utils/design-tokens.js';
+import { COLORS } from '../utils/design-tokens.js';
 import { createSvgElement } from '../utils/svg-utils.js';
 
+/** Content area padding configuration. */
 const CONTENT_AREA_CONFIG = {
     padding: {
         top: 34,
@@ -17,30 +18,8 @@ const CONTENT_AREA_CONFIG = {
 /** Exported padding for external calculations. */
 export const CONTENT_AREA_PADDING = CONTENT_AREA_CONFIG.padding;
 
-/** Current navbar width (updated dynamically). */
-let currentNavbarWidth: number = NAVBAR.width.default;
-
-/** Current RTL mode. */
-let isRtlMode = false;
-
 /**
- * Sets the navbar width for content area calculations.
- * @param width - The navbar width.
- */
-export function setNavbarWidth(width: number): void {
-    currentNavbarWidth = width;
-}
-
-/**
- * Sets the RTL mode for content area positioning.
- * @param isRtl - Whether RTL mode is enabled.
- */
-export function setRtlMode(isRtl: boolean): void {
-    isRtlMode = isRtl;
-}
-
-/**
- * Calculates the content area dimensions based on window size, border padding, and navbar width.
+ * Calculates the content area dimensions based on window size and navbar state.
  * @param borderPadding - Border padding value.
  * @param windowWidth - Total window width.
  * @param windowHeight - Total window height.
@@ -75,14 +54,22 @@ function calculateContentAreaDimensions(
  * @param borderPadding - Border padding value.
  * @param width - Total window width.
  * @param height - Total window height.
+ * @param navbarWidth - Current navbar width.
+ * @param isRtl - Whether RTL mode is enabled.
  * @returns The SVG group element containing the content area.
  */
-export function createContentArea(borderPadding: number, width: number, height: number): SVGGElement {
+export function createContentArea(
+    borderPadding: number,
+    width: number,
+    height: number,
+    navbarWidth: number,
+    isRtl: boolean,
+): SVGGElement {
     const group = createSvgElement('g', {
         'data-name': 'content-area-group',
     });
 
-    const dimensions = calculateContentAreaDimensions(borderPadding, width, height, currentNavbarWidth, isRtlMode);
+    const dimensions = calculateContentAreaDimensions(borderPadding, width, height, navbarWidth, isRtl);
 
     // Content area background.
     const background = createSvgElement('rect', {
@@ -106,8 +93,17 @@ export function createContentArea(borderPadding: number, width: number, height: 
  * @param borderPadding - Border padding value.
  * @param width - New window width.
  * @param height - New window height.
+ * @param navbarWidth - Current navbar width.
+ * @param isRtl - Whether RTL mode is enabled.
  */
-export function updateContentArea(svg: SVGSVGElement, borderPadding: number, width: number, height: number): void {
+export function updateContentArea(
+    svg: SVGSVGElement,
+    borderPadding: number,
+    width: number,
+    height: number,
+    navbarWidth: number,
+    isRtl: boolean,
+): void {
     const group = svg.querySelector<SVGGElement>('g[data-name="content-area-group"]');
 
     if (!group) {
@@ -117,7 +113,7 @@ export function updateContentArea(svg: SVGSVGElement, borderPadding: number, wid
     const background = group.querySelector<SVGRectElement>('rect[data-name="content-area"]');
 
     if (background) {
-        const dimensions = calculateContentAreaDimensions(borderPadding, width, height, currentNavbarWidth, isRtlMode);
+        const dimensions = calculateContentAreaDimensions(borderPadding, width, height, navbarWidth, isRtl);
 
         background.setAttribute('x', String(dimensions.x));
         background.setAttribute('y', String(dimensions.y));
@@ -127,7 +123,7 @@ export function updateContentArea(svg: SVGSVGElement, borderPadding: number, wid
 }
 
 /**
- * Gets the content area bounds.
+ * Gets the content area bounds from the SVG element.
  * @param svg - The SVG element containing the content area.
  * @returns The bounds or null if not found.
  */

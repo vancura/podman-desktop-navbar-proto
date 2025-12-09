@@ -3,8 +3,8 @@
  * Main navigation bar container that composes all panels.
  */
 
-import type { NavBarState } from '../../state/navbar-state.js';
-import { stateManager } from '../../state/navbar-state.js';
+import type { AppState, IconMode } from '../../state/app-state.js';
+import { appState } from '../../state/app-state.js';
 import type { NavItem } from '../../state/navigation-items.js';
 import { COLORS, NAVBAR } from '../../utils/design-tokens.js';
 import { createSvgElement } from '../../utils/svg-utils.js';
@@ -27,11 +27,16 @@ import {
     updateScrollbar,
 } from '../scrollbar/scrollbar.js';
 import { BottomPanel } from './bottom-panel.js';
+import {
+    createAccountContextMenuItems,
+    createEmptySpaceContextMenuItems,
+    createItemContextMenuItems,
+    createSettingsContextMenuItems,
+} from './context-menu-builders.js';
 import { EssentialsPanel } from './essentials-panel.js';
 import { createMoreButton, getMoreButtonHeight } from './more-button.js';
 import { createNavBarDivider, getDividerTotalHeight } from './navbar-divider.js';
-import type { ItemDisplayMode } from './navbar-item.js';
-import type { PanelRenderContext } from './navbar-panel.js';
+import type { RenderContext } from './navbar-panel.js';
 import { PinnedPanel } from './pinned-panel.js';
 import { RegularPanel } from './regular-panel.js';
 
@@ -90,7 +95,7 @@ export class NavBar {
 
     // Configuration
     private config: NavBarConfig;
-    private displayMode: ItemDisplayMode = 'icons-titles';
+    private displayMode: IconMode = 'icons-titles';
     private activeItemId: string | null = null;
     private focusedItemId: string | null = null;
     private hoveredItemId: string | null = null;
@@ -389,14 +394,15 @@ export class NavBar {
         if (item) {
             // Check for special items (Settings, Account)
             if (item.id === 'settings') {
-                menuItems = this.buildSettingsContextMenu();
+                menuItems = createSettingsContextMenuItems();
             } else if (item.id === 'account') {
-                menuItems = this.buildAccountContextMenu();
+                menuItems = createAccountContextMenuItems();
             } else {
-                menuItems = this.buildItemContextMenu(item);
+                menuItems = createItemContextMenuItems(item);
             }
         } else {
-            menuItems = this.buildEmptySpaceContextMenu();
+            const state = appState.getState();
+            menuItems = createEmptySpaceContextMenuItems(state.hiddenItems, this.displayMode);
         }
 
         // Get viewport dimensions
@@ -416,165 +422,6 @@ export class NavBar {
     }
 
     /**
-     * Builds context menu for a navbar item.
-     */
-    private buildItemContextMenu(item: NavItem): MenuItemDef[] {
-        const items: MenuItemDef[] = [];
-
-        // Pin/Unpin action
-        if (item.canPin) {
-            const isPinned = item.iconVariant === 'filled';
-            items.push({
-                id: isPinned ? 'unpin' : 'pin',
-                labelKey: isPinned ? 'menu.unpin' : 'menu.pinToTop',
-                icon: 'pin',
-            });
-        }
-
-        // Hide action
-        if (item.canHide) {
-            items.push({
-                id: 'hide',
-                labelKey: 'menu.hideFromNavBar',
-                icon: 'eyeOff',
-            });
-        }
-
-        // Separator
-        if (items.length > 0) {
-            items.push({ id: 'sep1', labelKey: '', isSeparator: true });
-        }
-
-        // Keyboard shortcut
-        items.push({
-            id: 'shortcut',
-            labelKey: 'menu.keyboardShortcut',
-            icon: 'keyboard',
-        });
-
-        // For extensions
-        if (item.id.includes('extension') || item.id === 'extensions') {
-            items.push({
-                id: 'extensionSettings',
-                labelKey: 'menu.extensionSettings',
-                icon: 'settings',
-            });
-            items.push({
-                id: 'removeExtension',
-                labelKey: 'menu.removeExtension',
-                icon: 'trash',
-                isDestructive: true,
-            });
-        }
-
-        // Separator
-        items.push({ id: 'sep2', labelKey: '', isSeparator: true });
-
-        // Configure navbar
-        items.push({
-            id: 'configureNavbar',
-            labelKey: 'menu.configureNavbar',
-        });
-
-        return items;
-    }
-
-    /**
-     * Builds context menu for empty navbar space.
-     */
-    private buildEmptySpaceContextMenu(): MenuItemDef[] {
-        // Get hidden items from state
-        const state = stateManager.getState();
-        const hiddenItems = state.hiddenItems;
-
-        // Build submenu for hidden items
-        let hiddenSubmenu: MenuItemDef[];
-        if (hiddenItems.length === 0) {
-            hiddenSubmenu = [{ id: 'noHiddenItems', labelKey: 'menu.noHiddenItems', disabled: true }];
-        } else {
-            hiddenSubmenu = hiddenItems.map((item) => ({
-                id: `unhide-${item.id}`,
-                labelKey: item.labelKey,
-                icon: item.icon,
-            }));
-        }
-
-        return [
-            {
-                id: 'toggleIconMode',
-                labelKey: this.displayMode === 'icons-only' ? 'menu.showIconsAndTitles' : 'menu.showIconsOnly',
-            },
-            {
-                id: 'showHiddenItems',
-                labelKey: 'menu.showHiddenItems',
-                submenu: hiddenSubmenu,
-                disabled: hiddenItems.length === 0,
-            },
-            { id: 'sep1', labelKey: '', isSeparator: true },
-            {
-                id: 'configureNavbar',
-                labelKey: 'menu.configureNavbar',
-            },
-            {
-                id: 'resetNavbar',
-                labelKey: 'menu.resetNavbar',
-            },
-        ];
-    }
-
-    /**
-     * Builds context menu for the Settings item.
-     */
-    private buildSettingsContextMenu(): MenuItemDef[] {
-        return [
-            {
-                id: 'settings',
-                labelKey: 'menu.settings',
-                icon: 'settings',
-            },
-            {
-                id: 'extensions',
-                labelKey: 'menu.extensions',
-                icon: 'plug',
-            },
-            { id: 'sep1', labelKey: '', isSeparator: true },
-            {
-                id: 'configureNavbar',
-                labelKey: 'menu.configureNavbar',
-            },
-            {
-                id: 'keyboardShortcuts',
-                labelKey: 'menu.keyboardShortcuts',
-                icon: 'keyboard',
-            },
-            { id: 'sep2', labelKey: '', isSeparator: true },
-            {
-                id: 'aboutPodman',
-                labelKey: 'menu.aboutPodmanDesktop',
-                icon: 'info',
-            },
-        ];
-    }
-
-    /**
-     * Builds context menu for the Account item.
-     */
-    private buildAccountContextMenu(): MenuItemDef[] {
-        return [
-            {
-                id: 'signOut',
-                labelKey: 'menu.signOut',
-                icon: 'logout',
-            },
-            { id: 'sep1', labelKey: '', isSeparator: true },
-            {
-                id: 'configureNavbar',
-                labelKey: 'menu.configureNavbar',
-            },
-        ];
-    }
-
-    /**
      * Handles context menu item selection.
      */
     private handleContextMenuSelect(menuItemId: string, item: NavItem | null): void {
@@ -584,14 +431,14 @@ export class NavBar {
             case 'toggleIconMode': {
                 const newMode = this.displayMode === 'icons-only' ? 'icons-titles' : 'icons-only';
                 this.setDisplayMode(newMode);
-                stateManager.setIconMode(newMode);
+                appState.setIconMode(newMode);
                 break;
             }
 
             case 'pin':
                 if (item) {
-                    const success = stateManager.pinItem(item.id);
-                    if (!success && stateManager.isPinnedLimitReached()) {
+                    const success = appState.pinItem(item.id);
+                    if (!success && appState.isPinnedLimitReached()) {
                         this.showInfoBanner('banner.pinLimitReached', 'banner.pinLimitReachedDesc');
                     }
                 }
@@ -599,7 +446,7 @@ export class NavBar {
 
             case 'unpin':
                 if (item) {
-                    stateManager.unpinItem(item.id);
+                    appState.unpinItem(item.id);
                 }
                 break;
 
@@ -610,7 +457,7 @@ export class NavBar {
                 break;
 
             case 'resetNavbar':
-                stateManager.reset();
+                appState.reset();
                 break;
 
             case 'shortcut':
@@ -653,7 +500,7 @@ export class NavBar {
                 // Check if it's a hidden item being restored
                 if (menuItemId.startsWith('unhide-')) {
                     const itemId = menuItemId.replace('unhide-', '');
-                    stateManager.unhideItem(itemId);
+                    appState.unhideItem(itemId);
                 }
                 break;
         }
@@ -663,7 +510,7 @@ export class NavBar {
      * Shows the hidden items menu from the More button.
      */
     private showHiddenItemsMenu(): void {
-        const state = stateManager.getState();
+        const state = appState.getState();
         const hiddenItems = state.hiddenItems;
 
         if (hiddenItems.length === 0) return;
@@ -720,17 +567,17 @@ export class NavBar {
      * Handles hiding an item with optional confirmation modal.
      */
     private handleHideItem(itemId: string): void {
-        const state = stateManager.getState();
+        const state = appState.getState();
 
         // If warning was already dismissed, hide immediately
         if (state.hideWarningDismissed) {
-            stateManager.hideItem(itemId);
+            appState.hideItem(itemId);
             return;
         }
 
         // If no modal handler, hide immediately
         if (!this.onShowModal) {
-            stateManager.hideItem(itemId);
+            appState.hideItem(itemId);
             return;
         }
 
@@ -752,11 +599,11 @@ export class NavBar {
         }).then((result) => {
             if (result.confirmed) {
                 // Hide the item
-                stateManager.hideItem(itemId);
+                appState.hideItem(itemId);
 
                 // Remember if user chose "don't show again"
                 if (result.checkboxChecked) {
-                    stateManager.dismissHideWarning();
+                    appState.dismissHideWarning();
                 }
             }
         });
@@ -808,7 +655,7 @@ export class NavBar {
      * Updates the navbar from state.
      * @param state - The current navbar state.
      */
-    updateFromState(state: NavBarState): void {
+    updateFromState(state: AppState): void {
         this.displayMode = state.iconMode;
         this.activeItemId = state.activeItemId;
         this.focusedItemId = state.focusedItemId;
@@ -860,7 +707,7 @@ export class NavBar {
      * Sets the display mode.
      * @param mode - The display mode.
      */
-    setDisplayMode(mode: ItemDisplayMode): void {
+    setDisplayMode(mode: IconMode): void {
         if (this.displayMode === mode) return;
         this.displayMode = mode;
         this.render();
@@ -937,7 +784,7 @@ export class NavBar {
         const { width, height } = this.config;
 
         // Get hidden items count from state for More button
-        const state = stateManager.getState();
+        const state = appState.getState();
         this.hiddenItemCount = state.hiddenItems.length;
         const moreButtonHeight = this.hiddenItemCount > 0 ? getMoreButtonHeight() : 0;
 
@@ -950,12 +797,14 @@ export class NavBar {
         // Update clip rect for scrollable area
         this.clipRect.setAttribute('height', String(this.viewportHeight));
 
-        // Calculate panel heights
+        // Calculate panel heights based on current display mode
         const essentialsHeight = this.essentialsPanel.calculateHeight(this.displayMode);
         const pinnedHeight = this.pinnedPanel.calculateHeight(this.displayMode);
         const regularHeight = this.regularPanel.calculateHeight(this.displayMode);
 
-        // Calculate total scrollable content height
+        // Calculate total scrollable content height by summing panels and dividers.
+        // The scrollable area contains: Essentials -> Divider -> Pinned -> Divider -> Regular
+        // Dividers are only added when their adjacent panels have content.
         let totalHeight = essentialsHeight;
 
         if (pinnedHeight > 0) {
@@ -969,14 +818,18 @@ export class NavBar {
 
         totalHeight += regularHeight;
 
+        // Store scrollable dimensions for scroll calculations:
+        // - scrollableHeight: Total height of all content
+        // - viewportHeight: Visible area height (set during layout)
+        // - maxScrollTop: Maximum scroll offset (content height - viewport height)
         this.scrollableHeight = totalHeight;
         this.maxScrollTop = Math.max(0, totalHeight - this.viewportHeight);
 
-        // Ensure scroll position is within bounds
+        // Clamp scroll position to valid range after content changes
         this.scrollTop = Math.max(0, Math.min(this.scrollTop, this.maxScrollTop));
 
         // Create render context
-        const context: PanelRenderContext = {
+        const context: RenderContext = {
             x: 0,
             y: 0,
             width,
@@ -1144,7 +997,7 @@ export class NavBar {
      * Updates panel visual states without full re-render.
      */
     private updatePanelStates(): void {
-        const context: PanelRenderContext = {
+        const context: RenderContext = {
             x: 0,
             y: 0,
             width: this.config.width,
@@ -1253,7 +1106,7 @@ export class NavBar {
                 const newItemId = allItems[newIndex];
                 if (newItemId) {
                     this.focusedItemId = newItemId;
-                    stateManager.setFocusedItem(newItemId);
+                    appState.setFocusedItem(newItemId);
                     this.scrollToItem(newItemId);
                 }
                 break;
@@ -1265,7 +1118,7 @@ export class NavBar {
                 const newItemId = allItems[newIndex];
                 if (newItemId) {
                     this.focusedItemId = newItemId;
-                    stateManager.setFocusedItem(newItemId);
+                    appState.setFocusedItem(newItemId);
                     this.scrollToItem(newItemId);
                 }
                 break;
@@ -1276,7 +1129,7 @@ export class NavBar {
                 const firstItemId = allItems[0];
                 if (firstItemId) {
                     this.focusedItemId = firstItemId;
-                    stateManager.setFocusedItem(firstItemId);
+                    appState.setFocusedItem(firstItemId);
                     this.setScrollTop(0);
                 }
                 break;
@@ -1287,7 +1140,7 @@ export class NavBar {
                 const lastItemId = allItems[allItems.length - 1];
                 if (lastItemId) {
                     this.focusedItemId = lastItemId;
-                    stateManager.setFocusedItem(lastItemId);
+                    appState.setFocusedItem(lastItemId);
                     this.setScrollTop(this.maxScrollTop);
                 }
                 break;
@@ -1307,7 +1160,7 @@ export class NavBar {
                 const newItemId = allItems[newIndex];
                 if (newItemId) {
                     this.focusedItemId = newItemId;
-                    stateManager.setFocusedItem(newItemId);
+                    appState.setFocusedItem(newItemId);
                     this.scrollToItem(newItemId);
                 }
                 break;
@@ -1319,7 +1172,7 @@ export class NavBar {
                 const newItemId = allItems[newIndex];
                 if (newItemId) {
                     this.focusedItemId = newItemId;
-                    stateManager.setFocusedItem(newItemId);
+                    appState.setFocusedItem(newItemId);
                     this.scrollToItem(newItemId);
                 }
                 break;
@@ -1331,7 +1184,7 @@ export class NavBar {
                 this.tooltipManager?.cancel();
                 // Clear focus
                 this.focusedItemId = null;
-                stateManager.setFocusedItem(null);
+                appState.setFocusedItem(null);
                 break;
             }
 
@@ -1366,7 +1219,7 @@ export class NavBar {
             }
 
             case 'toggle-navbar': {
-                stateManager.toggleNavbarVisibility();
+                appState.toggleNavbarVisibility();
                 break;
             }
 
@@ -1394,7 +1247,7 @@ export class NavBar {
         const allItems = this.getAllItems();
         if (allItems.includes(itemId)) {
             this.focusedItemId = itemId;
-            stateManager.setFocusedItem(itemId);
+            appState.setFocusedItem(itemId);
             this.scrollToItem(itemId);
             this.showInfoBanner('banner.featureOutOfScope', 'banner.featureOutOfScopeDesc');
         }

@@ -1,6 +1,6 @@
 /**
- * Navbar State Manager
- * Central state management for the navigation bar.
+ * Application State Manager
+ * Central state management for the Podman Desktop navbar prototype.
  */
 
 import { NAVBAR } from '../utils/design-tokens.js';
@@ -13,13 +13,13 @@ import {
     type NavItem,
 } from './navigation-items.js';
 
-/** Icon display mode. */
+/** Icon display mode for navbar items. */
 export type IconMode = 'icons-only' | 'icons-titles';
 
-/** Context menu type. */
+/** Context menu type based on click target. */
 export type ContextMenuType = 'item' | 'empty' | 'settings' | 'account' | null;
 
-/** Tooltip state. */
+/** Tooltip state for displaying item information on hover. */
 export interface TooltipState {
     visible: boolean;
     targetId: string | null;
@@ -28,7 +28,7 @@ export interface TooltipState {
     shortcut: string | undefined;
 }
 
-/** Context menu state. */
+/** Context menu state for right-click menus. */
 export interface ContextMenuState {
     visible: boolean;
     type: ContextMenuType;
@@ -36,14 +36,14 @@ export interface ContextMenuState {
     position: { x: number; y: number };
 }
 
-/** Info banner state. */
+/** Info banner state for displaying action feedback. */
 export interface InfoBannerState {
     visible: boolean;
     titleKey: string | null;
     messageKey: string | null;
 }
 
-/** Modal dialog state. */
+/** Modal dialog state for confirmation dialogs. */
 export interface ModalDialogState {
     visible: boolean;
     titleKey: string | null;
@@ -53,8 +53,8 @@ export interface ModalDialogState {
     onConfirm: (() => void) | undefined;
 }
 
-/** Complete navbar state. */
-export interface NavBarState {
+/** Complete application state. */
+export interface AppState {
     // Navigation items by category.
     essentialItems: NavItem[];
     pinnedItems: NavItem[];
@@ -93,10 +93,10 @@ export interface NavBarState {
 }
 
 /** State change listener type. */
-export type StateListener = (state: NavBarState, prevState: NavBarState) => void;
+export type StateListener = (state: AppState, prevState: AppState) => void;
 
 /** Creates the initial default state. */
-function createInitialState(): NavBarState {
+function createInitialState(): AppState {
     return {
         essentialItems: [...DEFAULT_ESSENTIAL_ITEMS],
         pinnedItems: [],
@@ -155,11 +155,11 @@ function createInitialState(): NavBarState {
 }
 
 /**
- * Navbar State Manager
- * Manages the application state with observer pattern.
+ * Application State Manager
+ * Manages the application state with observer pattern for reactive updates.
  */
-export class NavBarStateManager {
-    private state: NavBarState;
+export class AppStateManager {
+    private state: AppState;
     private listeners: Set<StateListener> = new Set();
 
     constructor() {
@@ -168,8 +168,9 @@ export class NavBarStateManager {
 
     /**
      * Gets the current state (readonly).
+     * @returns The current application state.
      */
-    getState(): Readonly<NavBarState> {
+    getState(): Readonly<AppState> {
         return this.state;
     }
 
@@ -185,9 +186,9 @@ export class NavBarStateManager {
 
     /**
      * Updates the state and notifies listeners.
-     * @param updater - Function that returns the new state.
+     * @param updater - Function that returns the partial state update.
      */
-    dispatch(updater: (state: NavBarState) => Partial<NavBarState>): void {
+    dispatch(updater: (state: AppState) => Partial<AppState>): void {
         const prevState = this.state;
         const updates = updater(this.state);
         this.state = { ...this.state, ...updates };
@@ -214,6 +215,7 @@ export class NavBarStateManager {
 
     /**
      * Pins an item to the pinned section.
+     * @param itemId - The ID of the item to pin.
      * @returns true if the item was pinned, false if limit was reached or item not found.
      */
     pinItem(itemId: string): boolean {
@@ -241,6 +243,7 @@ export class NavBarStateManager {
 
     /**
      * Checks if the pinned items limit has been reached.
+     * @returns true if no more items can be pinned.
      */
     isPinnedLimitReached(): boolean {
         return this.state.pinnedItems.length >= MAX_PINNED_ITEMS;
@@ -248,6 +251,7 @@ export class NavBarStateManager {
 
     /**
      * Unpins an item back to regular section.
+     * @param itemId - The ID of the item to unpin.
      */
     unpinItem(itemId: string): void {
         this.dispatch((state) => {
@@ -264,7 +268,7 @@ export class NavBarStateManager {
     }
 
     /**
-     * Unpins all items.
+     * Unpins all items back to regular section.
      */
     unpinAllItems(): void {
         this.dispatch((state) => {
@@ -281,7 +285,8 @@ export class NavBarStateManager {
     }
 
     /**
-     * Hides an item.
+     * Hides an item from the navbar.
+     * @param itemId - The ID of the item to hide.
      */
     hideItem(itemId: string): void {
         this.dispatch((state) => {
@@ -309,6 +314,7 @@ export class NavBarStateManager {
 
     /**
      * Unhides a specific item.
+     * @param itemId - The ID of the item to unhide.
      */
     unhideItem(itemId: string): void {
         this.dispatch((state) => {
@@ -325,7 +331,7 @@ export class NavBarStateManager {
     }
 
     /**
-     * Unhides all items.
+     * Unhides all hidden items.
      */
     unhideAllItems(): void {
         this.dispatch((state) => ({
@@ -336,6 +342,7 @@ export class NavBarStateManager {
 
     /**
      * Adds a new item to regular items.
+     * @param item - The navigation item to add.
      */
     addItem(item: NavItem): void {
         this.dispatch((state) => ({
@@ -440,13 +447,14 @@ export class NavBarStateManager {
     // --- Display Settings ---
 
     /**
-     * Sets the navbar width.
+     * Sets the navbar width with automatic icon mode switching.
+     * @param width - The new navbar width in pixels.
      */
     setNavbarWidth(width: number): void {
         const clampedWidth = Math.max(NAVBAR.width.min, Math.min(NAVBAR.width.max, width));
 
         this.dispatch((state) => {
-            // Determine icon mode based on width with hysteresis
+            // Determine icon mode based on width with hysteresis to prevent flickering
             let newIconMode = state.iconMode;
             const threshold = NAVBAR.width.iconOnlyThreshold;
             const hysteresis = NAVBAR.width.hysteresis;
@@ -466,13 +474,14 @@ export class NavBarStateManager {
 
     /**
      * Sets the icon mode directly.
+     * @param mode - The icon mode to set.
      */
     setIconMode(mode: IconMode): void {
         this.dispatch(() => ({ iconMode: mode }));
     }
 
     /**
-     * Toggles icon mode.
+     * Toggles between icon-only and icons-titles modes.
      */
     toggleIconMode(): void {
         this.dispatch((state) => ({
@@ -481,7 +490,8 @@ export class NavBarStateManager {
     }
 
     /**
-     * Sets the locale.
+     * Sets the locale and updates RTL mode accordingly.
+     * @param locale - The locale to set.
      */
     setLocale(locale: Locale): void {
         this.dispatch(() => ({
@@ -502,14 +512,16 @@ export class NavBarStateManager {
     // --- UI State ---
 
     /**
-     * Sets the active item.
+     * Sets the active (selected) item.
+     * @param itemId - The ID of the item to activate, or null to clear.
      */
     setActiveItem(itemId: string | null): void {
         this.dispatch(() => ({ activeItemId: itemId }));
     }
 
     /**
-     * Sets the focused item.
+     * Sets the focused item for keyboard navigation.
+     * @param itemId - The ID of the item to focus, or null to clear.
      */
     setFocusedItem(itemId: string | null): void {
         this.dispatch(() => ({ focusedItemId: itemId }));
@@ -517,6 +529,7 @@ export class NavBarStateManager {
 
     /**
      * Sets the hovered item.
+     * @param itemId - The ID of the item being hovered, or null to clear.
      */
     setHoveredItem(itemId: string | null): void {
         this.dispatch(() => ({ hoveredItemId: itemId }));
@@ -525,7 +538,11 @@ export class NavBarStateManager {
     // --- Overlay State ---
 
     /**
-     * Shows a tooltip.
+     * Shows a tooltip for an item.
+     * @param targetId - The ID of the target item.
+     * @param position - The position for the tooltip.
+     * @param content - The tooltip content text.
+     * @param shortcut - Optional keyboard shortcut to display.
      */
     showTooltip(targetId: string, position: { x: number; y: number }, content: string, shortcut?: string): void {
         this.dispatch(() => ({
@@ -553,6 +570,9 @@ export class NavBarStateManager {
 
     /**
      * Shows a context menu.
+     * @param type - The type of context menu.
+     * @param position - The position for the menu.
+     * @param targetId - Optional ID of the target item.
      */
     showContextMenu(type: ContextMenuType, position: { x: number; y: number }, targetId?: string): void {
         this.dispatch(() => ({
@@ -586,6 +606,8 @@ export class NavBarStateManager {
 
     /**
      * Shows an info banner.
+     * @param titleKey - The translation key for the title.
+     * @param messageKey - The translation key for the message.
      */
     showInfoBanner(titleKey: string, messageKey: string): void {
         this.dispatch(() => ({
@@ -617,6 +639,10 @@ export class NavBarStateManager {
 
     /**
      * Shows a modal dialog.
+     * @param titleKey - The translation key for the title.
+     * @param messageKey - The translation key for the message.
+     * @param checkboxKey - Optional translation key for checkbox label.
+     * @param onConfirm - Optional callback when confirmed.
      */
     showModalDialog(titleKey: string, messageKey: string, checkboxKey?: string, onConfirm?: () => void): void {
         this.dispatch(() => ({
@@ -650,7 +676,7 @@ export class NavBarStateManager {
     }
 
     /**
-     * Toggles the modal checkbox.
+     * Toggles the modal checkbox state.
      */
     toggleModalCheckbox(): void {
         this.dispatch((state) => ({
@@ -664,7 +690,7 @@ export class NavBarStateManager {
     // --- Drag State ---
 
     /**
-     * Starts resize drag.
+     * Starts a resize drag operation.
      */
     startResizeDrag(): void {
         this.dispatch((state) => ({
@@ -674,7 +700,7 @@ export class NavBarStateManager {
     }
 
     /**
-     * Ends resize drag.
+     * Ends a resize drag operation.
      */
     endResizeDrag(): void {
         this.dispatch(() => ({
@@ -683,7 +709,7 @@ export class NavBarStateManager {
     }
 
     /**
-     * Cancels resize drag (restores original width).
+     * Cancels a resize drag operation and restores original width.
      */
     cancelResizeDrag(): void {
         this.dispatch((state) => ({
@@ -696,6 +722,7 @@ export class NavBarStateManager {
 
     /**
      * Sets the scroll position.
+     * @param scrollTop - The scroll position in pixels.
      */
     setScrollTop(scrollTop: number): void {
         this.dispatch((state) => ({
@@ -705,6 +732,7 @@ export class NavBarStateManager {
 
     /**
      * Sets the maximum scroll position.
+     * @param maxScrollTop - The maximum scroll position in pixels.
      */
     setMaxScrollTop(maxScrollTop: number): void {
         this.dispatch(() => ({ maxScrollTop }));
@@ -713,7 +741,7 @@ export class NavBarStateManager {
     // --- Preferences ---
 
     /**
-     * Dismisses the hide warning.
+     * Dismisses the hide warning permanently.
      */
     dismissHideWarning(): void {
         this.dispatch(() => ({ hideWarningDismissed: true }));
@@ -722,7 +750,8 @@ export class NavBarStateManager {
     // --- Helpers ---
 
     /**
-     * Gets all visible items in order.
+     * Gets all visible items in display order.
+     * @returns Array of all visible navigation items.
      */
     getAllVisibleItems(): NavItem[] {
         const state = this.state;
@@ -731,6 +760,8 @@ export class NavBarStateManager {
 
     /**
      * Finds an item by ID across all categories.
+     * @param itemId - The ID of the item to find.
+     * @returns The navigation item, or undefined if not found.
      */
     findItem(itemId: string): NavItem | undefined {
         const state = this.state;
@@ -745,6 +776,8 @@ export class NavBarStateManager {
 
     /**
      * Gets the category of an item.
+     * @param itemId - The ID of the item.
+     * @returns The category name, or null if item not found.
      */
     getItemCategory(itemId: string): string | null {
         const state = this.state;
@@ -757,5 +790,5 @@ export class NavBarStateManager {
     }
 }
 
-/** Global state manager instance. */
-export const stateManager = new NavBarStateManager();
+/** Global application state manager instance. */
+export const appState = new AppStateManager();

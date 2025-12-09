@@ -3,22 +3,17 @@
  * macOS-style window frame with title bar, status bar, navbar, and drop shadow.
  */
 
+import type { AppState } from '../state/app-state.js';
 import type { Locale, NavItem } from '../state/navigation-items.js';
 import type { InfoBannerConfig } from './overlays/info-banner.js';
 import type { ModalDialogConfig, ModalDialogResult } from './overlays/modal-dialog.js';
 
 import { setLocale, subscribeToLocale } from '../i18n/i18n.js';
-import { type NavBarState, stateManager } from '../state/navbar-state.js';
-import { COLORS } from '../utils/design-tokens.js';
+import { appState } from '../state/app-state.js';
+import { COLORS, LAYOUT } from '../utils/design-tokens.js';
 import { createSvgElement } from '../utils/svg-utils.js';
 import { assert } from '../utils/utils.js';
-import {
-    createContentArea,
-    getContentAreaBounds,
-    setNavbarWidth,
-    setRtlMode,
-    updateContentArea,
-} from './content-area.js';
+import { createContentArea, getContentAreaBounds, updateContentArea } from './content-area.js';
 import { createButtonGroup } from './controls/action-button.js';
 import { createKeyboardShortcutsHelp, getKeyboardShortcutsHelpWidth } from './controls/keyboard-shortcuts-help.js';
 import { createLocaleSwitcher, updateLocaleSwitcher } from './controls/locale-switcher.js';
@@ -31,32 +26,36 @@ import { createStatusBar, updateStatusBar } from './status-bar.js';
 import { createTitleBar, updateTitleBar } from './title-bar.js';
 
 /** Shadow padding exported for external calculations. */
-export const SHADOW_PADDING = 100;
-
-const WINDOW_CONFIG = {
-    borderWidth: 2,
-
-    padding: {
-        top: 54,
-        right: 40,
-        bottom: 40,
-        left: 40,
-    },
-} as const;
+export const SHADOW_PADDING = LAYOUT.shadowPadding;
 
 /**
  * Calculates the window dimensions based on browser viewport and configuration.
+ *
+ * The window is sized to fill available space while maintaining minimum dimensions
+ * and leaving padding around the edges for visual breathing room.
+ *
  * @returns Object with width and height for the window frame.
  */
 function calculateWindowDimensions(): { width: number; height: number } {
     return {
-        width: Math.max(550, window.innerWidth - WINDOW_CONFIG.padding.left - WINDOW_CONFIG.padding.right),
-        height: Math.max(200, window.innerHeight - WINDOW_CONFIG.padding.top - WINDOW_CONFIG.padding.bottom),
+        width: Math.max(
+            LAYOUT.minWindow.width,
+            window.innerWidth - LAYOUT.windowPadding.left - LAYOUT.windowPadding.right,
+        ),
+        height: Math.max(
+            LAYOUT.minWindow.height,
+            window.innerHeight - LAYOUT.windowPadding.top - LAYOUT.windowPadding.bottom,
+        ),
     };
 }
 
 /**
  * Calculates the SVG container dimensions including shadow padding.
+ *
+ * The SVG is oversized to accommodate the drop shadow effect, which extends
+ * beyond the visible window frame. The top/left offsets position the SVG
+ * so the window appears at the correct location despite the extra padding.
+ *
  * @param width - Window frame width.
  * @param height - Window frame height.
  * @returns Object with SVG width, height, and position offsets.
@@ -68,9 +67,45 @@ function calculateSvgDimensions(
     return {
         width: width + SHADOW_PADDING * 2,
         height: height + SHADOW_PADDING * 2,
-        top: WINDOW_CONFIG.padding.top - SHADOW_PADDING,
-        left: WINDOW_CONFIG.padding.left - SHADOW_PADDING,
+        top: LAYOUT.windowPadding.top - SHADOW_PADDING,
+        left: LAYOUT.windowPadding.left - SHADOW_PADDING,
     };
+}
+
+/** Navbar layout dimensions. */
+interface NavbarLayout {
+    navbarX: number;
+    navbarY: number;
+    navbarHeight: number;
+    handleX: number;
+}
+
+/**
+ * Calculates navbar layout dimensions based on window size and RTL mode.
+ *
+ * In LTR mode, the navbar is positioned on the left side of the window.
+ * In RTL mode, the navbar flips to the right side. The resize handle
+ * is positioned at the edge of the navbar closest to the content area.
+ *
+ * @param windowWidth - Total window width.
+ * @param windowHeight - Total window height.
+ * @param navbarWidth - Current navbar width.
+ * @param isRtl - Whether RTL mode is enabled.
+ * @returns The calculated navbar layout dimensions.
+ */
+function calculateNavbarLayout(
+    windowWidth: number,
+    windowHeight: number,
+    navbarWidth: number,
+    isRtl: boolean,
+): NavbarLayout {
+    const borderPadding = LAYOUT.border.width;
+    const navbarY = borderPadding + LAYOUT.titleBar.height;
+    const navbarHeight = windowHeight - navbarY - LAYOUT.statusBar.height - borderPadding;
+    const navbarX = isRtl ? windowWidth - navbarWidth - borderPadding : borderPadding;
+    const handleX = isRtl ? windowWidth - navbarWidth - borderPadding : borderPadding + navbarWidth;
+
+    return { navbarX, navbarY, navbarHeight, handleX };
 }
 
 /**
@@ -109,13 +144,13 @@ function createWindowBackground(width: number, height: number): SVGRectElement {
  */
 function createWindowBorder(width: number, height: number): SVGRectElement {
     return createSvgElement('rect', {
-        x: String(WINDOW_CONFIG.borderWidth / 2),
-        y: String(WINDOW_CONFIG.borderWidth / 2),
-        width: String(width - WINDOW_CONFIG.borderWidth),
-        height: String(height - WINDOW_CONFIG.borderWidth),
+        x: String(LAYOUT.border.width / 2),
+        y: String(LAYOUT.border.width / 2),
+        width: String(width - LAYOUT.border.width),
+        height: String(height - LAYOUT.border.width),
         fill: 'none',
         stroke: COLORS.windowBorder,
-        'stroke-width': String(WINDOW_CONFIG.borderWidth),
+        'stroke-width': String(LAYOUT.border.width),
         'data-name': 'border',
     });
 }
@@ -125,9 +160,17 @@ function createWindowBorder(width: number, height: number): SVGRectElement {
  * @param container - The container element to append the SVG to.
  * @param width - Width of the window frame.
  * @param height - Height of the window frame.
+ * @param navbarWidth - Current navbar width.
+ * @param isRtl - Whether RTL mode is enabled.
  * @returns The created SVG element.
  */
-function createWindowFrame(container: HTMLElement, width: number, height: number): SVGSVGElement {
+function createWindowFrame(
+    container: HTMLElement,
+    width: number,
+    height: number,
+    navbarWidth: number,
+    isRtl: boolean,
+): SVGSVGElement {
     const svgDimensions = calculateSvgDimensions(width, height);
 
     const svg = createSvgElement('svg', {
@@ -139,7 +182,7 @@ function createWindowFrame(container: HTMLElement, width: number, height: number
     });
 
     // Padding from border for all inner elements.
-    const borderPadding = WINDOW_CONFIG.borderWidth;
+    const borderPadding = LAYOUT.border.width;
 
     // Drop shadow filter.
     svg.appendChild(createDropShadowFilter());
@@ -151,7 +194,7 @@ function createWindowFrame(container: HTMLElement, width: number, height: number
     windowGroup.appendChild(createWindowBorder(width, height));
     windowGroup.appendChild(createTitleBar(borderPadding, borderPadding, width, 'Search'));
     windowGroup.appendChild(createStatusBar(borderPadding, width, height));
-    windowGroup.appendChild(createContentArea(borderPadding, width, height));
+    windowGroup.appendChild(createContentArea(borderPadding, width, height, navbarWidth, isRtl));
 
     svg.appendChild(windowGroup);
 
@@ -204,8 +247,8 @@ function updateWindowBackground(svg: SVGSVGElement, width: number, height: numbe
 function updateWindowBorder(svg: SVGSVGElement, width: number, height: number): void {
     const border = assert(svg.querySelector('rect[data-name="border"]'), 'Border element not found');
 
-    border.setAttribute('width', String(width - WINDOW_CONFIG.borderWidth));
-    border.setAttribute('height', String(height - WINDOW_CONFIG.borderWidth));
+    border.setAttribute('width', String(width - LAYOUT.border.width));
+    border.setAttribute('height', String(height - LAYOUT.border.width));
 }
 
 /**
@@ -213,21 +256,21 @@ function updateWindowBorder(svg: SVGSVGElement, width: number, height: number): 
  * Manages a macOS-style window frame with responsive sizing and drop shadow.
  */
 export class WindowFrame {
-    private svg: SVGSVGElement;
+    private readonly svg: SVGSVGElement;
     private resizeAnimationFrame = 0;
-    private resizeHandler: () => void;
-    private navbar: NavBar | null = null;
-    private resizeHandleGroup: SVGGElement | null = null;
-    private cleanupResizeHandlers: (() => void) | null = null;
-    private unsubscribeState: (() => void) | null = null;
-    private unsubscribeLocale: (() => void) | null = null;
-    private controlsGroup: SVGGElement | null = null;
-    private helpGroup: SVGGElement | null = null;
-    private localeSwitcherGroup: SVGGElement | null = null;
-    private tooltipOverlayGroup: SVGGElement | null = null;
-    private overlayGroup: SVGGElement | null = null;
-    private infoBannerManager: InfoBannerManager | null = null;
-    private modalDialogManager: ModalDialogManager | null = null;
+    private readonly resizeHandler: () => void;
+    private navbar!: NavBar;
+    private resizeHandleGroup!: SVGGElement;
+    private cleanupResizeHandlers!: () => void;
+    private unsubscribeState!: () => void;
+    private unsubscribeLocale!: () => void;
+    private controlsGroup!: SVGGElement;
+    private helpGroup!: SVGGElement;
+    private localeSwitcherGroup!: SVGGElement;
+    private readonly tooltipOverlayGroup: SVGGElement;
+    private readonly overlayGroup: SVGGElement;
+    private readonly infoBannerManager: InfoBannerManager;
+    private readonly modalDialogManager: ModalDialogManager;
 
     /**
      * Creates a new window frame instance.
@@ -235,30 +278,20 @@ export class WindowFrame {
      */
     constructor(container: HTMLElement) {
         const { width, height } = calculateWindowDimensions();
-        const state = stateManager.getState();
+        const state = appState.getState();
 
-        // Initialize content area with current navbar width
-        setNavbarWidth(state.navbarWidth);
-        setRtlMode(state.isRtl);
-
-        this.svg = createWindowFrame(container, width, height);
+        this.svg = createWindowFrame(container, width, height, state.navbarWidth, state.isRtl);
 
         // Create tooltip overlay group (rendered after content area, before info banners)
-        this.tooltipOverlayGroup = createSvgElement('g', {
-            'data-name': 'tooltip-overlays',
-        });
+        this.tooltipOverlayGroup = createSvgElement('g', { 'data-name': 'tooltip-overlays' });
         this.svg.appendChild(this.tooltipOverlayGroup);
 
-        // Create overlay group for top-level overlays (info banners, etc.)
-        this.overlayGroup = createSvgElement('g', {
-            'data-name': 'overlays',
-        });
+        // Create overlay group for top-level overlays (info banners, modals)
+        this.overlayGroup = createSvgElement('g', { 'data-name': 'overlays' });
         this.svg.appendChild(this.overlayGroup);
 
-        // Create info banner manager
+        // Initialize managers
         this.infoBannerManager = new InfoBannerManager(this.overlayGroup);
-
-        // Create modal dialog manager
         this.modalDialogManager = new ModalDialogManager(this.overlayGroup);
 
         // Create navbar
@@ -268,15 +301,13 @@ export class WindowFrame {
         this.createControls();
 
         // Subscribe to state changes
-        this.unsubscribeState = stateManager.subscribe(this.handleStateChange.bind(this));
+        this.unsubscribeState = appState.subscribe(this.handleStateChange.bind(this));
 
         // Subscribe to locale changes
         this.unsubscribeLocale = subscribeToLocale((locale) => {
-            stateManager.setLocale(locale);
+            appState.setLocale(locale);
             // Update locale switcher to reflect the new active locale
-            if (this.localeSwitcherGroup) {
-                updateLocaleSwitcher(this.localeSwitcherGroup, locale);
-            }
+            updateLocaleSwitcher(this.localeSwitcherGroup, locale);
         });
 
         this.resizeHandler = (): void => {
@@ -289,76 +320,56 @@ export class WindowFrame {
 
     /**
      * Creates the navbar and resize handle.
-     * @param windowWidth
-     * @param windowHeight
+     * @param windowWidth - Window width.
+     * @param windowHeight - Window height.
      */
     private createNavbar(windowWidth: number, windowHeight: number): void {
-        const state = stateManager.getState();
-        const borderPadding = WINDOW_CONFIG.borderWidth;
-
-        // Calculate navbar dimensions
-        const navbarX = state.isRtl ? windowWidth - state.navbarWidth - borderPadding : borderPadding;
-        const navbarY = borderPadding + 32; // Below title bar
-        const navbarHeight = windowHeight - navbarY - 32 - borderPadding; // Above status bar
+        const state = appState.getState();
+        const layout = calculateNavbarLayout(windowWidth, windowHeight, state.navbarWidth, state.isRtl);
 
         // Create navbar with info banner and modal callbacks
         this.navbar = new NavBar({
-            x: navbarX,
-            y: navbarY,
+            x: layout.navbarX,
+            y: layout.navbarY,
             onShowInfoBanner: (config: InfoBannerConfig) => {
-                if (this.infoBannerManager) {
-                    this.infoBannerManager.show(config);
-                }
+                this.infoBannerManager.show(config);
             },
             onShowModal: (config: ModalDialogConfig): Promise<ModalDialogResult> => {
-                if (this.modalDialogManager) {
-                    return this.modalDialogManager.show(config);
-                }
-                return Promise.resolve({ confirmed: true, checkboxChecked: false });
+                return this.modalDialogManager.show(config);
             },
             width: state.navbarWidth,
-            height: navbarHeight,
-            tooltipOverlayGroup: this.tooltipOverlayGroup ?? undefined,
+            height: layout.navbarHeight,
+            tooltipOverlayGroup: this.tooltipOverlayGroup,
         });
 
         this.navbar.updateFromState(state);
 
         // Add navbar to window group
-        const windowGroup = this.svg.querySelector('g[filter]');
-        if (windowGroup) {
-            // Insert navbar before content area
-            const contentAreaGroup = this.svg.querySelector('g[data-name="content-area-group"]');
-            if (contentAreaGroup) {
-                windowGroup.insertBefore(this.navbar.getGroup(), contentAreaGroup);
-            } else {
-                windowGroup.appendChild(this.navbar.getGroup());
-            }
+        const windowGroup = assert(this.svg.querySelector('g[filter]'), 'Window group not found');
+        const contentAreaGroup = this.svg.querySelector('g[data-name="content-area-group"]');
+        if (contentAreaGroup) {
+            windowGroup.insertBefore(this.navbar.getGroup(), contentAreaGroup);
+        } else {
+            windowGroup.appendChild(this.navbar.getGroup());
         }
 
         // Create resize handle
-        const handleX = state.isRtl
-            ? windowWidth - state.navbarWidth - borderPadding
-            : borderPadding + state.navbarWidth;
-
         this.resizeHandleGroup = createResizeHandle({
-            x: handleX,
-            y: navbarY,
-            height: navbarHeight,
+            x: layout.handleX,
+            y: layout.navbarY,
+            height: layout.navbarHeight,
             isRtl: state.isRtl,
         });
-
-        if (windowGroup) {
-            windowGroup.appendChild(this.resizeHandleGroup);
-        }
+        windowGroup.appendChild(this.resizeHandleGroup);
 
         // Setup resize drag handlers
         this.cleanupResizeHandlers = setupResizeDragHandlers(this.resizeHandleGroup, {
-            isRtl: () => stateManager.getState().isRtl,
-            getCurrentWidth: () => stateManager.getState().navbarWidth,
-            onDragStart: () => stateManager.startResizeDrag(),
-            onDrag: (newWidth) => stateManager.setNavbarWidth(newWidth),
-            onDragEnd: () => stateManager.endResizeDrag(),
-            onDragCancel: () => stateManager.cancelResizeDrag(),
+            isRtl: () => appState.getState().isRtl,
+            getCurrentWidth: () => appState.getState().navbarWidth,
+            onDragStart: () => appState.startResizeDrag(),
+            onDrag: (newWidth) => appState.setNavbarWidth(newWidth),
+            onDragEnd: () => appState.endResizeDrag(),
+            onDragCancel: () => appState.cancelResizeDrag(),
         });
     }
 
@@ -405,7 +416,7 @@ export class WindowFrame {
         const bounds = getContentAreaBounds(this.svg);
         if (!bounds) return;
 
-        const state = stateManager.getState();
+        const state = appState.getState();
         const controlsX = this.calculateControlsX(bounds);
         const controlsY = bounds.y + 20;
 
@@ -464,7 +475,7 @@ export class WindowFrame {
             },
             (locale: Locale) => {
                 setLocale(locale);
-                stateManager.setLocale(locale);
+                appState.setLocale(locale);
             },
         );
         this.controlsGroup.appendChild(this.localeSwitcherGroup);
@@ -494,16 +505,11 @@ export class WindowFrame {
         if (!bounds) return;
 
         const controlsY = bounds.y + 20;
+        const controlsX = this.calculateControlsX(bounds);
+        const helpX = this.calculateHelpX(bounds);
 
-        if (this.controlsGroup) {
-            const controlsX = this.calculateControlsX(bounds);
-            this.controlsGroup.setAttribute('transform', `translate(${controlsX}, ${controlsY})`);
-        }
-
-        if (this.helpGroup) {
-            const helpX = this.calculateHelpX(bounds);
-            this.helpGroup.setAttribute('transform', `translate(${helpX}, ${controlsY})`);
-        }
+        this.controlsGroup.setAttribute('transform', `translate(${controlsX}, ${controlsY})`);
+        this.helpGroup.setAttribute('transform', `translate(${helpX}, ${controlsY})`);
     }
 
     /**
@@ -523,26 +529,26 @@ export class WindowFrame {
                     canHide: true,
                     originalCategory: 'regular',
                 };
-                stateManager.addItem(newItem);
+                appState.addItem(newItem);
                 break;
             }
             case 'removeLastItem':
-                stateManager.removeLastItem();
+                appState.removeLastItem();
                 break;
             case 'removeRandomItem':
-                stateManager.removeRandomItem();
+                appState.removeRandomItem();
                 break;
             case 'pinRandomItem':
-                stateManager.pinRandomItem();
+                appState.pinRandomItem();
                 break;
             case 'unpinAllItems':
-                stateManager.unpinAllItems();
+                appState.unpinAllItems();
                 break;
             case 'hideRandomItem':
-                stateManager.hideRandomItem();
+                appState.hideRandomItem();
                 break;
             case 'unhideAllItems':
-                stateManager.unhideAllItems();
+                appState.unhideAllItems();
                 break;
         }
     }
@@ -552,57 +558,39 @@ export class WindowFrame {
      * @param state
      * @param prevState
      */
-    private handleStateChange(state: NavBarState, prevState: NavBarState): void {
+    private handleStateChange(state: AppState, prevState: AppState): void {
         const { width, height } = calculateWindowDimensions();
-        const borderPadding = WINDOW_CONFIG.borderWidth;
+        const borderPadding = LAYOUT.border.width;
 
         // Update locale switcher if locale changed
-        if (state.locale !== prevState.locale && this.localeSwitcherGroup) {
+        if (state.locale !== prevState.locale) {
             updateLocaleSwitcher(this.localeSwitcherGroup, state.locale);
         }
 
         // Update content area if navbar width or RTL changed
         if (state.navbarWidth !== prevState.navbarWidth || state.isRtl !== prevState.isRtl) {
-            setNavbarWidth(state.navbarWidth);
-            setRtlMode(state.isRtl);
-            updateContentArea(this.svg, borderPadding, width, height);
+            updateContentArea(this.svg, borderPadding, width, height, state.navbarWidth, state.isRtl);
             this.updateControls();
 
-            // Update navbar dimensions
-            if (this.navbar) {
-                const navbarX = state.isRtl ? width - state.navbarWidth - borderPadding : borderPadding;
-                const navbarY = borderPadding + 32;
-                const navbarHeight = height - navbarY - 32 - borderPadding;
+            // Update navbar and resize handle layout
+            const layout = calculateNavbarLayout(width, height, state.navbarWidth, state.isRtl);
+            this.navbar.updateDimensions({
+                x: layout.navbarX,
+                y: layout.navbarY,
+                width: state.navbarWidth,
+                height: layout.navbarHeight,
+            });
 
-                this.navbar.updateDimensions({
-                    x: navbarX,
-                    y: navbarY,
-                    width: state.navbarWidth,
-                    height: navbarHeight,
-                });
-            }
-
-            // Update resize handle position
-            if (this.resizeHandleGroup) {
-                const handleX = state.isRtl
-                    ? width - state.navbarWidth - borderPadding
-                    : borderPadding + state.navbarWidth;
-                const navbarY = borderPadding + 32;
-                const navbarHeight = height - navbarY - 32 - borderPadding;
-
-                updateResizeHandle(this.resizeHandleGroup, {
-                    x: handleX,
-                    y: navbarY,
-                    height: navbarHeight,
-                    isRtl: state.isRtl,
-                });
-            }
+            updateResizeHandle(this.resizeHandleGroup, {
+                x: layout.handleX,
+                y: layout.navbarY,
+                height: layout.navbarHeight,
+                isRtl: state.isRtl,
+            });
         }
 
         // Update navbar from state
-        if (this.navbar) {
-            this.navbar.updateFromState(state);
-        }
+        this.navbar.updateFromState(state);
     }
 
     /**
@@ -610,8 +598,8 @@ export class WindowFrame {
      */
     private handleWindowResize(): void {
         const { width, height } = calculateWindowDimensions();
-        const borderPadding = WINDOW_CONFIG.borderWidth;
-        const state = stateManager.getState();
+        const borderPadding = LAYOUT.border.width;
+        const state = appState.getState();
 
         // Update SVG dimensions
         updateSvgDimensions(this.svg, width, height);
@@ -619,36 +607,24 @@ export class WindowFrame {
         updateWindowBorder(this.svg, width, height);
         updateTitleBar(this.svg, borderPadding, width);
         updateStatusBar(this.svg, borderPadding, width, height);
-        updateContentArea(this.svg, borderPadding, width, height);
+        updateContentArea(this.svg, borderPadding, width, height, state.navbarWidth, state.isRtl);
         this.updateControls();
 
-        // Update navbar dimensions
-        if (this.navbar) {
-            const navbarX = state.isRtl ? width - state.navbarWidth - borderPadding : borderPadding;
-            const navbarY = borderPadding + 32;
-            const navbarHeight = height - navbarY - 32 - borderPadding;
+        // Update navbar and resize handle layout
+        const layout = calculateNavbarLayout(width, height, state.navbarWidth, state.isRtl);
+        this.navbar.updateDimensions({
+            x: layout.navbarX,
+            y: layout.navbarY,
+            width: state.navbarWidth,
+            height: layout.navbarHeight,
+        });
 
-            this.navbar.updateDimensions({
-                x: navbarX,
-                y: navbarY,
-                width: state.navbarWidth,
-                height: navbarHeight,
-            });
-        }
-
-        // Update resize handle
-        if (this.resizeHandleGroup) {
-            const handleX = state.isRtl ? width - state.navbarWidth - borderPadding : borderPadding + state.navbarWidth;
-            const navbarY = borderPadding + 32;
-            const navbarHeight = height - navbarY - 32 - borderPadding;
-
-            updateResizeHandle(this.resizeHandleGroup, {
-                x: handleX,
-                y: navbarY,
-                height: navbarHeight,
-                isRtl: state.isRtl,
-            });
-        }
+        updateResizeHandle(this.resizeHandleGroup, {
+            x: layout.handleX,
+            y: layout.navbarY,
+            height: layout.navbarHeight,
+            isRtl: state.isRtl,
+        });
     }
 
     /**
@@ -661,9 +637,9 @@ export class WindowFrame {
 
     /**
      * Gets the navbar instance.
-     * @returns The navbar or null.
+     * @returns The navbar.
      */
-    getNavbar(): NavBar | null {
+    getNavbar(): NavBar {
         return this.navbar;
     }
 
@@ -684,23 +660,10 @@ export class WindowFrame {
     destroy(): void {
         window.removeEventListener('resize', this.resizeHandler);
         cancelAnimationFrame(this.resizeAnimationFrame);
-
-        if (this.cleanupResizeHandlers) {
-            this.cleanupResizeHandlers();
-        }
-
-        if (this.unsubscribeState) {
-            this.unsubscribeState();
-        }
-
-        if (this.unsubscribeLocale) {
-            this.unsubscribeLocale();
-        }
-
-        if (this.navbar) {
-            this.navbar.destroy();
-        }
-
+        this.cleanupResizeHandlers();
+        this.unsubscribeState();
+        this.unsubscribeLocale();
+        this.navbar.destroy();
         this.svg.remove();
     }
 }

@@ -3,8 +3,8 @@
  * Contains user-pinned items. Hidden when empty.
  */
 
-import { NavBarPanel, type PanelRenderContext } from './navbar-panel.js';
-import type { ItemDisplayMode } from './navbar-item.js';
+import type { IconMode } from '../../state/app-state.js';
+import { NavBarPanel, type RenderContext } from './navbar-panel.js';
 
 /**
  * Pinned Panel
@@ -26,7 +26,7 @@ export class PinnedPanel extends NavBarPanel {
      * @param displayMode - The display mode.
      * @returns The height in pixels.
      */
-    override calculateHeight(displayMode: ItemDisplayMode): number {
+    override calculateHeight(displayMode: IconMode): number {
         if (this.items.length === 0) {
             return 0;
         }
@@ -45,7 +45,7 @@ export class PinnedPanel extends NavBarPanel {
      * Renders the panel only if there are items.
      * @param context - The render context.
      */
-    override render(context: PanelRenderContext): void {
+    override render(context: RenderContext): void {
         if (!this.isVisible()) {
             this.clear();
             return;
@@ -57,7 +57,7 @@ export class PinnedPanel extends NavBarPanel {
      * Updates the panel only if there are items.
      * @param context - The render context.
      */
-    override update(context: PanelRenderContext): void {
+    override update(context: RenderContext): void {
         if (!this.isVisible()) {
             this.clear();
             return;

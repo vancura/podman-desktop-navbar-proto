@@ -3,13 +3,11 @@
  * Individual navigation item with icon and optional title.
  */
 
+import type { IconMode } from '../../state/app-state.js';
 import { createIcon, type IconName, type IconVariant } from '../../icons/icons.js';
 import type { NavItem } from '../../state/navigation-items.js';
 import { COLORS, NAVBAR, TYPOGRAPHY } from '../../utils/design-tokens.js';
 import { createSvgElement } from '../../utils/svg-utils.js';
-
-/** Item display mode. */
-export type ItemDisplayMode = 'icons-only' | 'icons-titles';
 
 /** NavBar item configuration. */
 export interface NavBarItemConfig {
@@ -17,7 +15,7 @@ export interface NavBarItemConfig {
     x: number;
     y: number;
     width: number;
-    displayMode: ItemDisplayMode;
+    displayMode: IconMode;
     isActive?: boolean;
     isFocused?: boolean;
     isHovered?: boolean;
@@ -29,7 +27,7 @@ export interface NavBarItemConfig {
  * @param displayMode - The display mode.
  * @returns The item height in pixels.
  */
-export function getItemHeight(displayMode: ItemDisplayMode): number {
+export function getItemHeight(displayMode: IconMode): number {
     return displayMode === 'icons-only' ? NAVBAR.item.heightIconOnly : NAVBAR.item.height;
 }
 

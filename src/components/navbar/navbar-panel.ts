@@ -3,11 +3,12 @@
  * Abstract base class for navbar panels (Essentials, Pinned, Regular, Bottom).
  */
 
+import type { IconMode } from '../../state/app-state.js';
 import { t } from '../../i18n/i18n.js';
 import type { NavItem } from '../../state/navigation-items.js';
 import { NAVBAR } from '../../utils/design-tokens.js';
 import { createSvgElement } from '../../utils/svg-utils.js';
-import { createNavBarItem, getItemHeight, updateNavBarItem, type ItemDisplayMode } from './navbar-item.js';
+import { createNavBarItem, getItemHeight, updateNavBarItem } from './navbar-item.js';
 
 /** Panel configuration. */
 export interface PanelConfig {
@@ -21,12 +22,12 @@ export interface PanelConfig {
     showDividerBelow: boolean;
 }
 
-/** Panel render context. */
-export interface PanelRenderContext {
+/** Render context passed to panels for layout and state. */
+export interface RenderContext {
     x: number;
     y: number;
     width: number;
-    displayMode: ItemDisplayMode;
+    displayMode: IconMode;
     activeItemId: string | null;
     focusedItemId: string | null;
     hoveredItemId: string | null;
@@ -83,7 +84,7 @@ export abstract class NavBarPanel {
      * @param displayMode - The display mode.
      * @returns The height in pixels.
      */
-    calculateHeight(displayMode: ItemDisplayMode): number {
+    calculateHeight(displayMode: IconMode): number {
         if (this.items.length === 0) {
             return 0;
         }
@@ -99,7 +100,7 @@ export abstract class NavBarPanel {
      * Renders the panel.
      * @param context - The render context.
      */
-    render(context: PanelRenderContext): void {
+    render(context: RenderContext): void {
         const { x, y, width, displayMode, activeItemId, focusedItemId, hoveredItemId } = context;
 
         this.group.setAttribute('transform', `translate(${x}, ${y})`);
@@ -140,7 +141,7 @@ export abstract class NavBarPanel {
      * Updates the panel with new context.
      * @param context - The render context.
      */
-    update(context: PanelRenderContext): void {
+    update(context: RenderContext): void {
         const { x, y, width, displayMode, activeItemId, focusedItemId, hoveredItemId } = context;
 
         this.group.setAttribute('transform', `translate(${x}, ${y})`);
@@ -204,7 +205,7 @@ export abstract class NavBarPanel {
      * @param itemId - The item ID.
      * @param context - The render context.
      */
-    updateItemState(itemId: string, context: PanelRenderContext): void {
+    updateItemState(itemId: string, context: RenderContext): void {
         const itemGroup = this.itemGroups.get(itemId);
         const item = this.items.find((i) => i.id === itemId);
 

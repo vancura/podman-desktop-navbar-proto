@@ -1,29 +1,40 @@
 /**
  * RTL (Right-to-Left) Utilities
- * Handles layout transformations for RTL languages like Arabic.
+ *
+ * Handles layout transformations for RTL languages (Arabic, Hebrew).
+ * All functions accept isRtl as a parameter to avoid hidden state dependencies.
+ *
+ * Key concepts:
+ * - In RTL mode, horizontal positioning is mirrored (left becomes right)
+ * - Text anchors and alignment swap (start -> end, left -> right)
+ * - The navbar appears on the right side of the window
+ * - Some directional icons (arrows, chevrons) should be mirrored
  */
-
-import { isRtl } from '../i18n/i18n.js';
 
 /**
  * Gets the horizontal alignment based on RTL mode.
- * @param alignment - The original alignment ('left' or 'right').
+ * @param alignment - The original alignment ('left', 'right', or 'center').
+ * @param isRtl - Whether RTL mode is enabled.
  * @returns The adjusted alignment for RTL.
  */
-export function getHorizontalAlignment(alignment: 'left' | 'right' | 'center'): 'left' | 'right' | 'center' {
+export function getHorizontalAlignment(
+    alignment: 'left' | 'right' | 'center',
+    isRtl: boolean,
+): 'left' | 'right' | 'center' {
     if (alignment === 'center') return 'center';
-    if (!isRtl()) return alignment;
+    if (!isRtl) return alignment;
     return alignment === 'left' ? 'right' : 'left';
 }
 
 /**
  * Gets the text anchor based on RTL mode.
  * @param anchor - The original anchor ('start', 'middle', 'end').
+ * @param isRtl - Whether RTL mode is enabled.
  * @returns The adjusted anchor for RTL.
  */
-export function getTextAnchor(anchor: 'start' | 'middle' | 'end'): 'start' | 'middle' | 'end' {
+export function getTextAnchor(anchor: 'start' | 'middle' | 'end', isRtl: boolean): 'start' | 'middle' | 'end' {
     if (anchor === 'middle') return 'middle';
-    if (!isRtl()) return anchor;
+    if (!isRtl) return anchor;
     return anchor === 'start' ? 'end' : 'start';
 }
 
@@ -31,20 +42,22 @@ export function getTextAnchor(anchor: 'start' | 'middle' | 'end'): 'start' | 'mi
  * Calculates an X position adjusted for RTL.
  * @param x - The original X position.
  * @param containerWidth - The container width.
+ * @param isRtl - Whether RTL mode is enabled.
  * @returns The adjusted X position.
  */
-export function getRtlX(x: number, containerWidth: number): number {
-    if (!isRtl()) return x;
+export function getRtlX(x: number, containerWidth: number, isRtl: boolean): number {
+    if (!isRtl) return x;
     return containerWidth - x;
 }
 
 /**
  * Gets the transform for mirroring in RTL mode.
  * @param width - The width to use for the mirror point.
+ * @param isRtl - Whether RTL mode is enabled.
  * @returns SVG transform string, or empty string if LTR.
  */
-export function getRtlTransform(width: number): string {
-    if (!isRtl()) return '';
+export function getRtlTransform(width: number, isRtl: boolean): string {
+    if (!isRtl) return '';
     return `translate(${width}, 0) scale(-1, 1)`;
 }
 
@@ -53,19 +66,21 @@ export function getRtlTransform(width: number): string {
  * This keeps text readable when the parent is mirrored.
  * @param x - The X position of the text.
  * @param width - The width of the text container.
+ * @param isRtl - Whether RTL mode is enabled.
  * @returns SVG transform string, or empty string if LTR.
  */
-export function getRtlTextTransform(x: number, width: number): string {
-    if (!isRtl()) return '';
+export function getRtlTextTransform(x: number, width: number, isRtl: boolean): string {
+    if (!isRtl) return '';
     return `translate(${x + width}, 0) scale(-1, 1)`;
 }
 
 /**
  * Gets the direction attribute value.
+ * @param isRtl - Whether RTL mode is enabled.
  * @returns 'rtl' or 'ltr'.
  */
-export function getDirection(): 'rtl' | 'ltr' {
-    return isRtl() ? 'rtl' : 'ltr';
+export function getDirection(isRtl: boolean): 'rtl' | 'ltr' {
+    return isRtl ? 'rtl' : 'ltr';
 }
 
 /**
@@ -73,10 +88,11 @@ export function getDirection(): 'rtl' | 'ltr' {
  * @param windowWidth - The total window width.
  * @param navbarWidth - The navbar width.
  * @param borderPadding - The border padding.
+ * @param isRtl - Whether RTL mode is enabled.
  * @returns The X position for the navbar.
  */
-export function getNavbarX(windowWidth: number, navbarWidth: number, borderPadding: number): number {
-    if (!isRtl()) return borderPadding;
+export function getNavbarX(windowWidth: number, navbarWidth: number, borderPadding: number, isRtl: boolean): number {
+    if (!isRtl) return borderPadding;
     return windowWidth - navbarWidth - borderPadding;
 }
 
@@ -84,11 +100,11 @@ export function getNavbarX(windowWidth: number, navbarWidth: number, borderPaddi
  * Calculates the content area X position based on RTL mode.
  * @param navbarWidth - The navbar width.
  * @param borderPadding - The border padding.
- * @param _windowWidth - The total window width (unused, kept for API consistency).
+ * @param isRtl - Whether RTL mode is enabled.
  * @returns The X position for the content area.
  */
-export function getContentAreaX(navbarWidth: number, borderPadding: number, _windowWidth: number): number {
-    if (!isRtl()) return borderPadding + navbarWidth;
+export function getContentAreaX(navbarWidth: number, borderPadding: number, isRtl: boolean): number {
+    if (!isRtl) return borderPadding + navbarWidth;
     return borderPadding;
 }
 
@@ -97,7 +113,8 @@ export function getContentAreaX(navbarWidth: number, borderPadding: number, _win
  * @param navbarWidth - The navbar width.
  * @param borderPadding - The border padding.
  * @param handleWidth - The resize handle width.
- * @param windowWidth - The total window width (needed for RTL).
+ * @param windowWidth - The total window width.
+ * @param isRtl - Whether RTL mode is enabled.
  * @returns The X position for the resize handle.
  */
 export function getResizeHandleX(
@@ -105,8 +122,9 @@ export function getResizeHandleX(
     borderPadding: number,
     handleWidth: number,
     windowWidth: number,
+    isRtl: boolean,
 ): number {
-    if (!isRtl()) {
+    if (!isRtl) {
         return borderPadding + navbarWidth - handleWidth / 2;
     }
     return windowWidth - navbarWidth - borderPadding - handleWidth / 2;
@@ -117,10 +135,11 @@ export function getResizeHandleX(
  * @param clickX - The click X position.
  * @param menuWidth - The menu width.
  * @param viewportWidth - The viewport width.
+ * @param isRtl - Whether RTL mode is enabled.
  * @returns The X position for the context menu.
  */
-export function getContextMenuX(clickX: number, menuWidth: number, viewportWidth: number): number {
-    if (isRtl()) {
+export function getContextMenuX(clickX: number, menuWidth: number, viewportWidth: number, isRtl: boolean): number {
+    if (isRtl) {
         // In RTL, prefer opening to the left of the click
         const leftX = clickX - menuWidth;
         if (leftX >= 0) return leftX;
@@ -142,6 +161,7 @@ export function getContextMenuX(clickX: number, menuWidth: number, viewportWidth
  * @param itemWidth - The item width.
  * @param tooltipWidth - The tooltip width.
  * @param viewportWidth - The viewport width.
+ * @param isRtl - Whether RTL mode is enabled.
  * @param gap - Gap between item and tooltip.
  * @returns The X position for the tooltip.
  */
@@ -150,9 +170,10 @@ export function getTooltipX(
     itemWidth: number,
     tooltipWidth: number,
     viewportWidth: number,
+    isRtl: boolean,
     gap = 8,
 ): number {
-    if (isRtl()) {
+    if (isRtl) {
         // In RTL, prefer showing tooltip to the left
         const leftX = itemX - tooltipWidth - gap;
         if (leftX >= 0) return leftX;
@@ -172,10 +193,11 @@ export function getTooltipX(
 /**
  * Gets the flex direction for RTL support.
  * @param direction - The original direction ('row' or 'row-reverse').
+ * @param isRtl - Whether RTL mode is enabled.
  * @returns The adjusted direction.
  */
-export function getFlexDirection(direction: 'row' | 'row-reverse'): 'row' | 'row-reverse' {
-    if (!isRtl()) return direction;
+export function getFlexDirection(direction: 'row' | 'row-reverse', isRtl: boolean): 'row' | 'row-reverse' {
+    if (!isRtl) return direction;
     return direction === 'row' ? 'row-reverse' : 'row';
 }
 
@@ -195,10 +217,11 @@ export function mirrorIconPath(pathData: string, _shouldMirror = false): string 
 /**
  * Checks if an icon should be mirrored in RTL mode.
  * @param iconName - The icon name.
+ * @param isRtl - Whether RTL mode is enabled.
  * @returns True if the icon should be mirrored.
  */
-export function shouldMirrorIcon(iconName: string): boolean {
+export function shouldMirrorIcon(iconName: string, isRtl: boolean): boolean {
     // Icons that indicate direction should be mirrored
     const directionalIcons = ['chevronRight', 'chevronLeft', 'logout', 'arrowRight', 'arrowLeft'];
-    return isRtl() && directionalIcons.includes(iconName);
+    return isRtl && directionalIcons.includes(iconName);
 }

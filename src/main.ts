@@ -63,10 +63,7 @@ function main(): void {
 
     // Register shortcut handler to forward to navbar.
     unregisterShortcutHandler = registerShortcutHandler((action, _event) => {
-        const navbar = windowFrame?.getNavbar();
-        if (navbar) {
-            navbar.handleKeyboardAction(action);
-        }
+        windowFrame?.getNavbar().handleKeyboardAction(action);
     });
 
     // Set up resize handler for info updates.

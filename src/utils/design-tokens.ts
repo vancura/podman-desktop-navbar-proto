@@ -218,3 +218,38 @@ export const ACCESSIBILITY = {
     minTouchTarget: 44,
     reducedMotionDuration: 0,
 } as const;
+
+/** Window layout constants. */
+export const LAYOUT = {
+    /** Title bar at top of window. */
+    titleBar: {
+        height: 32,
+    },
+
+    /** Status bar at bottom of window. */
+    statusBar: {
+        height: 32,
+    },
+
+    /** Window border. */
+    border: {
+        width: 2,
+    },
+
+    /** Window frame padding from viewport edge. */
+    windowPadding: {
+        top: 54,
+        right: 40,
+        bottom: 40,
+        left: 40,
+    },
+
+    /** Minimum window dimensions. */
+    minWindow: {
+        width: 550,
+        height: 200,
+    },
+
+    /** Drop shadow padding around window. */
+    shadowPadding: 100,
+} as const;
