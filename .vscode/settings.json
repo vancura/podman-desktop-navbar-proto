@@ -19,6 +19,5 @@
   },
   "[javascriptreact]": {
     "editor.defaultFormatter": "biomejs.biome"
-  },
-  "cSpell.words": ["ambilab", "grotesk"]
+  }
 }
