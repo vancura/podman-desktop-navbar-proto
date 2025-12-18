@@ -1,9 +1,26 @@
 {
-  "words": [
-    "Deutsch",
-    "rgba",
-    "titlebar",
-    "עברית",
-    "العربية"
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "version": "0.2",
+  "language": "en",
+  "words": ["Deutsch", "rgba", "titlebar"],
+  "flagWords": ["cant", "dont", "hte", "teh", "wont"],
+  "ignorePaths": [
+    "*.map",
+    "*.min.js",
+    ".changeset/*.md",
+    ".git",
+    ".pnpm-store",
+    "CHANGELOG.md",
+    "coverage",
+    "dist",
+    "node_modules",
+    "pnpm-lock.yaml"
+  ],
+  "ignoreRegExpList": ["/#[0-9A-Fa-f]{6,8}/", "/0x[0-9A-Fa-f]+/", "/@[a-zA-Z0-9_-]+\\/[a-zA-Z0-9_-]+/"],
+  "overrides": [
+    {
+      "filename": "**/*.ts",
+      "words": ["instanceof", "keyof", "readonly", "typeof"]
+    }
   ]
 }
