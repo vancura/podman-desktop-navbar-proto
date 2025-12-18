@@ -169,6 +169,32 @@ export default [
         },
     },
 
+    // Svelte files - relax unused vars rule
+    // The TypeScript parser doesn't understand Svelte template syntax,
+    // so it can't detect that props destructured from $props() are used in templates
+    {
+        files: ['**/*.svelte'],
+        languageOptions: {
+            parser: tsParser,
+            parserOptions: {
+                ecmaVersion: 'latest',
+                sourceType: 'module',
+            },
+            globals: {
+                ...globals.browser,
+                ...globals.es2022,
+            },
+        },
+        plugins: {
+            '@typescript-eslint': tseslint,
+        },
+        rules: {
+            // Turn off unused vars for Svelte files since props are used in templates
+            // which the TypeScript parser can't analyze
+            '@typescript-eslint/no-unused-vars': 'off',
+        },
+    },
+
     // Prettier config (must be last)
     prettierConfig,
 ];

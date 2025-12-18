@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.10/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**/*.ts", "**/*.js", "**/*.mjs", "**/*.cjs", "**/*.json", "**/*.jsonc", "**/*.css", "**/*.svelte"]
+    "includes": ["**/*.ts", "**/*.js", "**/*.mjs", "**/*.cjs", "**/*.json", "**/*.jsonc", "**/*.css"]
   },
   "formatter": {
     "enabled": true,
@@ -19,14 +19,6 @@
   },
   "assist": {
     "enabled": false
-  },
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "single",
-      "trailingCommas": "all",
-      "semicolons": "always",
-      "arrowParentheses": "always"
-    }
   },
   "json": {
     "formatter": {
@@ -73,6 +65,23 @@
       }
     }
   },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "trailingCommas": "all",
+      "semicolons": "always",
+      "arrowParentheses": "always"
+    },
+    "linter": {
+      "enabled": true
+    }
+  },
+  "html": {
+    "formatter": {
+      "enabled": true
+    },
+    "experimentalFullSupportEnabled": true
+  },
   "overrides": [
     {
       "includes": ["examples/**/*.ts"],
@@ -82,6 +91,12 @@
             "noNonNullAssertion": "off"
           }
         }
+      }
+    },
+    {
+      "includes": ["**/*.svelte"],
+      "linter": {
+        "enabled": false
       }
     }
   ]

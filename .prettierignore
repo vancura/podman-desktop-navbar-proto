@@ -1,6 +1,7 @@
-# Prettier ignore - only for Markdown/YAML formatting
+# Prettier ignore - only for Markdown/YAML/Svelte formatting
 
 # NOTE: TS/JS/JSON/CSS are handled by Biome, not Prettier
+# NOTE: Svelte files are handled by Prettier with prettier-plugin-svelte
 
 # NOTE: HTML files are excluded - they use Handlebars syntax
 *.html
