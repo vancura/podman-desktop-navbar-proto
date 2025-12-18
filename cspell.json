@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
   "version": "0.2",
   "language": "en",
-  "words": ["Deutsch", "rgba", "titlebar"],
+  "words": ["Deutsch", "rgba", "titlebar", "bootc", "Bootc", "pinnable", "hideable"],
   "flagWords": ["cant", "dont", "hte", "teh", "wont"],
   "ignorePaths": [
     "*.map",
@@ -14,7 +14,8 @@
     "coverage",
     "dist",
     "node_modules",
-    "pnpm-lock.yaml"
+    "pnpm-lock.yaml",
+    "src/lib/i18n/locales/*.ts"
   ],
   "ignoreRegExpList": ["/#[0-9A-Fa-f]{6,8}/", "/0x[0-9A-Fa-f]+/", "/@[a-zA-Z0-9_-]+\\/[a-zA-Z0-9_-]+/"],
   "overrides": [

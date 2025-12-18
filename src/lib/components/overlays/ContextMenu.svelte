@@ -168,7 +168,7 @@
             actions.showModal({
                 titleKey: 'modal.hideItem',
                 descriptionKey: 'modal.hideItemDescription',
-                checkboxKey: 'modal.dontShowAgain',
+                checkboxKey: 'modal.doNotShowAgain',
                 onConfirm: (checked) => {
                     if (checked) actions.dismissHideWarning();
                     actions.hideItem(itemIdToHide);

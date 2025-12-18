@@ -74,7 +74,7 @@ export const en = {
     // Modal dialog
     'modal.hideItem': 'Hide Item',
     'modal.hideItemDescription': 'This item will be hidden. You can restore it in Settings.',
-    'modal.dontShowAgain': "Don't show this again",
+    'modal.doNotShowAgain': "Don't show this again",
     'modal.ok': 'OK',
     'modal.cancel': 'Cancel',
 
