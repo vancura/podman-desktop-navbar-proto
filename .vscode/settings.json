@@ -20,5 +20,5 @@
   "[javascriptreact]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
-  "cSpell.words": ["ambilab", "webgpu", "WGSL"]
+  "cSpell.words": ["ambilab", "grotesk"]
 }

@@ -7,16 +7,16 @@
 /** Navbar width constraints and behavior thresholds. */
 export const NAVBAR = {
     /** Minimum width in pixels. */
-    minWidth: 80,
+    minWidth: 60,
 
     /** Maximum width in pixels. */
-    maxWidth: 300,
+    maxWidth: 160,
 
     /** Default width in pixels. */
-    defaultWidth: 200,
+    defaultWidth: 160,
 
     /** Width threshold below which icon-only mode is used. */
-    collapseThreshold: 160,
+    collapseThreshold: 120,
 
     /** Hysteresis to prevent mode flickering during resize. */
     hysteresis: 10,

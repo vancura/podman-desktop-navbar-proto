@@ -2,6 +2,7 @@
   KeyboardShortcutsHelp Component
   Displays all available keyboard shortcuts organized by category.
 -->
+
 <script lang="ts">
     import { appState } from '../../state/app-state.svelte.js';
 
@@ -29,9 +30,7 @@
         },
         {
             title: 'Pinned Items',
-            shortcuts: [
-                { key: '⌘6–9', description: 'Pinned 1–4' },
-            ],
+            shortcuts: [{ key: '⌘6 – 9', description: 'Pinned 1–4' }],
         },
         {
             title: 'Focus Navigation',
@@ -56,31 +55,33 @@
 </script>
 
 {#key locale}
-<div class="rounded-lg border border-[var(--color-content-border)] bg-[var(--color-content-bg-secondary)] p-4">
-    <h3 class="mb-4 text-sm font-semibold text-[var(--color-text-primary)]">
-        Keyboard Shortcuts
-    </h3>
+    <div class="rounded-2xl border-2 border-content-border bg-content-bg-secondary p-6 my-6">
+        <h3 class="mb-4 text-md font-semibold text-text-primary">Keyboard Shortcuts</h3>
 
-    <div class="grid grid-cols-2 gap-6">
-        {#each SHORTCUT_GROUPS as group (group.title)}
-            <div>
-                <h4 class="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
-                    {group.title}
-                </h4>
-                <div class="space-y-1.5">
-                    {#each group.shortcuts as shortcut (shortcut.key)}
-                        <div class="flex items-center justify-between text-sm">
-                            <kbd class="min-w-16 rounded bg-[var(--color-kbd-bg)] px-2 py-0.5 font-mono text-xs text-[var(--color-kbd-text)]">
-                                {shortcut.key}
-                            </kbd>
-                            <span class="flex-1 pl-3 text-[var(--color-text-secondary)]">
-                                {shortcut.description}
-                            </span>
-                        </div>
-                    {/each}
+        <div class="grid grid-cols-2 gap-6">
+            {#each SHORTCUT_GROUPS as group (group.title)}
+                <div>
+                    <h4 class="mb-3 text-sm font-medium text-text-secondary">
+                        {group.title}:
+                    </h4>
+
+                    <div class="space-y-1.5">
+                        {#each group.shortcuts as shortcut (shortcut.key)}
+                            <div class="flex items-center justify-between text-sm">
+                                <kbd
+                                    class="min-w-24 rounded-lg border border-content-border px-2 py-1.25 text-sm text-text-secondary text-center tracking-wide"
+                                >
+                                    {shortcut.key}
+                                </kbd>
+
+                                <span class="flex-1 pl-3 text-text-secondary">
+                                    {shortcut.description}
+                                </span>
+                            </div>
+                        {/each}
+                    </div>
                 </div>
-            </div>
-        {/each}
+            {/each}
+        </div>
     </div>
-</div>
 {/key}

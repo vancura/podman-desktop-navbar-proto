@@ -3,16 +3,20 @@
   Reusable overlay backdrop for modals, menus, and dialogs.
   Handles click-outside dismissal and provides consistent styling.
 -->
+
 <script lang="ts">
     import type { Snippet } from 'svelte';
 
     interface Props {
         /** Z-index layer (uses CSS custom property name). */
         zIndex: 'z-context-menu' | 'z-modal' | 'z-banner';
+
         /** Whether to show semi-transparent background. */
         showOverlay?: boolean;
+
         /** Called when backdrop is clicked. */
         onClose: () => void;
+
         /** Content to render inside the backdrop. */
         children: Snippet;
     }
@@ -20,11 +24,13 @@
     const { zIndex, showOverlay = false, onClose, children }: Props = $props();
 
     /** Map z-index prop to CSS custom property value. */
-    const zIndexValue = $derived({
-        'z-context-menu': 'var(--z-context-menu)',
-        'z-modal': 'var(--z-modal)',
-        'z-banner': 'var(--z-banner)',
-    }[zIndex]);
+    const zIndexValue = $derived(
+        {
+            'z-context-menu': 'var(--z-context-menu)',
+            'z-modal': 'var(--z-modal)',
+            'z-banner': 'var(--z-banner)',
+        }[zIndex],
+    );
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -40,4 +46,3 @@
 >
     {@render children()}
 </div>
-

@@ -2,6 +2,7 @@
   ActionButton Component
   Button for control actions in the content area.
 -->
+
 <script lang="ts">
     interface Props {
         onclick?: () => void;
@@ -14,13 +15,11 @@
 
 <button
     type="button"
-    class="rounded-md bg-[var(--color-button-bg)] px-3 py-1.5 text-xs font-medium text-[var(--color-button-text)] transition-colors
-        hover:bg-[var(--color-button-bg-hover)]
-        active:bg-[var(--color-button-bg-active)]
+    class="rounded-lg bg-button-bg px-3 py-2 text-sm shadow-sm text-button-text
+        active:bg-button-bg-active
         disabled:cursor-not-allowed disabled:opacity-50"
     {onclick}
     {disabled}
 >
     {@render children()}
 </button>
-

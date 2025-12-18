@@ -19,7 +19,7 @@ import { ja } from './locales/ja.js';
 // ============================================================================
 
 /** All available translations indexed by locale code. */
-const TRANSLATIONS: Record<Locale, Record<TranslationKey, string>> = {
+const TRANSLATIONS: Record<Locale, Partial<Record<TranslationKey, string>>> = {
     en,
     de,
     ja,
@@ -66,11 +66,12 @@ export function isRtl(): boolean {
 
 /**
  * Translate a key to the current locale.
+ * Falls back to English if the translation is missing in the current locale.
  * @param key - Translation key from the English translations
  * @returns Translated string
  */
 export function t(key: TranslationKey): string {
-    return TRANSLATIONS[currentLocale][key];
+    return TRANSLATIONS[currentLocale][key] ?? en[key];
 }
 
 /**
@@ -90,10 +91,10 @@ export function formatShortcut(shortcut: string): string {
 /** Available locales with their native display names. */
 export const AVAILABLE_LOCALES: ReadonlyArray<{ code: Locale; name: string }> = [
     { code: 'en', name: 'English' },
-    { code: 'de', name: 'Deutsch' },
-    { code: 'ja', name: '日本語' },
-    { code: 'ar', name: 'العربية' },
-    { code: 'he', name: 'עברית' },
+    { code: 'de', name: 'German' },
+    { code: 'ja', name: 'Japanese' },
+    { code: 'ar', name: 'Arabic (RTL)' },
+    { code: 'he', name: 'Hebrew (RTL)' },
 ];
 
 // Re-export types for consumers

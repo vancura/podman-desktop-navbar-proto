@@ -36,6 +36,13 @@ interface MoreMenuConfig {
     y: number;
 }
 
+/** Tooltip configuration. */
+interface TooltipConfig {
+    x: number;
+    y: number;
+    itemId: string;
+}
+
 /** UI state for overlays and interactions. */
 interface UIState {
     activeItemId: string | null;
@@ -47,6 +54,7 @@ interface UIState {
     banner: BannerConfig | null;
     contextMenu: ContextMenuConfig | null;
     moreMenu: MoreMenuConfig | null;
+    tooltip: TooltipConfig | null;
     modalConfig: {
         titleKey: string;
         descriptionKey: string;
@@ -86,6 +94,7 @@ let ui = $state<UIState>({
     banner: null,
     contextMenu: null,
     moreMenu: null,
+    tooltip: null,
     modalConfig: null,
     modalCheckboxChecked: false,
 });
@@ -350,6 +359,16 @@ export const actions = {
         ui.moreMenu = null;
     },
 
+    /** Show tooltip for an item. */
+    showTooltip(x: number, y: number, itemId: string): void {
+        ui.tooltip = { x, y, itemId };
+    },
+
+    /** Hide tooltip. */
+    hideTooltip(): void {
+        ui.tooltip = null;
+    },
+
     /** Show modal dialog. */
     showModal(config: {
         titleKey: string;
@@ -377,6 +396,8 @@ export const actions = {
         items = createInitialItems();
         navbarWidth = NAVBAR.defaultWidth;
         isExpanded = true;
+        locale = 'en';
+        setI18nLocale('en');
         ui = {
             activeItemId: null,
             focusedItemId: null,
@@ -386,6 +407,7 @@ export const actions = {
             banner: null,
             contextMenu: null,
             moreMenu: null,
+            tooltip: null,
             modalConfig: null,
             modalCheckboxChecked: false,
         };

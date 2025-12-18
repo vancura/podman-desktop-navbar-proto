@@ -2,6 +2,7 @@
   ContextMenu Component
   Context menu overlay with actions for navbar items.
 -->
+
 <script lang="ts">
     import { t, type TranslationKey } from '../../i18n/index.js';
     import { actions, appState } from '../../state/app-state.svelte.js';
@@ -19,6 +20,7 @@
     const contextMenu = $derived(appState.ui.contextMenu);
     const targetItem = $derived(contextMenu?.itemId ? actions.findItem(contextMenu.itemId) : null);
     const isExpanded = $derived(appState.isExpanded);
+    const locale = $derived(appState.locale);
 
     let focusedIndex = $state(0);
 
@@ -30,9 +32,9 @@
     });
 
     // Determine item category for menu building
-    const isEssential = $derived(targetItem ? appState.items.essential.some(i => i.id === targetItem.id) : false);
-    const isPinned = $derived(targetItem ? appState.items.pinned.some(i => i.id === targetItem.id) : false);
-    const isRegular = $derived(targetItem ? appState.items.regular.some(i => i.id === targetItem.id) : false);
+    const isEssential = $derived(targetItem ? appState.items.essential.some((i) => i.id === targetItem.id) : false);
+    const isPinned = $derived(targetItem ? appState.items.pinned.some((i) => i.id === targetItem.id) : false);
+    const isRegular = $derived(targetItem ? appState.items.regular.some((i) => i.id === targetItem.id) : false);
     const isSettings = $derived(targetItem?.id === 'settings');
     const isAccount = $derived(targetItem?.id === 'account');
 
@@ -118,7 +120,7 @@
         menuItems
             .map((entry, index) => ({ entry, index }))
             .filter(({ entry }) => !entry.separator && !entry.disabled)
-            .map(({ index }) => index)
+            .map(({ index }) => index),
     );
 
     /** Execute menu action. */
@@ -209,34 +211,40 @@
 <svelte:window onkeydown={handleKeyDown} />
 
 {#if contextMenu}
-    <Backdrop zIndex="z-context-menu" onClose={() => actions.hideContextMenu()}>
-        <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-        <div
-            class="absolute min-w-52 rounded-lg border border-[var(--color-menu-border)] bg-[var(--color-menu-bg)] py-1 shadow-xl"
-            style="left: {contextMenu.x}px; top: {contextMenu.y}px;"
-            role="menu"
-            tabindex="-1"
-            onclick={(e) => e.stopPropagation()}
-        >
-            {#each menuItems as entry, index (index)}
-                {#if entry.separator}
-                    <div class="my-1 h-px bg-[var(--color-menu-separator)]"></div>
-                {:else}
-                    <button
-                        type="button"
-                        class="flex w-full px-3 py-1.5 text-left text-sm transition-colors
-                            {entry.disabled ? 'cursor-not-allowed text-[var(--color-menu-text-disabled)]' : 'text-[var(--color-menu-text)] hover:bg-[var(--color-menu-item-hover)]'}
-                            {focusedIndex === index && !entry.disabled ? 'bg-[var(--color-menu-item-hover)]' : ''}"
-                        role="menuitem"
-                        disabled={entry.disabled}
-                        tabindex="-1"
-                        onclick={() => !entry.disabled && executeAction(entry.action)}
-                        onmouseenter={() => { if (!entry.disabled) focusedIndex = index; }}
-                    >
-                        {t(entry.labelKey as TranslationKey)}
-                    </button>
-                {/if}
-            {/each}
-        </div>
-    </Backdrop>
+    {#key locale}
+        <Backdrop zIndex="z-context-menu" onClose={() => actions.hideContextMenu()}>
+            <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+            <div
+                class="absolute min-w-52 rounded-lg border border-(--color-menu-border) bg-(--color-menu-bg) py-1 shadow-xl"
+                style="left: {contextMenu.x}px; top: {contextMenu.y}px;"
+                role="menu"
+                tabindex="-1"
+                onclick={(e) => e.stopPropagation()}
+            >
+                {#each menuItems as entry, index (index)}
+                    {#if entry.separator}
+                        <div class="my-1 h-px bg-menu-separator"></div>
+                    {:else}
+                        <button
+                            type="button"
+                            class="flex w-full px-3 py-1.5 text-left text-sm rounded-sm
+                            {entry.disabled
+                                ? 'cursor-not-allowed text-(--color-menu-text-disabled)'
+                                : 'text-menu-text'}
+                            {focusedIndex === index && !entry.disabled ? 'bg-menu-item-selected' : ''}"
+                            role="menuitem"
+                            disabled={entry.disabled}
+                            tabindex="-1"
+                            onclick={() => !entry.disabled && executeAction(entry.action)}
+                            onmouseenter={() => {
+                                if (!entry.disabled) focusedIndex = index;
+                            }}
+                        >
+                            {t(entry.labelKey as TranslationKey)}
+                        </button>
+                    {/if}
+                {/each}
+            </div>
+        </Backdrop>
+    {/key}
 {/if}

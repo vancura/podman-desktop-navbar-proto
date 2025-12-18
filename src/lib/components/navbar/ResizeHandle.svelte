@@ -2,6 +2,7 @@
   ResizeHandle Component
   Draggable handle for resizing the navbar width.
 -->
+
 <script lang="ts">
     import { actions, appState } from '../../state/app-state.svelte.js';
     import { NAVBAR } from '../../utils/constants.js';
@@ -63,7 +64,7 @@
 
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div
-    class="group absolute top-0 z-[var(--z-resize)] h-full w-3 cursor-col-resize
+    class="group absolute top-0 z-(--z-resize) h-full w-3 cursor-col-resize
         {isRtl ? 'left-0 -translate-x-1/2' : 'right-0 translate-x-1/2'}"
     onmousedown={handleMouseDown}
     role="separator"
@@ -73,9 +74,9 @@
     aria-valuemax={NAVBAR.maxWidth}
 >
     <div
-        class="absolute top-0 h-full w-1 transition-all duration-100
+        class="absolute top-0 h-full w-1 transition-all
             {isRtl ? 'left-1/2 -translate-x-1/2' : 'right-1/2 translate-x-1/2'}
-            {isDragging ? 'bg-[var(--color-navbar-resize-hover)] w-2' : 'bg-[var(--color-navbar-resize)] group-hover:bg-[var(--color-navbar-resize-hover)] group-hover:w-2'}"
+            {isDragging ? 'bg-navbar-resize-hover w-2' : 'bg-navbar-resize group-hover:bg-navbar-resize-hover group-hover:w-2'}"
     ></div>
 </div>
 

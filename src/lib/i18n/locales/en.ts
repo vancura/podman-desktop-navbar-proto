@@ -47,7 +47,7 @@ export const en = {
     'menu.signOut': 'Sign Out',
 
     // Info banner messages
-    'banner.featureOutOfScope': 'Feature Out of Scope',
+    'banner.featureOutOfScope': 'Feature out of scope',
     'banner.featureOutOfScopeDesc': 'This feature is out of scope for this prototype.',
     'banner.keyboardShortcut': 'Keyboard Shortcut',
     'banner.keyboardShortcutDesc': 'This would open a dialog to assign a keyboard shortcut.',

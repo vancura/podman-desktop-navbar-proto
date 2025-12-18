@@ -2,6 +2,7 @@
   Icon Component
   Renders SVG icons with outline or filled variants.
 -->
+
 <script lang="ts">
     import type { IconName, IconVariant } from '../state/types.js';
 

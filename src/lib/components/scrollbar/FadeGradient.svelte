@@ -2,6 +2,7 @@
   FadeGradient Component
   Gradient overlay for scroll indicators.
 -->
+
 <script lang="ts">
     interface Props {
         position: 'top' | 'bottom';
@@ -18,7 +19,7 @@
 </script>
 
 <div
-    class="pointer-events-none absolute left-0 right-0 h-6 from-[var(--color-navbar-bg)] to-transparent transition-opacity duration-200
+    class="pointer-events-none absolute left-0 right-0 h-6 from-navbar-bg to-transparent
         {gradientClass}
         {visible ? 'opacity-100' : 'opacity-0'}"
     aria-hidden="true"

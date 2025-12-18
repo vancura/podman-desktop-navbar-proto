@@ -2,6 +2,7 @@
   MoreMenu Component
   Popup menu showing hidden navbar items.
 -->
+
 <script lang="ts">
     import { t, type TranslationKey } from '../../i18n/index.js';
     import { actions, appState } from '../../state/app-state.svelte.js';
@@ -70,33 +71,40 @@
 {#if moreMenu && hiddenItems.length > 0}
     <Backdrop zIndex="z-context-menu" onClose={() => actions.hideMoreMenu()}>
         {#key locale}
-        <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-        <div
-            class="absolute min-w-56 rounded-lg border border-[var(--color-menu-border)] bg-[var(--color-menu-bg)] py-1 shadow-xl"
-            style="left: {moreMenu.x}px; bottom: calc(100vh - {moreMenu.y}px);"
-            role="menu"
-            tabindex="-1"
-            onclick={(e) => e.stopPropagation()}
-        >
-            <div class="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--color-menu-text-disabled)]">
-                Hidden Items
-            </div>
-            {#each hiddenItems as item, index (item.id)}
-                <button
-                    type="button"
-                    class="flex w-full items-center gap-3 px-3 py-1.5 text-left text-sm text-[var(--color-menu-text)] transition-colors hover:bg-[var(--color-menu-item-hover)]
-                        {focusedIndex === index ? 'bg-[var(--color-menu-item-hover)]' : ''}"
-                    role="menuitem"
-                    tabindex="-1"
-                    onclick={() => handleUnhide(item.id)}
-                    onmouseenter={() => { focusedIndex = index; }}
+            <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+            <div
+                class="absolute min-w-56 rounded-lg border border-(--color-menu-border) bg-(--color-menu-bg) py-1 shadow-xl"
+                style="left: {moreMenu.x}px; bottom: calc(100vh - {moreMenu.y}px);"
+                role="menu"
+                tabindex="-1"
+                onclick={(e) => e.stopPropagation()}
+            >
+                <div
+                    class="px-3 py-1.5 text-sm font-semibold uppercase tracking-wide text-(--color-menu-text-disabled)"
                 >
-                    <Icon name={item.icon} variant="outline" size={16} class="text-[var(--color-menu-text)]" />
-                    <span class="flex-1">{t(item.labelKey as TranslationKey)}</span>
-                    <span class="text-xs text-[var(--color-menu-text-disabled)]">Show</span>
-                </button>
-            {/each}
-        </div>
+                    {t('menu.hiddenItems' as TranslationKey)}
+                </div>
+
+                {#each hiddenItems as item, index (item.id)}
+                    <button
+                        type="button"
+                        class="flex w-full items-center gap-3 px-3 py-1.5 text-left text-sm text-(--color-menu-text)
+                        {focusedIndex === index ? 'bg-(--color-menu-item-disabled)' : ''}"
+                        role="menuitem"
+                        tabindex="-1"
+                        onclick={() => handleUnhide(item.id)}
+                        onmouseenter={() => {
+                            focusedIndex = index;
+                        }}
+                    >
+                        <Icon name={item.icon} variant="outline" size={16} class="text-(--color-menu-text)" />
+
+                        <span class="flex-1">{t(item.labelKey as TranslationKey)}</span>
+
+                        <span class="text-sm text-(--color-menu-text-disabled)">{t('menu.show' as TranslationKey)}</span>
+                    </button>
+                {/each}
+            </div>
         {/key}
     </Backdrop>
 {/if}

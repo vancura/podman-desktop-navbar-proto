@@ -2,6 +2,7 @@
   LocaleSwitcher Component
   Language selector buttons.
 -->
+
 <script lang="ts">
     import { AVAILABLE_LOCALES } from '../../i18n/index.js';
     import { actions, appState } from '../../state/app-state.svelte.js';
@@ -18,10 +19,8 @@
     {#each AVAILABLE_LOCALES as { code, name } (code)}
         <button
             type="button"
-            class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors
-                {currentLocale === code
-                    ? 'bg-[var(--color-focus-ring)] text-white'
-                    : 'bg-[var(--color-button-bg)] text-[var(--color-button-text)] hover:bg-[var(--color-button-bg-hover)]'}"
+            class="rounded-lg bg-button-bg px-3 py-2 text-sm shadow-xs text-button-text
+                {currentLocale === code ? 'bg-focus-ring text-white' : 'bg-button-bg text-button-text'}"
             onclick={() => handleLocaleChange(code)}
         >
             {name}
