@@ -19,6 +19,7 @@ export default [
             '**/*.md',
             '**/*.mdx',
             '**/*.min.js',
+            '**/*.svelte', // Svelte files are handled by Biome
             '**/build/**',
             '**/coverage/**',
             '**/dist/**',
@@ -42,6 +43,12 @@ export default [
             globals: {
                 ...globals.browser,
                 ...globals.es2022,
+                // Svelte 5 runes
+                $state: 'readonly',
+                $derived: 'readonly',
+                $effect: 'readonly',
+                $props: 'readonly',
+                $bindable: 'readonly',
             },
         },
         plugins: {
@@ -169,9 +176,8 @@ export default [
         },
     },
 
-    // Svelte files - relax unused vars rule
-    // The TypeScript parser doesn't understand Svelte template syntax,
-    // so it can't detect that props destructured from $props() are used in templates
+    // Svelte files - ignore parsing errors since TypeScript parser doesn't understand Svelte syntax
+    // Biome handles Svelte files separately, so we'll just ignore them in ESLint
     {
         files: ['**/*.svelte'],
         languageOptions: {
@@ -192,6 +198,8 @@ export default [
             // Turn off unused vars for Svelte files since props are used in templates
             // which the TypeScript parser can't analyze
             '@typescript-eslint/no-unused-vars': 'off',
+            // Ignore parsing errors - TypeScript parser can't parse Svelte files properly
+            'no-undef': 'off',
         },
     },
 

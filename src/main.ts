@@ -3,13 +3,19 @@
  * Entry point for the Svelte application.
  */
 
+import './app.css';
+
 import { mount } from 'svelte';
 
 import App from './App.svelte';
-import './app.css';
+
+const appElement = document.getElementById('app');
+if (!appElement) {
+    throw new Error('App element not found');
+}
 
 const app = mount(App, {
-    target: document.getElementById('app')!,
+    target: appElement,
 });
 
 export default app;

@@ -90,14 +90,20 @@ function getAllVisibleItems() {
     return [...essential, ...pinned, ...regular, ...bottom];
 }
 
-/** Activate a navigation item and show prototype banner. */
+/**
+ * Activate a navigation item and show prototype banner.
+ * @param itemId
+ */
 function activateItem(itemId: string): void {
     actions.setActiveItem(itemId);
     actions.setFocusedItem(itemId);
     actions.showBanner('banner.featureOutOfScope', 'banner.featureOutOfScopeDesc');
 }
 
-/** Navigate focus to a specific item by index with wrapping. */
+/**
+ * Navigate focus to a specific item by index with wrapping.
+ * @param delta
+ */
 function navigateFocusByDelta(delta: number): void {
     const items = getAllVisibleItems();
     if (items.length === 0) return;
@@ -113,10 +119,16 @@ function navigateFocusByDelta(delta: number): void {
         newIndex = (currentIndex + delta + items.length) % items.length;
     }
 
-    actions.setFocusedItem(items[newIndex]!.id);
+    const item = items[newIndex];
+    if (item) {
+        actions.setFocusedItem(item.id);
+    }
 }
 
-/** Execute a keyboard shortcut action. */
+/**
+ * Execute a keyboard shortcut action.
+ * @param action
+ */
 function executeAction(action: string): void {
     const items = getAllVisibleItems();
 
@@ -130,8 +142,11 @@ function executeAction(action: string): void {
             if (settings) activateItem(settings.id);
         } else {
             const index = parseInt(action.replace('navigate-', ''), 10);
-            if (!isNaN(index) && index < items.length) {
-                activateItem(items[index]!.id);
+            if (!Number.isNaN(index) && index >= 0 && index < items.length) {
+                const item = items[index];
+                if (item) {
+                    activateItem(item.id);
+                }
             }
         }
         return;
@@ -187,13 +202,19 @@ function executeAction(action: string): void {
 
         case 'navigate-first':
             if (items.length > 0) {
-                actions.setFocusedItem(items[0]!.id);
+                const item = items[0];
+                if (item) {
+                    actions.setFocusedItem(item.id);
+                }
             }
             break;
 
         case 'navigate-last':
             if (items.length > 0) {
-                actions.setFocusedItem(items[items.length - 1]!.id);
+                const item = items[items.length - 1];
+                if (item) {
+                    actions.setFocusedItem(item.id);
+                }
             }
             break;
 
@@ -216,7 +237,11 @@ function executeAction(action: string): void {
 // Shortcut Matching
 // ============================================================================
 
-/** Check if a keyboard event matches a shortcut definition. */
+/**
+ * Check if a keyboard event matches a shortcut definition.
+ * @param event
+ * @param shortcut
+ */
 function matchesShortcut(event: KeyboardEvent, shortcut: KeyboardShortcut): boolean {
     // Match by key or code (code is more reliable for physical keys)
     const keyMatches = event.key === shortcut.key || (shortcut.code && event.code === shortcut.code);
@@ -235,7 +260,10 @@ function matchesShortcut(event: KeyboardEvent, shortcut: KeyboardShortcut): bool
 // Event Handler
 // ============================================================================
 
-/** Global keydown event handler. */
+/**
+ * Global keydown event handler.
+ * @param event
+ */
 function handleKeyDown(event: KeyboardEvent): void {
     // Ignore keyboard events when user is typing in form fields
     const target = event.target as HTMLElement;

@@ -44,21 +44,23 @@ export function navigateActionable(
     switch (direction) {
         case 'up':
             if (currentPos > 0) {
-                return actionableIndices[currentPos - 1]!;
+                const index = actionableIndices[currentPos - 1];
+                if (index !== undefined) return index;
             }
-            return actionableIndices[actionableIndices.length - 1]!;
+            return actionableIndices[actionableIndices.length - 1] ?? -1;
 
         case 'down':
             if (currentPos < actionableIndices.length - 1) {
-                return actionableIndices[currentPos + 1]!;
+                const index = actionableIndices[currentPos + 1];
+                if (index !== undefined) return index;
             }
-            return actionableIndices[0]!;
+            return actionableIndices[0] ?? -1;
 
         case 'first':
-            return actionableIndices[0]!;
+            return actionableIndices[0] ?? -1;
 
         case 'last':
-            return actionableIndices[actionableIndices.length - 1]!;
+            return actionableIndices[actionableIndices.length - 1] ?? -1;
     }
 }
 

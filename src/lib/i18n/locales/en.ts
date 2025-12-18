@@ -86,4 +86,7 @@ export const en = {
     'a11y.closeMenu': 'Close Menu',
 } as const;
 
+/**
+ * Translation key type.
+ */
 export type TranslationKey = keyof typeof en;

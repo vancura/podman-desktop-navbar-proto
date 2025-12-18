@@ -64,7 +64,10 @@ interface UIState {
     modalCheckboxChecked: boolean;
 }
 
-/** Create deep clone of items array. */
+/**
+ * Create deep clone of items array.
+ * @param items
+ */
 function cloneItems(items: NavItem[]): NavItem[] {
     return items.map((item) => ({ ...item }));
 }
@@ -163,7 +166,10 @@ export const appState = {
 
 // State mutations
 export const actions = {
-    /** Set navbar width with automatic mode switching. */
+    /**
+     * Set navbar width with automatic mode switching.
+     * @param width
+     */
     setNavbarWidth(width: number): void {
         const clamped = Math.max(NAVBAR.minWidth, Math.min(NAVBAR.maxWidth, width));
         navbarWidth = clamped;
@@ -184,13 +190,19 @@ export const actions = {
         isExpanded = !isExpanded;
     },
 
-    /** Set the current locale (updates both app state and i18n module). */
+    /**
+     * Set the current locale (updates both app state and i18n module).
+     * @param newLocale
+     */
     setLocale(newLocale: Locale): void {
         locale = newLocale;
         setI18nLocale(newLocale);
     },
 
-    /** Pin an item (moves from regular to pinned). */
+    /**
+     * Pin an item (moves from regular to pinned).
+     * @param itemId
+     */
     pinItem(itemId: string): boolean {
         if (items.pinned.length >= NAVBAR.maxPinnedItems) {
             return false;
@@ -199,20 +211,24 @@ export const actions = {
         const index = items.regular.findIndex((item) => item.id === itemId);
         if (index === -1) return false;
 
-        const item = items.regular[index]!;
-        if (!item.canPin) return false;
+        const item = items.regular[index];
+        if (!item || !item.canPin) return false;
 
         items.regular.splice(index, 1);
         items.pinned.push({ ...item, iconVariant: 'filled' });
         return true;
     },
 
-    /** Unpin an item (moves from pinned to regular). */
+    /**
+     * Unpin an item (moves from pinned to regular).
+     * @param itemId
+     */
     unpinItem(itemId: string): void {
         const index = items.pinned.findIndex((item) => item.id === itemId);
         if (index === -1) return;
 
-        const item = items.pinned[index]!;
+        const item = items.pinned[index];
+        if (!item) return;
         items.pinned.splice(index, 1);
         items.regular.push({ ...item, iconVariant: 'outline' });
     },
@@ -224,13 +240,16 @@ export const actions = {
         items.pinned = [];
     },
 
-    /** Hide an item (moves from regular/pinned to hidden). */
+    /**
+     * Hide an item (moves from regular/pinned to hidden).
+     * @param itemId
+     */
     hideItem(itemId: string): void {
         // Check regular items
         let index = items.regular.findIndex((item) => item.id === itemId);
         if (index !== -1) {
-            const item = items.regular[index]!;
-            if (!item.canHide) return;
+            const item = items.regular[index];
+            if (!item || !item.canHide) return;
             items.regular.splice(index, 1);
             items.hidden.push(item);
             return;
@@ -239,19 +258,23 @@ export const actions = {
         // Check pinned items
         index = items.pinned.findIndex((item) => item.id === itemId);
         if (index !== -1) {
-            const item = items.pinned[index]!;
-            if (!item.canHide) return;
+            const item = items.pinned[index];
+            if (!item || !item.canHide) return;
             items.pinned.splice(index, 1);
             items.hidden.push({ ...item, iconVariant: 'outline' });
         }
     },
 
-    /** Unhide an item (moves from hidden to regular). */
+    /**
+     * Unhide an item (moves from hidden to regular).
+     * @param itemId
+     */
     unhideItem(itemId: string): void {
         const index = items.hidden.findIndex((item) => item.id === itemId);
         if (index === -1) return;
 
-        const item = items.hidden[index]!;
+        const item = items.hidden[index];
+        if (!item) return;
         items.hidden.splice(index, 1);
         items.regular.push(item);
     },
@@ -262,7 +285,10 @@ export const actions = {
         items.hidden = [];
     },
 
-    /** Add a new item to regular panel. */
+    /**
+     * Add a new item to regular panel.
+     * @param item
+     */
     addItem(item: NavItem): void {
         items.regular.push(item);
     },
@@ -286,8 +312,11 @@ export const actions = {
         const pinnable = items.regular.filter((item) => item.canPin);
         if (pinnable.length === 0 || items.pinned.length >= NAVBAR.maxPinnedItems) return;
 
-        const randomItem = pinnable[Math.floor(Math.random() * pinnable.length)]!;
-        actions.pinItem(randomItem.id);
+        const randomIndex = Math.floor(Math.random() * pinnable.length);
+        const randomItem = pinnable[randomIndex];
+        if (randomItem) {
+            actions.pinItem(randomItem.id);
+        }
     },
 
     /** Hide a random visible item. */
@@ -295,21 +324,33 @@ export const actions = {
         const hideable = [...items.regular, ...items.pinned].filter((item) => item.canHide);
         if (hideable.length === 0) return;
 
-        const randomItem = hideable[Math.floor(Math.random() * hideable.length)]!;
-        actions.hideItem(randomItem.id);
+        const randomIndex = Math.floor(Math.random() * hideable.length);
+        const randomItem = hideable[randomIndex];
+        if (randomItem) {
+            actions.hideItem(randomItem.id);
+        }
     },
 
-    /** Set the active (selected) item. */
+    /**
+     * Set the active (selected) item.
+     * @param itemId
+     */
     setActiveItem(itemId: string | null): void {
         ui.activeItemId = itemId;
     },
 
-    /** Set the focused item (keyboard navigation). */
+    /**
+     * Set the focused item (keyboard navigation).
+     * @param itemId
+     */
     setFocusedItem(itemId: string | null): void {
         ui.focusedItemId = itemId;
     },
 
-    /** Set the hovered item. */
+    /**
+     * Set the hovered item.
+     * @param itemId
+     */
     setHoveredItem(itemId: string | null): void {
         ui.hoveredItemId = itemId;
     },
@@ -329,7 +370,11 @@ export const actions = {
         ui.hideWarningDismissed = true;
     },
 
-    /** Show info banner. */
+    /**
+     * Show info banner.
+     * @param titleKey
+     * @param descriptionKey
+     */
     showBanner(titleKey: string, descriptionKey: string): void {
         ui.banner = { titleKey, descriptionKey };
     },
@@ -339,7 +384,12 @@ export const actions = {
         ui.banner = null;
     },
 
-    /** Show context menu. */
+    /**
+     * Show context menu.
+     * @param x
+     * @param y
+     * @param itemId
+     */
     showContextMenu(x: number, y: number, itemId: string | null = null): void {
         ui.contextMenu = { x, y, itemId };
     },
@@ -349,7 +399,11 @@ export const actions = {
         ui.contextMenu = null;
     },
 
-    /** Show more menu (hidden items). */
+    /**
+     * Show more menu (hidden items).
+     * @param x
+     * @param y
+     */
     showMoreMenu(x: number, y: number): void {
         ui.moreMenu = { x, y };
     },
@@ -359,7 +413,12 @@ export const actions = {
         ui.moreMenu = null;
     },
 
-    /** Show tooltip for an item. */
+    /**
+     * Show tooltip for an item.
+     * @param x
+     * @param y
+     * @param itemId
+     */
     showTooltip(x: number, y: number, itemId: string): void {
         ui.tooltip = { x, y, itemId };
     },
@@ -369,7 +428,14 @@ export const actions = {
         ui.tooltip = null;
     },
 
-    /** Show modal dialog. */
+    /**
+     * Show modal dialog.
+     * @param config
+     * @param config.titleKey
+     * @param config.descriptionKey
+     * @param config.checkboxKey
+     * @param config.onConfirm
+     */
     showModal(config: {
         titleKey: string;
         descriptionKey: string;
@@ -413,7 +479,10 @@ export const actions = {
         };
     },
 
-    /** Find an item by ID across all panels. */
+    /**
+     * Find an item by ID across all panels.
+     * @param itemId
+     */
     findItem(itemId: string): NavItem | undefined {
         return (
             items.essential.find((i) => i.id === itemId) ??

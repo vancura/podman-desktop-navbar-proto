@@ -52,6 +52,7 @@ export function getLocale(): Locale {
 /**
  * Set the current locale and update document attributes.
  * Note: Prefer using actions.setLocale() for reactivity.
+ * @param locale
  */
 export function setLocale(locale: Locale): void {
     currentLocale = locale;
