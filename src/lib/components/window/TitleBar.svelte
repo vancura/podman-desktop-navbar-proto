@@ -39,9 +39,7 @@
 <header class="flex h-8 shrink-0 items-center bg-(--color-titlebar-bg) px-3" dir="ltr">
     <TrafficLights />
 
-    <span class="flex-1 text-center text-sm text-text-secondary" dir={isRtl ? 'rtl' : 'ltr'}>
-        {displayTitle}
-    </span>
+    <span class="flex-1 text-center text-sm text-text-secondary" dir={isRtl ? 'rtl' : 'ltr'}> {displayTitle}</span>
 
     <!-- Spacer to balance traffic lights -->
     <div class="w-14"></div>

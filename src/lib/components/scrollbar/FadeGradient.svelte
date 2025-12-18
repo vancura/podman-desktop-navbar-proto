@@ -11,11 +11,7 @@
 
     const { position, visible }: Props = $props();
 
-    const gradientClass = $derived(
-        position === 'top'
-            ? 'top-0 bg-gradient-to-b'
-            : 'bottom-0 bg-gradient-to-t'
-    );
+    const gradientClass = $derived(position === 'top' ? 'top-0 bg-gradient-to-b' : 'bottom-0 bg-gradient-to-t');
 </script>
 
 <div
@@ -24,4 +20,3 @@
         {visible ? 'opacity-100' : 'opacity-0'}"
     aria-hidden="true"
 ></div>
-

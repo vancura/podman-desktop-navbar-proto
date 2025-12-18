@@ -76,7 +76,8 @@
     <div
         class="absolute top-0 h-full w-1 transition-all
             {isRtl ? 'left-1/2 -translate-x-1/2' : 'right-1/2 translate-x-1/2'}
-            {isDragging ? 'bg-navbar-resize-hover w-2' : 'bg-navbar-resize group-hover:bg-navbar-resize-hover group-hover:w-2'}"
+            {isDragging
+            ? 'bg-navbar-resize-hover w-2'
+            : 'bg-navbar-resize group-hover:bg-navbar-resize-hover group-hover:w-2'}"
     ></div>
 </div>
-

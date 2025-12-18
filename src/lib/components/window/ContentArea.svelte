@@ -13,6 +13,4 @@
     const { children }: Props = $props();
 </script>
 
-<main class="flex flex-1 flex-col overflow-hidden bg-(--color-content-bg) ps-px">
-    {@render children()}
-</main>
+<main class="flex flex-1 flex-col overflow-hidden bg-(--color-content-bg) ps-px">{@render children()}</main>

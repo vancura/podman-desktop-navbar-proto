@@ -101,7 +101,8 @@
 
                         <span class="flex-1">{t(item.labelKey as TranslationKey)}</span>
 
-                        <span class="text-sm text-(--color-menu-text-disabled)">{t('menu.show' as TranslationKey)}</span>
+                        <span class="text-sm text-(--color-menu-text-disabled)">{t('menu.show' as TranslationKey)}</span
+                        >
                     </button>
                 {/each}
             </div>
