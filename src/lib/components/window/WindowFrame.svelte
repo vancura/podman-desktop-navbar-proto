@@ -21,7 +21,7 @@
 
 <div
     class="flex h-screen w-full items-center justify-center bg-canvas-bg p-10"
-    style="padding-top: 60px; padding-left: 60px; padding-right: 60px; padding-bottom: 60px;"
+    style="padding-top: 80px; padding-left: 80px; padding-right: 80px; padding-bottom: 120px;"
     dir={isRtl ? 'rtl' : 'ltr'}
 >
     <div
