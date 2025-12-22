@@ -10,7 +10,7 @@ export const NAVBAR = {
     minWidth: 60,
 
     /** Maximum width in pixels. */
-    maxWidth: 160,
+    maxWidth: 240,
 
     /** Default width in pixels. */
     defaultWidth: 160,

@@ -107,8 +107,8 @@
     <button
         bind:this={buttonElement}
         type="button"
-        class="focus-ring group flex w-full cursor-pointer flex-col items-center justify-center rounded-lg
-        {heightClass}
+        class="focus-ring group flex w-full cursor-pointer items-center rounded-lg
+        {isExpanded ? 'h-11 flex-row justify-start px-3' : 'h-11 flex-col justify-center'}
         {isActive ? 'bg-navbar-item-selected' : 'hover:bg-(--color-navbar-item-hover)'}
         {isFocused ? 'ring-2 ring-focus-ring ring-offset-2 ring-offset-navbar-bg' : ''}"
         tabindex={isDefaultTabbable ? 0 : -1}
@@ -148,7 +148,7 @@
 
         {#if isExpanded}
             <span
-                class="mt-1 max-w-full truncate px-1 text-[11px] font-medium leading-tight
+                class="ml-3 max-w-full truncate text-[13px] font-medium leading-tight
                 {isActive ? 'text-navbar-text-active' : 'text-navbar-text'}"
             >
                 {label}
