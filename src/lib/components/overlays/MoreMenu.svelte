@@ -78,6 +78,9 @@
                 role="menu"
                 tabindex="-1"
                 onclick={(e) => e.stopPropagation()}
+                onmouseleave={() => {
+                    focusedIndex = -1;
+                }}
             >
                 <div
                     class="px-3 py-1.5 text-sm font-semibold uppercase tracking-wide text-(--color-menu-text-disabled)"

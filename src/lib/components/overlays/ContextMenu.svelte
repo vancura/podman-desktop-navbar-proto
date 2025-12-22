@@ -220,6 +220,9 @@
                 role="menu"
                 tabindex="-1"
                 onclick={(e) => e.stopPropagation()}
+                onmouseleave={() => {
+                    focusedIndex = -1;
+                }}
             >
                 {#each menuItems as entry, index (index)}
                     {#if entry.separator}
