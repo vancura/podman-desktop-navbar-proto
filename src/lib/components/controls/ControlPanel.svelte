@@ -11,10 +11,27 @@
     import LocaleSwitcher from './LocaleSwitcher.svelte';
 
     function handleAddItem() {
+        const itemTypes = [
+            { labelKey: 'nav.extensions', icon: 'plug', prefix: 'ext' },
+            { labelKey: 'nav.containers', icon: 'box', prefix: 'con' },
+            { labelKey: 'nav.images', icon: 'gallery', prefix: 'img' },
+            { labelKey: 'nav.volumes', icon: 'database', prefix: 'vol' },
+            { labelKey: 'nav.pods', icon: 'widget', prefix: 'pod' },
+            { labelKey: 'nav.kubernetes', icon: 'server', prefix: 'k8s' },
+            { labelKey: 'nav.terminal', icon: 'terminal', prefix: 'term' },
+            { labelKey: 'nav.dockerCompose', icon: 'box', prefix: 'dc' },
+            { labelKey: 'nav.kind', icon: 'widget', prefix: 'kind' },
+            { labelKey: 'nav.lima', icon: 'server', prefix: 'lima' },
+            { labelKey: 'nav.bootc', icon: 'database', prefix: 'bootc' },
+            { labelKey: 'nav.minikube', icon: 'server', prefix: 'mini' },
+        ];
+
+        const randomType = itemTypes[Math.floor(Math.random() * itemTypes.length)];
+
         const newItem: NavItem = {
-            id: `ext-${Date.now()}`,
-            labelKey: 'nav.extensions',
-            icon: 'plug',
+            id: `${randomType.prefix}-${Date.now()}`,
+            labelKey: randomType.labelKey,
+            icon: randomType.icon,
             canPin: true,
             canHide: true,
             originalCategory: 'regular',
