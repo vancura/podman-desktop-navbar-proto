@@ -127,6 +127,11 @@ body {
     background: var(--color-window-bg);
 }
 
+a {
+    color: #8a63d2;
+    text-decoration: underline;
+}
+
 /* Ensure font is applied universally */
 * {
     font-family: inherit;

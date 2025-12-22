@@ -77,4 +77,10 @@
 
     <!-- Keyboard Shortcuts -->
     <KeyboardShortcutsHelp />
+
+    <p>
+        GitHub: <a href="https://github.com/vancura/podman-desktop-navbar-proto">
+            @vancura/podman-desktop-navbar-proto
+        </a>
+    </p>
 </div>
