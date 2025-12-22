@@ -6,7 +6,6 @@
 <script lang="ts">
     import { t, type TranslationKey } from '../../i18n/index.js';
     import { actions, appState } from '../../state/app-state.svelte.js';
-    import FadeGradient from '../scrollbar/FadeGradient.svelte';
     import NavbarDivider from './NavbarDivider.svelte';
     import NavbarItem from './NavbarItem.svelte';
     import ResizeHandle from './ResizeHandle.svelte';
@@ -32,7 +31,6 @@
     let clientHeight = $state(0);
 
     const showTopFade = $derived(scrollTop > 0);
-    const showBottomFade = $derived(scrollTop + clientHeight < scrollHeight - 1);
 
     function handleScroll() {
         if (scrollContainer) {
@@ -76,9 +74,6 @@
             class="navbar-scrollbar relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden p-2"
             onscroll={handleScroll}
         >
-            <!-- Top fade gradient -->
-            <FadeGradient position="top" visible={showTopFade} />
-
             <!-- Essential items (always visible) -->
             <div class="flex flex-col gap-1">
                 {#each items.essential as navItem (navItem.id)}
@@ -132,9 +127,6 @@
 
             <!-- Spacer to push bottom panel down -->
             <div class="flex-1"></div>
-
-            <!-- Bottom fade gradient -->
-            <FadeGradient position="bottom" visible={showBottomFade} />
         </div>
 
         <!-- More button (if hidden items exist) -->
@@ -153,9 +145,15 @@
             </div>
         {/if}
 
-        <!-- Bottom panel (Settings, Account) -->
+        <div
+            class="absolute w-[100%] left-0 bg-gradient-to-b pointer-events-none h-30 -my-6 from-transparent to-navbar-bg"
+            style="bottom: {isExpanded ? '158px' : '134px'};"
+            aria-hidden="true"
+        ></div>
+
         <NavbarDivider />
 
+        <!-- Bottom panel (Settings, Account) -->
         <div class="flex flex-col gap-1 p-2 pt-0">
             {#each items.bottom as navItem (navItem.id)}
                 <NavbarItem
