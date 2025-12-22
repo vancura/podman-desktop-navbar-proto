@@ -169,10 +169,10 @@ function executeAction(action: string): void {
             break;
 
         case 'pin-current': {
-            const activeId = appState.ui.activeItemId;
-            if (!activeId) break;
+            const focusedId = appState.ui.focusedItemId;
+            if (!focusedId) break;
 
-            const item = actions.findItem(activeId);
+            const item = actions.findItem(focusedId);
             if (!item?.canPin) break;
 
             const isPinned = appState.items.pinned.some((p) => p.id === item.id);
