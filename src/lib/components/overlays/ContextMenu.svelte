@@ -228,7 +228,7 @@
                         <button
                             type="button"
                             class="flex w-full px-3 py-1.5 text-left text-sm rounded-sm
-                            {entry.disabled ? 'cursor-not-allowed text-(--color-menu-text-disabled)' : 'text-menu-text'}
+                            {entry.disabled ? 'text-(--color-menu-text-disabled)' : 'text-menu-text'}
                             {focusedIndex === index && !entry.disabled ? 'bg-menu-item-selected' : ''}"
                             role="menuitem"
                             disabled={entry.disabled}

@@ -17,7 +17,7 @@
     type="button"
     class="rounded-lg bg-button-bg px-3 py-2 text-sm shadow-sm text-button-text
         active:bg-button-bg-active
-        disabled:cursor-not-allowed disabled:opacity-50"
+        disabled:opacity-50"
     {onclick}
     {disabled}
 >
