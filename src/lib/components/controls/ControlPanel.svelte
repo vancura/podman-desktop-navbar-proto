@@ -15,7 +15,6 @@
             id: `ext-${Date.now()}`,
             labelKey: 'nav.extensions',
             icon: 'plug',
-            iconVariant: 'outline',
             canPin: true,
             canHide: true,
             originalCategory: 'regular',

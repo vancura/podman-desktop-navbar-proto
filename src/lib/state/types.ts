@@ -17,9 +17,6 @@ export type IconName =
     | 'chevron-right'
     | 'more';
 
-/** Icon variant - outline for regular, filled for pinned items. */
-export type IconVariant = 'outline' | 'filled';
-
 /** Supported locales. */
 export type Locale = 'en' | 'de' | 'ja' | 'ar' | 'he';
 
@@ -36,9 +33,6 @@ export interface NavItem {
 
     /** Icon name from the icon set. */
     icon: IconName;
-
-    /** Icon variant (outline for regular, filled for pinned). */
-    iconVariant: IconVariant;
 
     /** Keyboard shortcut (e.g., 'cmd+1'). */
     shortcut?: string;

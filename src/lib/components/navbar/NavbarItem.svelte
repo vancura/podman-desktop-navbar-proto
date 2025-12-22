@@ -63,7 +63,6 @@
     >
         <Icon
             name={navItem.icon}
-            variant={navItem.iconVariant}
             size={isExpanded ? 24 : 20}
             class={isActive ? 'text-navbar-text-active' : 'text-navbar-text'}
         />

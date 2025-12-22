@@ -215,7 +215,7 @@ export const actions = {
         if (!item || !item.canPin) return false;
 
         items.regular.splice(index, 1);
-        items.pinned.push({ ...item, iconVariant: 'filled' });
+        items.pinned.push({ ...item });
         return true;
     },
 
@@ -230,12 +230,12 @@ export const actions = {
         const item = items.pinned[index];
         if (!item) return;
         items.pinned.splice(index, 1);
-        items.regular.push({ ...item, iconVariant: 'outline' });
+        items.regular.push({ ...item });
     },
 
     /** Unpin all items. */
     unpinAll(): void {
-        const unpinned = items.pinned.map((item) => ({ ...item, iconVariant: 'outline' as const }));
+        const unpinned = items.pinned.map((item) => ({ ...item }));
         items.regular.push(...unpinned);
         items.pinned = [];
     },
@@ -261,7 +261,7 @@ export const actions = {
             const item = items.pinned[index];
             if (!item || !item.canHide) return;
             items.pinned.splice(index, 1);
-            items.hidden.push({ ...item, iconVariant: 'outline' });
+            items.hidden.push({ ...item });
         }
     },
 

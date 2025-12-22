@@ -198,7 +198,6 @@ This will work the same way as how VSCode and MS Teams work, it's a gold standar
 Pinned items change their appearance:
 
 - They have their own section (Pinned group under Essentials, above the Rest of Items, see description above).
-- The icons there are visually different (use outlined vs. filled icons, Solar icons support this).
 - Limit the count of pinned items, so that people can't pin everything. Allow users to pin 10 items. If there are
   already 10 items pinned, don't allow pinning.
 

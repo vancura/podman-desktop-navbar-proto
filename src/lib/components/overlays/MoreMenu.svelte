@@ -97,7 +97,7 @@
                             focusedIndex = index;
                         }}
                     >
-                        <Icon name={item.icon} variant="outline" size={16} class="text-(--color-menu-text)" />
+                        <Icon name={item.icon} size={16} class="text-(--color-menu-text)" />
 
                         <span class="flex-1">{t(item.labelKey as TranslationKey)}</span>
 
