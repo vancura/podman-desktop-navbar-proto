@@ -16,11 +16,20 @@
         isExpanded: boolean;
         isActive?: boolean;
         isFocused?: boolean;
+        isPinned?: boolean;
         onclick?: () => void;
         oncontextmenu?: (e: MouseEvent) => void;
     }
 
-    const { navItem, isExpanded, isActive = false, isFocused = false, onclick, oncontextmenu }: Props = $props();
+    const {
+        navItem,
+        isExpanded,
+        isActive = false,
+        isFocused = false,
+        isPinned = false,
+        onclick,
+        oncontextmenu,
+    }: Props = $props();
 
     // Re-derive when locale changes (tracked via appState.locale)
     const _locale = $derived(appState.locale);
@@ -61,11 +70,23 @@
         onmouseenter={handleMouseEnter}
         onmouseleave={handleMouseLeave}
     >
-        <Icon
-            name={navItem.icon}
-            size={isExpanded ? 24 : 20}
-            class={isActive ? 'text-navbar-text-active' : 'text-navbar-text'}
-        />
+        <div class="relative">
+            <Icon
+                name={navItem.icon}
+                size={isExpanded ? 24 : 20}
+                class={isActive ? 'text-navbar-text-active' : 'text-navbar-text'}
+            />
+
+            {#if isPinned}
+                <div
+                    class="absolute -bottom-1 -right-2 rounded-full p-0.5 {isActive
+                        ? 'bg-navbar-item-selected'
+                        : 'bg-navbar-bg'}"
+                >
+                    <Icon name="pin" size={10} class={isActive ? 'text-navbar-text-active' : 'text-navbar-text'} />
+                </div>
+            {/if}
+        </div>
 
         {#if isExpanded}
             <span

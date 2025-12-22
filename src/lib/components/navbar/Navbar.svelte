@@ -104,6 +104,7 @@
                             {isExpanded}
                             isActive={activeItemId === navItem.id}
                             isFocused={focusedItemId === navItem.id}
+                            isPinned={true}
                             onclick={() => handleItemClick(navItem.id)}
                             oncontextmenu={(e) => handleItemContextMenu(e, navItem.id)}
                         />
