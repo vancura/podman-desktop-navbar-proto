@@ -88,8 +88,8 @@
                 {#each hiddenItems as item, index (item.id)}
                     <button
                         type="button"
-                        class="flex w-full items-center gap-3 px-3 py-1.5 text-left text-sm text-(--color-menu-text)
-                        {focusedIndex === index ? 'bg-(--color-menu-item-disabled)' : ''}"
+                        class="flex w-full items-center gap-3 px-3 py-1.5 text-left text-sm rounded-sm text-(--color-menu-text)
+                        {focusedIndex === index ? 'bg-menu-item-selected' : ''}"
                         role="menuitem"
                         tabindex="-1"
                         onclick={() => handleUnhide(item.id)}
@@ -100,9 +100,6 @@
                         <Icon name={item.icon} size={16} class="text-(--color-menu-text)" />
 
                         <span class="flex-1">{t(item.labelKey as TranslationKey)}</span>
-
-                        <span class="text-sm text-(--color-menu-text-disabled)">{t('menu.show' as TranslationKey)}</span
-                        >
                     </button>
                 {/each}
             </div>
