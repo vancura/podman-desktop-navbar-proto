@@ -6,6 +6,8 @@
  */
 
 @theme {
+    --color-debug: #f0f;
+
     /* Canvas colors */
     --color-canvas-bg: #bbb;
 
@@ -169,4 +171,12 @@ a {
 .focus-ring:focus-visible {
     outline: 2px solid var(--color-focus-ring);
     outline-offset: 2px;
+}
+
+kbd {
+    @apply inline flex items-center justify-center rounded-full border border-gray-300 bg-white px-2 py-0.5 font-medium leading-tight text-gray-500;
+}
+
+p {
+    @apply text-sm font-medium;
 }

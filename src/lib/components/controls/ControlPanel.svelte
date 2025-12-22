@@ -92,6 +92,10 @@
         </section>
     </div>
 
+    <p>
+        Tip: Hold <kbd>⌘</kbd> or <kbd>CTRL</kbd> to see the keyboard shortcuts above navigation bar items.
+    </p>
+
     <!-- Keyboard Shortcuts -->
     <KeyboardShortcutsHelp />
 
