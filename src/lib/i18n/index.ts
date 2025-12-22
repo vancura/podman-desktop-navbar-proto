@@ -30,9 +30,6 @@ const TRANSLATIONS: Record<Locale, Partial<Record<TranslationKey, string>>> = {
 /** Locales that use right-to-left text direction. */
 const RTL_LOCALES: Locale[] = ['ar', 'he'];
 
-/** Platform detection for keyboard shortcut formatting. */
-const IS_MAC = typeof navigator !== 'undefined' && navigator.platform.includes('Mac');
-
 // ============================================================================
 // State
 // ============================================================================
@@ -77,16 +74,32 @@ export function t(key: TranslationKey): string {
 
 /**
  * Format a keyboard shortcut for display based on platform.
+ * Uses the centralized keyboard utility for consistent formatting.
  * @param shortcut - Shortcut string (e.g., 'cmd+1', 'shift+cmd+p')
  * @returns Formatted shortcut (e.g., '⌘1' on Mac, 'Ctrl+1' on Windows)
+ * @deprecated Consider using formatKeyboardShortcut from keyboard.ts directly
  */
 export function formatShortcut(shortcut: string): string {
-    return shortcut
-        .replace(/cmd\+/gi, IS_MAC ? '⌘' : 'Ctrl+')
-        .replace(/alt\+/gi, IS_MAC ? '⌥' : 'Alt+')
-        .replace(/shift\+/gi, IS_MAC ? '⇧' : 'Shift+')
-        .replace(/ctrl\+/gi, IS_MAC ? '⌃' : 'Ctrl+')
-        .toUpperCase();
+    // Note: This function is kept for backward compatibility
+    // but uses the centralized keyboard utility internally.
+    // For new code, import and use formatKeyboardShortcut directly.
+    const { formatKeyboardShortcut } = require('./utils/keyboard.js');
+
+    // Parse the shortcut string into modifier keys and main key
+    const lowerShortcut = shortcut.toLowerCase();
+    const hasCmd = lowerShortcut.includes('cmd');
+    const hasShift = lowerShortcut.includes('shift');
+    const hasAlt = lowerShortcut.includes('alt');
+
+    // Extract the main key (last part after all modifiers)
+    const key = shortcut.split('+').pop() || '';
+
+    return formatKeyboardShortcut({
+        cmd: hasCmd,
+        shift: hasShift,
+        alt: hasAlt,
+        key: key,
+    });
 }
 
 /** Available locales with their native display names. */

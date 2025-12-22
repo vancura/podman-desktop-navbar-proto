@@ -48,6 +48,84 @@ let isMetaKeyPressed = false;
 /** Check if running on macOS. */
 const IS_MAC = typeof navigator !== 'undefined' && navigator.platform.toLowerCase().includes('mac');
 
+/** Platform override for keyboard shortcut display. */
+type PlatformOverride = 'mac' | 'windows';
+
+/** Current platform override setting. */
+let platformOverride: PlatformOverride = 'mac';
+
+/** Callbacks to notify when platform override changes. */
+const platformChangeCallbacks: Set<() => void> = new Set();
+
+/**
+ * Get the current platform for keyboard shortcuts.
+ * Returns true for Mac, false for Windows/Linux.
+ */
+function getEffectivePlatform(): boolean {
+    return platformOverride === 'mac';
+}
+
+/**
+ * Format a keyboard shortcut for display based on platform.
+ * @param keys - Object describing the shortcut (e.g., { cmd: true, key: '1' })
+ * @returns Formatted shortcut string (e.g., '⌘1' on Mac, 'Ctrl+1' on Windows)
+ */
+export function formatKeyboardShortcut(keys: { cmd?: boolean; shift?: boolean; alt?: boolean; key?: string }): string {
+    const isMac = getEffectivePlatform();
+    const parts: string[] = [];
+
+    if (keys.cmd) {
+        parts.push(isMac ? '⌘' : 'Ctrl');
+    }
+    if (keys.shift) {
+        parts.push(isMac ? '⇧' : 'Shift');
+    }
+    if (keys.alt) {
+        parts.push(isMac ? '⌥' : 'Alt');
+    }
+    if (keys.key) {
+        parts.push(keys.key);
+    }
+
+    return isMac ? parts.join('') : parts.join('+');
+}
+
+/**
+ * Get platform override setting.
+ */
+export function getPlatformOverride(): PlatformOverride {
+    return platformOverride;
+}
+
+/**
+ * Set platform override for keyboard shortcut display.
+ * @param override - 'mac' for macOS or 'windows' for Windows/Linux
+ */
+export function setPlatformOverride(override: PlatformOverride): void {
+    if (platformOverride !== override) {
+        platformOverride = override;
+        // Notify all subscribers of the change
+        platformChangeCallbacks.forEach((callback) => callback());
+    }
+}
+
+/**
+ * Get the current effective platform name for display.
+ */
+export function getEffectivePlatformName(): string {
+    return getEffectivePlatform() ? 'macOS' : 'Windows/Linux';
+}
+
+/**
+ * Subscribe to platform override changes.
+ * @param callback - Function to call when platform override changes
+ * @returns Unsubscribe function
+ */
+export function subscribeToPlatformChanges(callback: () => void): () => void {
+    platformChangeCallbacks.add(callback);
+    return () => platformChangeCallbacks.delete(callback);
+}
+
 // ============================================================================
 // Shortcut Definitions
 // ============================================================================
@@ -280,7 +358,8 @@ function matchesShortcut(event: KeyboardEvent, shortcut: KeyboardShortcut): bool
     const keyMatches = event.key === shortcut.key || (shortcut.code && event.code === shortcut.code);
     if (!keyMatches) return false;
 
-    // Check modifier keys - Cmd on Mac, Ctrl on other platforms
+    // Check modifier keys - Always use actual platform for matching, not override
+    // (Override only affects display, not actual keybindings)
     const cmdPressed = IS_MAC ? event.metaKey : event.ctrlKey;
     const cmdRequired = shortcut.cmd ?? false;
     const shiftRequired = shortcut.shift ?? false;
@@ -298,6 +377,7 @@ function matchesShortcut(event: KeyboardEvent, shortcut: KeyboardShortcut): bool
  * @param event
  */
 function handleMetaKeyPress(event: KeyboardEvent): void {
+    // Always use actual platform for detecting key press
     const cmdPressed = IS_MAC ? event.metaKey : event.ctrlKey;
 
     // Only proceed if CMD/CTRL is pressed and wasn't already pressed
@@ -323,6 +403,7 @@ function handleMetaKeyPress(event: KeyboardEvent): void {
  * @param event
  */
 function handleMetaKeyRelease(event: KeyboardEvent): void {
+    // Always use actual platform for detecting key release
     const cmdPressed = IS_MAC ? event.metaKey : event.ctrlKey;
 
     // Hide shortcuts when CMD/CTRL is released

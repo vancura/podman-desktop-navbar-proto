@@ -6,6 +6,7 @@
 <script lang="ts">
     import { t, type TranslationKey } from '../../i18n/index.js';
     import { actions, appState } from '../../state/app-state.svelte.js';
+    import { formatKeyboardShortcut, subscribeToPlatformChanges } from '../../utils/keyboard.js';
     import NavbarDivider from './NavbarDivider.svelte';
     import NavbarItem from './NavbarItem.svelte';
     import ResizeHandle from './ResizeHandle.svelte';
@@ -19,24 +20,43 @@
     const focusedItemId = $derived(appState.ui.focusedItemId);
     const locale = $derived(appState.locale);
 
+    // Reactive state for platform changes - increments to force re-computation
+    let platformChangeCount = $state(0);
+
+    // Subscribe to platform override changes
+    $effect(() => {
+        const unsubscribe = subscribeToPlatformChanges(() => {
+            platformChangeCount++;
+        });
+        return unsubscribe;
+    });
+
     // Helper function to get keyboard shortcut for specific item IDs
+    // Made reactive by depending on platformChangeCount
     function getKeyboardShortcut(itemId: string): string | undefined {
+        // Access platformChangeCount to create reactive dependency
+        platformChangeCount;
+
         const shortcuts: Record<string, string> = {
-            containers: '⌘1',
-            images: '⌘2',
-            pods: '⌘3',
-            volumes: '⌘4',
-            kubernetes: '⌘5',
-            terminal: hasPinnedItems ? '' : '⌘6', // Terminal only shows ⌘6 when no pinned items
-            settings: '⌘0',
+            containers: formatKeyboardShortcut({ cmd: true, key: '1' }),
+            images: formatKeyboardShortcut({ cmd: true, key: '2' }),
+            pods: formatKeyboardShortcut({ cmd: true, key: '3' }),
+            volumes: formatKeyboardShortcut({ cmd: true, key: '4' }),
+            kubernetes: formatKeyboardShortcut({ cmd: true, key: '5' }),
+            terminal: hasPinnedItems ? '' : formatKeyboardShortcut({ cmd: true, key: '6' }),
+            settings: formatKeyboardShortcut({ cmd: true, key: '0' }),
         };
         return shortcuts[itemId] || undefined;
     }
 
     // Helper function to get keyboard shortcut for pinned items by index
+    // Made reactive by depending on platformChangeCount
     function getPinnedKeyboardShortcut(index: number): string | undefined {
+        // Access platformChangeCount to create reactive dependency
+        platformChangeCount;
+
         if (index >= 0 && index < 4) {
-            return `⌘${index + 6}`;
+            return formatKeyboardShortcut({ cmd: true, key: String(index + 6) });
         }
         return undefined;
     }

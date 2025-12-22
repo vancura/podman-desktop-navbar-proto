@@ -4,11 +4,30 @@
 -->
 
 <script lang="ts">
-    import { actions } from '../../state/app-state.svelte.js';
+    import { actions, appState } from '../../state/app-state.svelte.js';
     import type { NavItem } from '../../state/types.js';
+    import { formatKeyboardShortcut, subscribeToPlatformChanges } from '../../utils/keyboard.js';
     import ActionButton from './ActionButton.svelte';
     import KeyboardShortcutsHelp from './KeyboardShortcutsHelp.svelte';
     import LocaleSwitcher from './LocaleSwitcher.svelte';
+
+    // Reactive state for platform changes - increments to force re-computation
+    let platformChangeCount = $state(0);
+
+    // Subscribe to platform override changes
+    $effect(() => {
+        const unsubscribe = subscribeToPlatformChanges(() => {
+            platformChangeCount++;
+        });
+        return unsubscribe;
+    });
+
+    // Platform-aware keyboard shortcut for the tip (reactive to platform changes)
+    const cmdKey = $derived.by(() => {
+        // Access platformChangeCount to create reactive dependency
+        platformChangeCount;
+        return formatKeyboardShortcut({ cmd: true, key: '' }).replace(/\+$/, '');
+    });
 
     function handleAddItem() {
         const itemTypes = [
@@ -93,7 +112,7 @@
     </div>
 
     <p>
-        Tip: Hold <kbd>⌘</kbd> or <kbd>CTRL</kbd> to see the keyboard shortcuts above navigation bar items.
+        Tip: Hold <kbd>{cmdKey}</kbd> to see keyboard shortcuts above navigation bar items.
     </p>
 
     <!-- Keyboard Shortcuts -->
