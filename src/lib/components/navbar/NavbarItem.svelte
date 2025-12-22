@@ -39,6 +39,26 @@
     // Show tooltip only when collapsed (icon-only mode)
     const shouldShowTooltip = $derived(!isExpanded);
 
+    // Reference to the button element for programmatic focus
+    let buttonElement: HTMLButtonElement | null = $state(null);
+
+    // Auto-focus this button when it becomes focused via state
+    $effect(() => {
+        if (isFocused && buttonElement && document.activeElement !== buttonElement) {
+            buttonElement.focus();
+        }
+    });
+
+    // Determine if this item should be tabbable
+    // When nothing is focused, the first essential item should be the default tab entry point
+    const isDefaultTabbable = $derived(() => {
+        if (isFocused) return true;
+        if (appState.ui.focusedItemId !== null) return false;
+        // Check if this is the first essential item
+        const firstItem = appState.items.essential[0];
+        return firstItem?.id === navItem.id;
+    });
+
     function handleMouseEnter(e: MouseEvent) {
         if (!shouldShowTooltip) return;
 
@@ -56,17 +76,43 @@
     function handleMouseLeave() {
         actions.hideTooltip();
     }
+
+    function handleKeyDown(e: KeyboardEvent) {
+        // Intercept Tab/Shift+Tab to keep navigation within navbar
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            // Navigate same as arrow keys: Tab = down, Shift+Tab = up
+            const delta = e.shiftKey ? -1 : 1;
+
+            // Get all visible items
+            const { essential, pinned, regular, bottom } = appState.items;
+            const allItems = [...essential, ...pinned, ...regular, ...bottom];
+
+            const currentIndex = allItems.findIndex((i) => i.id === navItem.id);
+            if (currentIndex !== -1) {
+                const newIndex = (currentIndex + delta + allItems.length) % allItems.length;
+                const nextItem = allItems[newIndex];
+                if (nextItem) {
+                    actions.setFocusedItem(nextItem.id);
+                }
+            }
+        }
+    }
 </script>
 
 {#key _locale}
     <button
+        bind:this={buttonElement}
         type="button"
         class="focus-ring group flex w-full cursor-pointer flex-col items-center justify-center rounded-lg
         {heightClass}
         {isActive ? 'bg-navbar-item-selected' : 'hover:bg-(--color-navbar-item-hover)'}
         {isFocused ? 'ring-2 ring-focus-ring ring-offset-2 ring-offset-navbar-bg' : ''}"
+        tabindex={isDefaultTabbable ? 0 : -1}
         {onclick}
         {oncontextmenu}
+        onfocus={() => actions.setFocusedItem(navItem.id)}
+        onkeydown={handleKeyDown}
         onmouseenter={handleMouseEnter}
         onmouseleave={handleMouseLeave}
     >
