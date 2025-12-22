@@ -31,6 +31,19 @@
 
     const showTopFade = $derived(scrollTop > 0);
 
+    // Calculate opacity for bottom fade (0-1) based on distance from bottom
+    // Fades out in the last 100pt: 100% visible until last 100pt, then fades to 0%
+    const bottomFadeOpacity = $derived.by(() => {
+        if (scrollHeight === 0) return 1; // Show on initial load
+
+        const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+
+        if (distanceFromBottom >= 100) return 1; // 100% visible when more than 100pt from bottom
+        if (distanceFromBottom <= 0) return 0; // 0% visible at the end
+
+        return distanceFromBottom / 100; // Gradual fade from 100% to 0% in last 100pt
+    });
+
     function handleScroll() {
         if (scrollContainer) {
             scrollTop = scrollContainer.scrollTop;
@@ -149,11 +162,13 @@
             </div>
         {/if}
 
-        <div
-            class="absolute w-[100%] left-0 bg-gradient-to-b pointer-events-none h-30 -my-6 from-transparent to-navbar-bg"
-            style="bottom: {isExpanded ? '158px' : '134px'};"
-            aria-hidden="true"
-        ></div>
+        {#if bottomFadeOpacity > 0}
+            <div
+                class="absolute w-[100%] left-0 bg-gradient-to-b pointer-events-none h-30 my-[-20px] from-transparent to-navbar-bg"
+                style="bottom: {isExpanded ? '158px' : '134px'}; opacity: {bottomFadeOpacity};"
+                aria-hidden="true"
+            ></div>
+        {/if}
 
         <NavbarDivider />
 
