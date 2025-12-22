@@ -19,10 +19,9 @@
     const focusedItemId = $derived(appState.ui.focusedItemId);
     const locale = $derived(appState.locale);
 
-    // Translated "more" text with count
-    const moreButtonText = $derived(
-        t('nav.moreCount' as TranslationKey).replace('{count}', String(items.hidden.length)),
-    );
+    // Translated "more" text (without count)
+    const moreButtonText = $derived(t('nav.more' as TranslationKey));
+    const hiddenItemCount = $derived(items.hidden.length);
 
     // Scroll state for fade gradients
     let scrollContainer: HTMLElement | null = $state(null);
@@ -131,16 +130,21 @@
 
         <!-- More button (if hidden items exist) -->
         {#if hasHiddenItems}
-            <div class="px-2 pb-1">
+            <div class="px-2 pb-1 z-10">
                 <button
                     type="button"
-                    class="flex h-8 w-full items-center justify-center gap-1 rounded-lg text-sm text-navbar-text"
+                    class="flex h-8 w-full items-center justify-center gap-2 rounded-lg text-[11px] font-medium leading-tight text-navbar-text"
                     onclick={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
                         actions.showMoreMenu(rect.left, rect.top);
                     }}
                 >
                     <span>{moreButtonText}</span>
+                    <span
+                        class="flex h-5 w-5 items-center justify-center rounded-full bg-navbar-text text-navbar-bg text-[11px] font-medium leading-tight"
+                    >
+                        {hiddenItemCount}
+                    </span>
                 </button>
             </div>
         {/if}
