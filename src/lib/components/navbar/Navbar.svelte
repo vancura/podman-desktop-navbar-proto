@@ -19,6 +19,28 @@
     const focusedItemId = $derived(appState.ui.focusedItemId);
     const locale = $derived(appState.locale);
 
+    // Helper function to get keyboard shortcut for specific item IDs
+    function getKeyboardShortcut(itemId: string): string | undefined {
+        const shortcuts: Record<string, string> = {
+            containers: '⌘1',
+            images: '⌘2',
+            pods: '⌘3',
+            volumes: '⌘4',
+            kubernetes: '⌘5',
+            terminal: hasPinnedItems ? '' : '⌘6', // Terminal only shows ⌘6 when no pinned items
+            settings: '⌘0',
+        };
+        return shortcuts[itemId] || undefined;
+    }
+
+    // Helper function to get keyboard shortcut for pinned items by index
+    function getPinnedKeyboardShortcut(index: number): string | undefined {
+        if (index >= 0 && index < 4) {
+            return `⌘${index + 6}`;
+        }
+        return undefined;
+    }
+
     // Translated "more" text (without count)
     const moreButtonText = $derived(t('nav.more' as TranslationKey));
     const hiddenItemCount = $derived(items.hidden.length);
@@ -94,6 +116,7 @@
                         {isExpanded}
                         isActive={activeItemId === navItem.id}
                         isFocused={focusedItemId === navItem.id}
+                        keyboardShortcut={getKeyboardShortcut(navItem.id)}
                         onclick={() => handleItemClick(navItem.id)}
                         oncontextmenu={(e) => handleItemContextMenu(e, navItem.id)}
                     />
@@ -105,13 +128,14 @@
                 <NavbarDivider />
 
                 <div class="flex flex-col gap-1">
-                    {#each items.pinned as navItem (navItem.id)}
+                    {#each items.pinned as navItem, index (navItem.id)}
                         <NavbarItem
                             {navItem}
                             {isExpanded}
                             isActive={activeItemId === navItem.id}
                             isFocused={focusedItemId === navItem.id}
                             isPinned={true}
+                            keyboardShortcut={getPinnedKeyboardShortcut(index)}
                             onclick={() => handleItemClick(navItem.id)}
                             oncontextmenu={(e) => handleItemContextMenu(e, navItem.id)}
                         />
@@ -130,6 +154,7 @@
                             {isExpanded}
                             isActive={activeItemId === navItem.id}
                             isFocused={focusedItemId === navItem.id}
+                            keyboardShortcut={getKeyboardShortcut(navItem.id)}
                             onclick={() => handleItemClick(navItem.id)}
                             oncontextmenu={(e) => handleItemContextMenu(e, navItem.id)}
                         />
@@ -180,6 +205,7 @@
                     {isExpanded}
                     isActive={activeItemId === navItem.id}
                     isFocused={focusedItemId === navItem.id}
+                    keyboardShortcut={getKeyboardShortcut(navItem.id)}
                     onclick={() => handleItemClick(navItem.id)}
                     oncontextmenu={(e) => handleItemContextMenu(e, navItem.id)}
                 />

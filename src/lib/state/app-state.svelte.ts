@@ -50,6 +50,7 @@ interface UIState {
     hoveredItemId: string | null;
     isDraggingResize: boolean;
     hideWarningDismissed: boolean;
+    showKeyboardShortcuts: boolean;
     // Overlay states
     banner: BannerConfig | null;
     contextMenu: ContextMenuConfig | null;
@@ -94,6 +95,7 @@ let ui = $state<UIState>({
     hoveredItemId: null,
     isDraggingResize: false,
     hideWarningDismissed: false,
+    showKeyboardShortcuts: false,
     banner: null,
     contextMenu: null,
     moreMenu: null,
@@ -457,6 +459,16 @@ export const actions = {
         ui.modalCheckboxChecked = !ui.modalCheckboxChecked;
     },
 
+    /** Show keyboard shortcuts. */
+    showKeyboardShortcuts(): void {
+        ui.showKeyboardShortcuts = true;
+    },
+
+    /** Hide keyboard shortcuts. */
+    hideKeyboardShortcuts(): void {
+        ui.showKeyboardShortcuts = false;
+    },
+
     /** Reset all state to defaults. */
     reset(): void {
         items = createInitialItems();
@@ -470,6 +482,7 @@ export const actions = {
             hoveredItemId: null,
             isDraggingResize: false,
             hideWarningDismissed: false,
+            showKeyboardShortcuts: false,
             banner: null,
             contextMenu: null,
             moreMenu: null,

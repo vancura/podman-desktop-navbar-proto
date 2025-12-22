@@ -10,6 +10,7 @@
     import Icon from '../Icon.svelte';
 
     const isRtl = $derived(appState.isRtl);
+    const showKeyboardShortcuts = $derived(appState.ui.showKeyboardShortcuts);
 
     interface Props {
         navItem: NavItem;
@@ -17,6 +18,7 @@
         isActive?: boolean;
         isFocused?: boolean;
         isPinned?: boolean;
+        keyboardShortcut?: string;
         onclick?: () => void;
         oncontextmenu?: (e: MouseEvent) => void;
     }
@@ -27,6 +29,7 @@
         isActive = false,
         isFocused = false,
         isPinned = false,
+        keyboardShortcut,
         onclick,
         oncontextmenu,
     }: Props = $props();
@@ -119,9 +122,18 @@
         <div class="relative">
             <Icon
                 name={navItem.icon}
-                size={isExpanded ? 24 : 20}
+                size={isExpanded ? 24 : 18}
                 class={isActive ? 'text-navbar-text-active' : 'text-navbar-text'}
             />
+
+            {#if keyboardShortcut && showKeyboardShortcuts}
+                <!-- Keyboard shortcut indicator -->
+                <div
+                    class="absolute left-[-22px] top-[-6px] flex items-center justify-center rounded-full border border-gray-300 bg-white px-1 py-0.5 text-[10px] font-medium leading-tight text-gray-500"
+                >
+                    {keyboardShortcut}
+                </div>
+            {/if}
 
             {#if isPinned}
                 <div

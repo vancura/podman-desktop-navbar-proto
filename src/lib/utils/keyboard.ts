@@ -29,6 +29,19 @@ interface KeyboardShortcut {
 }
 
 // ============================================================================
+// Keyboard Shortcut Visibility
+// ============================================================================
+
+/** Timeout for showing keyboard shortcuts after holding CMD/CTRL. */
+const SHORTCUT_SHOW_DELAY_MS = 750;
+
+/** Timer for delayed keyboard shortcut visibility. */
+let shortcutVisibilityTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** Track if CMD/CTRL is currently pressed. */
+let isMetaKeyPressed = false;
+
+// ============================================================================
 // Platform Detection
 // ============================================================================
 
@@ -281,10 +294,60 @@ function matchesShortcut(event: KeyboardEvent, shortcut: KeyboardShortcut): bool
 // ============================================================================
 
 /**
+ * Handle CMD/CTRL key press for showing keyboard shortcuts.
+ * @param event
+ */
+function handleMetaKeyPress(event: KeyboardEvent): void {
+    const cmdPressed = IS_MAC ? event.metaKey : event.ctrlKey;
+
+    // Only proceed if CMD/CTRL is pressed and wasn't already pressed
+    if (cmdPressed && !isMetaKeyPressed) {
+        isMetaKeyPressed = true;
+
+        // Clear any existing timer
+        if (shortcutVisibilityTimer) {
+            clearTimeout(shortcutVisibilityTimer);
+        }
+
+        // Set timer to show shortcuts after delay
+        shortcutVisibilityTimer = setTimeout(() => {
+            if (isMetaKeyPressed) {
+                actions.showKeyboardShortcuts();
+            }
+        }, SHORTCUT_SHOW_DELAY_MS);
+    }
+}
+
+/**
+ * Handle CMD/CTRL key release for hiding keyboard shortcuts.
+ * @param event
+ */
+function handleMetaKeyRelease(event: KeyboardEvent): void {
+    const cmdPressed = IS_MAC ? event.metaKey : event.ctrlKey;
+
+    // Hide shortcuts when CMD/CTRL is released
+    if (!cmdPressed && isMetaKeyPressed) {
+        isMetaKeyPressed = false;
+
+        // Clear the timer if shortcuts haven't been shown yet
+        if (shortcutVisibilityTimer) {
+            clearTimeout(shortcutVisibilityTimer);
+            shortcutVisibilityTimer = null;
+        }
+
+        // Hide shortcuts immediately
+        actions.hideKeyboardShortcuts();
+    }
+}
+
+/**
  * Global keydown event handler.
  * @param event
  */
 function handleKeyDown(event: KeyboardEvent): void {
+    // Handle CMD/CTRL press for keyboard shortcut visibility
+    handleMetaKeyPress(event);
+
     // Ignore keyboard events when user is typing in form fields
     const target = event.target as HTMLElement;
     if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
@@ -312,6 +375,15 @@ function handleKeyDown(event: KeyboardEvent): void {
     }
 }
 
+/**
+ * Global keyup event handler.
+ * @param event
+ */
+function handleKeyUp(event: KeyboardEvent): void {
+    // Handle CMD/CTRL release for keyboard shortcut visibility
+    handleMetaKeyRelease(event);
+}
+
 // ============================================================================
 // Public API
 // ============================================================================
@@ -323,8 +395,16 @@ function handleKeyDown(event: KeyboardEvent): void {
 export function initKeyboardHandling(): () => void {
     // Use capture phase to intercept events before other handlers
     document.addEventListener('keydown', handleKeyDown, true);
+    document.addEventListener('keyup', handleKeyUp, true);
 
     return () => {
         document.removeEventListener('keydown', handleKeyDown, true);
+        document.removeEventListener('keyup', handleKeyUp, true);
+
+        // Clean up any pending timers
+        if (shortcutVisibilityTimer) {
+            clearTimeout(shortcutVisibilityTimer);
+            shortcutVisibilityTimer = null;
+        }
     };
 }
