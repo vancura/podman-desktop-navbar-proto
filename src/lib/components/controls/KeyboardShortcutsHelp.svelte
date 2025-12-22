@@ -46,7 +46,7 @@
             title: 'Other',
             shortcuts: [
                 { key: '⌘B', description: 'Toggle navbar' },
-                { key: '⌘⇧P', description: 'Pin current item' },
+                { key: '⌘P', description: 'Pin current item' },
                 { key: '⌘⇧K', description: 'Show hidden items' },
                 { key: 'Esc', description: 'Close overlay' },
             ],

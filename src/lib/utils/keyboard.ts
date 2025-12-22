@@ -59,7 +59,7 @@ const SHORTCUTS: KeyboardShortcut[] = [
 
     // Navbar management
     { key: 'b', cmd: true, action: 'toggle-navbar' },
-    { key: 'p', cmd: true, shift: true, action: 'pin-current' },
+    { key: 'p', cmd: true, action: 'pin-current' },
     { key: 'k', cmd: true, shift: true, action: 'show-hidden' },
 
     // Arrow key navigation (only when no overlay is open)
