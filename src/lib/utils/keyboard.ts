@@ -188,7 +188,27 @@ function executeAction(action: string): void {
 
         case 'show-hidden':
             if (appState.hasHiddenItems) {
-                actions.showBanner('banner.configureNavbar', 'banner.configureNavbarDesc');
+                // Position the menu near where the More button would be
+                const navbarWidth = appState.navbarWidth;
+                const isRtl = appState.isRtl;
+
+                // Calculate x position based on RTL mode
+                // In LTR: navbar is on left, x is at navbar edge + padding (8px)
+                // In RTL: navbar is on right, x is at window width - navbar width + padding
+                const padding = 88;
+                const x = isRtl
+                    ? typeof window !== 'undefined'
+                        ? window.innerWidth - navbarWidth + padding - 160
+                        : navbarWidth + padding
+                    : padding;
+
+                // Calculate y position from bottom
+                // Bottom panel items (typically 2): ~88px collapsed or ~112px expanded
+                // Plus padding (8px) + divider (2px) + More button area (36px)
+                const bottomOffset = appState.isExpanded ? 331 : 134;
+                const y = typeof window !== 'undefined' ? window.innerHeight - bottomOffset : 500;
+
+                actions.showMoreMenu(x, y);
             }
             break;
 
