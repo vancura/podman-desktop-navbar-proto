@@ -70,8 +70,8 @@
 
             <div class="flex flex-wrap gap-2">
                 <ActionButton onclick={handleAddItem}>Add Item</ActionButton>
-                <ActionButton onclick={() => actions.removeLastItem()}>Remove Last</ActionButton>
-                <ActionButton onclick={() => actions.removeRandomItem()}>Remove Random</ActionButton>
+                <ActionButton onclick={() => actions.removeLastItem()}>Hide Last</ActionButton>
+                <ActionButton onclick={() => actions.removeRandomItem()}>Hide Random</ActionButton>
             </div>
         </section>
 

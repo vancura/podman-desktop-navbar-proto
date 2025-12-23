@@ -49,8 +49,8 @@ Please create the following components, but be free to alter the list or recomme
 These actions will be available as buttons in the content area, and will control the navbar:
 
 - Add a new item
-- Remove the last item
-- Remove a random item
+- Hide the last item
+- Hide a random item
 - Pin a random item
 - Unpin all items
 - Hide a random item
@@ -96,7 +96,7 @@ Allow to:
   is.
 - "Extension Settings" - goes to the settings in Podman Desktop Settings. Show a quick banner in the middle of the
   screen, explaining what's going to happen. Hide on click on the banner
-- "Remove Extension" - launches the uninstall flow. Show the banner explaining what would happen now.
+- "Hide Extension" - launches the uninstall flow. Show the banner explaining what would happen now.
 - "Configure Navigation Bar" - goes to Navigation Bar settings in Settings. Here in the prototype, show just the banner
   what would happen.
 
