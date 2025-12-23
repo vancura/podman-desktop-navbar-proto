@@ -45,9 +45,6 @@ let isMetaKeyPressed = false;
 // Platform Detection
 // ============================================================================
 
-/** Check if running on macOS. */
-const IS_MAC = typeof navigator !== 'undefined' && navigator.platform.toLowerCase().includes('mac');
-
 /** Platform override for keyboard shortcut display. */
 type PlatformOverride = 'mac' | 'windows';
 
@@ -105,7 +102,9 @@ export function setPlatformOverride(override: PlatformOverride): void {
     if (platformOverride !== override) {
         platformOverride = override;
         // Notify all subscribers of the change
-        platformChangeCallbacks.forEach((callback) => callback());
+        platformChangeCallbacks.forEach((callback) => {
+            callback();
+        });
     }
 }
 
