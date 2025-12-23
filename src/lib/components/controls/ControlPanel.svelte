@@ -4,11 +4,12 @@
 -->
 
 <script lang="ts">
-    import { actions, appState } from '../../state/app-state.svelte.js';
+    import { actions } from '../../state/app-state.svelte.js';
     import type { NavItem } from '../../state/types.js';
-    import { formatKeyboardShortcut, subscribeToPlatformChanges } from '../../utils/keyboard.js';
+    import { subscribeToPlatformChanges } from '../../utils/keyboard.js';
     import ActionButton from './ActionButton.svelte';
     import KeyboardShortcutsHelp from './KeyboardShortcutsHelp.svelte';
+    import TipSection from './TipSection.svelte';
     import LocaleSwitcher from './LocaleSwitcher.svelte';
 
     // Reactive state for platform changes - increments to force re-computation
@@ -20,13 +21,6 @@
             platformChangeCount++;
         });
         return unsubscribe;
-    });
-
-    // Platform-aware keyboard shortcut for the tip (reactive to platform changes)
-    const cmdKey = $derived.by(() => {
-        // Access platformChangeCount to create reactive dependency
-        platformChangeCount;
-        return formatKeyboardShortcut({ cmd: true, key: '' }).replace(/\+$/, '');
     });
 
     function handleAddItem() {
@@ -47,12 +41,17 @@
 
         const randomType = itemTypes[Math.floor(Math.random() * itemTypes.length)];
 
+        if (!randomType) {
+            throw new Error('Failed to pick a random item type');
+        }
+
         const newItem: NavItem = {
             id: `${randomType.prefix}-${Date.now()}`,
             labelKey: randomType.labelKey,
-            icon: randomType.icon,
+            icon: randomType.icon as any,
             canPin: true,
             canHide: true,
+
             originalCategory: 'regular',
         };
 
@@ -111,9 +110,7 @@
         </section>
     </div>
 
-    <p>
-        Tip: Hold <kbd>{cmdKey}</kbd> to see keyboard shortcuts above navigation bar items.
-    </p>
+    <TipSection />
 
     <!-- Keyboard Shortcuts -->
     <KeyboardShortcutsHelp />
