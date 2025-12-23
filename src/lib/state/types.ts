@@ -16,7 +16,8 @@ export type IconName =
     | 'settings'
     | 'chevron-right'
     | 'more'
-    | 'pin';
+    | 'pin'
+    | 'pen';
 
 /** Supported locales. */
 export type Locale = 'en' | 'de' | 'ja' | 'ar' | 'he';
