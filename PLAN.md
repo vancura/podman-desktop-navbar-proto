@@ -225,7 +225,7 @@ to update.
 
 We have to plan for 30-35% expansion. When truncation happens, add Tailwind truncate AND show a tooltip. Add buttons to
 the content area switching locales (AND translate all strings). Add buttons for English (default, use some visualisation
-that this setting is on), German, Japanese (which is shorter). Add Arabic (will switch to RTL, see below). Use this to
+that this setting is on), German, Chinese (which is shorter). Add Arabic (will switch to RTL, see below). Use this to
 show that the navigation bar is localizable. You don't need to translate the banner component, but everything else yes
 (navbar items, menus, tooltips, did I forget something?)
 

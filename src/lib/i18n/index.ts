@@ -12,7 +12,7 @@ import { ar } from './locales/ar.js';
 import { de } from './locales/de.js';
 import { en, type TranslationKey } from './locales/en.js';
 import { he } from './locales/he.js';
-import { ja } from './locales/ja.js';
+import { zh } from './locales/zh.js';
 
 // ============================================================================
 // Configuration
@@ -22,7 +22,7 @@ import { ja } from './locales/ja.js';
 const TRANSLATIONS: Record<Locale, Partial<Record<TranslationKey, string>>> = {
     en,
     de,
-    ja,
+    zh,
     ar,
     he,
 };
@@ -106,7 +106,7 @@ export function formatShortcut(shortcut: string): string {
 export const AVAILABLE_LOCALES: ReadonlyArray<{ code: Locale; name: string }> = [
     { code: 'en', name: 'English' },
     { code: 'de', name: 'German' },
-    { code: 'ja', name: 'Japanese' },
+    { code: 'zh', name: 'Chinese' },
     { code: 'ar', name: 'Arabic (RTL)' },
     { code: 'he', name: 'Hebrew (RTL)' },
 ];

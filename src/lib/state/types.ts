@@ -22,7 +22,7 @@ export type IconName =
     | 'reset';
 
 /** Supported locales. */
-export type Locale = 'en' | 'de' | 'ja' | 'ar' | 'he';
+export type Locale = 'en' | 'de' | 'zh' | 'ar' | 'he';
 
 /** Navigation item category. */
 export type ItemCategory = 'essential' | 'pinned' | 'regular' | 'hidden' | 'bottom';

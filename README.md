@@ -31,7 +31,7 @@ navigation, and internationalization support.
 
 ### Multi-language Support
 
-- **Multi-language support** — English, German, Japanese, Arabic, and Hebrew
+- **Multi-language support** — English, German, Chinese, Arabic, and Hebrew
 - **RTL support** — Full right-to-left layout for Arabic and Hebrew
 - **Locale switching** — Test different languages and text expansion scenarios
 
@@ -93,7 +93,7 @@ podman-desktop-navbar-proto/
 │       │   └── window/            # Window frame components
 │       ├── i18n/                  # Internationalization
 │       │   ├── index.ts           # Translation functions
-│       │   └── locales/           # Translation files (en, de, ja, ar, he)
+│       │   └── locales/           # Translation files (en, de, zh, ar, he)
 │       ├── state/                 # State management
 │       │   ├── app-state.svelte.ts
 │       │   ├── nav-items.ts       # Default navigation items
@@ -172,7 +172,7 @@ The prototype supports 5 languages:
 
 - **English** (en) — Default
 - **German** (de)
-- **Japanese** (ja)
+- **Chinese** (zh)
 - **Arabic** (ar) — RTL
 - **Hebrew** (he) — RTL
 
