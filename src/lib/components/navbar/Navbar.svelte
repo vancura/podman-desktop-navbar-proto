@@ -187,17 +187,21 @@
 
         <!-- More button (if hidden items exist) -->
         {#if hasHiddenItems}
-            <div class="px-6 pb-1 z-10">
+            <div class={`pb-1 z-10 ${isExpanded ? 'px-6' : 'px-0'}`}>
                 <button
                     type="button"
-                    class="flex h-8 w-full items-center justify-start gap-2 rounded-lg text-[11px] font-medium leading-tight text-navbar-text"
+                    class="flex h-8 w-full items-center {isExpanded
+                        ? 'justify-start'
+                        : 'justify-center'} gap-1 rounded-lg text-[11px] font-medium leading-tight text-navbar-text"
                     onclick={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
                         actions.showMoreMenu(rect.left, rect.top);
                     }}
                 >
                     <Icon name="pen" size={14} class="text-navbar-text" />
-                    <span>{moreButtonText}</span>
+                    {#if isExpanded}
+                        <span>{moreButtonText}</span>
+                    {/if}
                     <span
                         class="flex h-5 w-5 items-center justify-center rounded-full bg-navbar-text text-navbar-bg text-[11px] font-medium leading-tight"
                     >
