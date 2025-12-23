@@ -5,6 +5,7 @@
 
 /** Icon names available in the icon set. */
 export type IconName =
+    | 'dashboard'
     | 'box'
     | 'gallery'
     | 'widget'

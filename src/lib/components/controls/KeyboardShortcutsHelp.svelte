@@ -54,17 +54,18 @@
         {
             title: 'Navigation',
             shortcuts: [
-                { keys: { cmd: true, key: '1' }, description: 'Containers' },
-                { keys: { cmd: true, key: '2' }, description: 'Images' },
-                { keys: { cmd: true, key: '3' }, description: 'Pods' },
-                { keys: { cmd: true, key: '4' }, description: 'Kubernetes' },
-                { keys: { cmd: true, key: '5' }, description: 'Terminal' },
-                { keys: { cmd: true, key: '0' }, description: 'Settings' },
+                { keys: { cmd: true, key: '1' }, description: 'Dashboard' },
+                { keys: { cmd: true, key: '2' }, description: 'Containers' },
+                { keys: { cmd: true, key: '3' }, description: 'Images' },
+                { keys: { cmd: true, key: '4' }, description: 'Pods' },
+                { keys: { cmd: true, key: '5' }, description: 'Kubernetes' },
+                { keys: { cmd: true, key: '6' }, description: 'Terminal' },
+                { keys: { cmd: true, key: ',' }, description: 'Settings' },
             ],
         },
         {
             title: 'Pinned Items',
-            shortcuts: [{ keys: { cmd: true, key: '6 – 9' }, description: 'Pinned 1–4' }],
+            shortcuts: [{ keys: { cmd: true, key: '7 – 9' }, description: 'Pinned 1–3' }],
         },
         {
             title: 'Focus Navigation',

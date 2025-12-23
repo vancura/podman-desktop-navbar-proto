@@ -4,6 +4,7 @@
 
 export const en = {
     // Navigation items
+    'nav.dashboard': 'Dashboard',
     'nav.containers': 'Containers',
     'nav.images': 'Images',
     'nav.pods': 'Pods',

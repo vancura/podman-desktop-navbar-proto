@@ -6,6 +6,7 @@ import type { TranslationKey } from './en.js';
 
 export const ar: Partial<Record<TranslationKey, string>> = {
     // Navigation items
+    'nav.dashboard': 'لوحة التحكم',
     'nav.containers': 'الحاويات',
     'nav.images': 'الصور',
     'nav.pods': 'البودات',

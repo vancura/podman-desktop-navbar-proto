@@ -6,6 +6,7 @@ import type { TranslationKey } from './en.js';
 
 export const zh: Partial<Record<TranslationKey, string>> = {
     // Navigation items
+    'nav.dashboard': '仪表板',
     'nav.containers': '容器',
     'nav.images': '镜像',
     'nav.pods': '容器组',
