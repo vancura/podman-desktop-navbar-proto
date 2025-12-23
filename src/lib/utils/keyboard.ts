@@ -360,7 +360,9 @@ function matchesShortcut(event: KeyboardEvent, shortcut: KeyboardShortcut): bool
 
     // Check modifier keys - Always use actual platform for matching, not override
     // (Override only affects display, not actual keybindings)
-    const cmdPressed = IS_MAC ? event.metaKey : event.ctrlKey;
+    // Support both CMD (metaKey) and CTRL (ctrlKey) for cross-platform compatibility
+    // On Mac, both CTRL and CMD work; on other platforms, CTRL works
+    const cmdPressed = event.metaKey || event.ctrlKey;
     const cmdRequired = shortcut.cmd ?? false;
     const shiftRequired = shortcut.shift ?? false;
     const altRequired = shortcut.alt ?? false;
@@ -377,8 +379,9 @@ function matchesShortcut(event: KeyboardEvent, shortcut: KeyboardShortcut): bool
  * @param event
  */
 function handleMetaKeyPress(event: KeyboardEvent): void {
-    // Always use actual platform for detecting key press
-    const cmdPressed = IS_MAC ? event.metaKey : event.ctrlKey;
+    // Support both CMD (metaKey) and CTRL (ctrlKey) for cross-platform compatibility
+    // On Mac, both CTRL and CMD work; on other platforms, CTRL works
+    const cmdPressed = event.metaKey || event.ctrlKey;
 
     // Only proceed if CMD/CTRL is pressed and wasn't already pressed
     if (cmdPressed && !isMetaKeyPressed) {
@@ -403,8 +406,9 @@ function handleMetaKeyPress(event: KeyboardEvent): void {
  * @param event
  */
 function handleMetaKeyRelease(event: KeyboardEvent): void {
-    // Always use actual platform for detecting key release
-    const cmdPressed = IS_MAC ? event.metaKey : event.ctrlKey;
+    // Support both CMD (metaKey) and CTRL (ctrlKey) for cross-platform compatibility
+    // On Mac, both CTRL and CMD work; on other platforms, CTRL works
+    const cmdPressed = event.metaKey || event.ctrlKey;
 
     // Hide shortcuts when CMD/CTRL is released
     if (!cmdPressed && isMetaKeyPressed) {
