@@ -8,6 +8,7 @@
  */
 
 import type { Locale } from '../state/types.js';
+import { formatKeyboardShortcut } from '../utils/keyboard.js';
 import { ar } from './locales/ar.js';
 import { de } from './locales/de.js';
 import { en, type TranslationKey } from './locales/en.js';
@@ -83,7 +84,6 @@ export function formatShortcut(shortcut: string): string {
     // Note: This function is kept for backward compatibility
     // but uses the centralized keyboard utility internally.
     // For new code, import and use formatKeyboardShortcut directly.
-    const { formatKeyboardShortcut } = require('./utils/keyboard.js');
 
     // Parse the shortcut string into modifier keys and main key
     const lowerShortcut = shortcut.toLowerCase();
