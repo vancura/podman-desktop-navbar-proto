@@ -38,6 +38,7 @@ export const he: Partial<Record<TranslationKey, string>> = {
     'menu.showHiddenItems': 'הצג פריטים מוסתרים',
     'menu.noHiddenItems': '(אין פריטים מוסתרים)',
     'menu.resetNavbar': 'איפוס שורת ניווט',
+    'menu.resetLayout': 'איפוס פריסה',
     'menu.hiddenItems': 'פריטים מוסתרים',
     'menu.show': 'הצג',
 

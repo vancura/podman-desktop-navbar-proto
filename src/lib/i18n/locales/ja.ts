@@ -38,6 +38,7 @@ export const ja: Partial<Record<TranslationKey, string>> = {
     'menu.showHiddenItems': '非表示の項目を表示',
     'menu.noHiddenItems': '（非表示の項目はありません）',
     'menu.resetNavbar': 'ナビゲーションバーをリセット',
+    'menu.resetLayout': 'レイアウトをリセット',
     'menu.hiddenItems': '非表示の項目',
     'menu.show': '表示',
 

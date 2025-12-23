@@ -17,7 +17,9 @@ export type IconName =
     | 'chevron-right'
     | 'more'
     | 'pin'
-    | 'pen';
+    | 'pen'
+    | 'checkbox'
+    | 'reset';
 
 /** Supported locales. */
 export type Locale = 'en' | 'de' | 'ja' | 'ar' | 'he';

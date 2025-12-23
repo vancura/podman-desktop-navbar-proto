@@ -38,6 +38,7 @@ export const ar: Partial<Record<TranslationKey, string>> = {
     'menu.showHiddenItems': 'إظهار العناصر المخفية',
     'menu.noHiddenItems': '(لا توجد عناصر مخفية)',
     'menu.resetNavbar': 'إعادة تعيين شريط التنقل',
+    'menu.resetLayout': 'إعادة تعيين التخطيط',
     'menu.hiddenItems': 'العناصر المخفية',
     'menu.show': 'إظهار',
 

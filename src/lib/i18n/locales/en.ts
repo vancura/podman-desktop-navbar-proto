@@ -36,6 +36,7 @@ export const en = {
     'menu.showHiddenItems': 'Show Hidden Items',
     'menu.noHiddenItems': '(No hidden items)',
     'menu.resetNavbar': 'Reset Navigation Bar',
+    'menu.resetLayout': 'Reset Layout',
     'menu.hiddenItems': 'Hidden Items',
     'menu.show': 'Show',
 

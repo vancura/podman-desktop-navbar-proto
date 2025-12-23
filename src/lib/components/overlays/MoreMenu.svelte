@@ -14,6 +14,10 @@
     const hiddenItems = $derived(appState.items.hidden);
     const locale = $derived(appState.locale);
 
+    // Total menu items: hidden items + separator + reset item
+    const totalMenuItems = $derived(hiddenItems.length + 1);
+    const resetItemIndex = $derived(hiddenItems.length);
+
     let focusedIndex = $state(0);
 
     // Reset focus when menu opens
@@ -31,6 +35,11 @@
         }
     }
 
+    function handleResetLayout() {
+        actions.unhideAll();
+        actions.hideMoreMenu();
+    }
+
     function handleKeyDown(e: KeyboardEvent) {
         if (!moreMenu || hiddenItems.length === 0) return;
 
@@ -44,21 +53,25 @@
                 actions.hideMoreMenu();
                 break;
             case 'up':
-                focusedIndex = navigatePrevious(focusedIndex, hiddenItems.length);
+                focusedIndex = navigatePrevious(focusedIndex, totalMenuItems);
                 break;
             case 'down':
-                focusedIndex = navigateNext(focusedIndex, hiddenItems.length);
+                focusedIndex = navigateNext(focusedIndex, totalMenuItems);
                 break;
             case 'first':
                 focusedIndex = 0;
                 break;
             case 'last':
-                focusedIndex = hiddenItems.length - 1;
+                focusedIndex = totalMenuItems - 1;
                 break;
             case 'select': {
-                const focusedItem = hiddenItems[focusedIndex];
-                if (focusedItem) {
-                    handleUnhide(focusedItem.id);
+                if (focusedIndex === resetItemIndex) {
+                    handleResetLayout();
+                } else {
+                    const focusedItem = hiddenItems[focusedIndex];
+                    if (focusedItem) {
+                        handleUnhide(focusedItem.id);
+                    }
                 }
                 break;
             }
@@ -82,12 +95,6 @@
                     focusedIndex = -1;
                 }}
             >
-                <div
-                    class="px-3 py-1.5 text-sm font-semibold uppercase tracking-wide text-(--color-menu-text-disabled)"
-                >
-                    {t('menu.hiddenItems' as TranslationKey)}
-                </div>
-
                 {#each hiddenItems as item, index (item.id)}
                     <button
                         type="button"
@@ -100,11 +107,27 @@
                             focusedIndex = index;
                         }}
                     >
-                        <Icon name={item.icon} size={16} class="text-(--color-menu-text)" />
-
+                        <Icon name="checkbox" size={16} class="text-(--color-menu-text)" />
                         <span class="flex-1">{t(item.labelKey as TranslationKey)}</span>
                     </button>
                 {/each}
+
+                <div class="my-1 h-px bg-menu-separator"></div>
+
+                <button
+                    type="button"
+                    class="flex w-full items-center gap-3 px-3 py-1.5 text-left text-sm rounded-sm text-(--color-menu-text)
+                    {focusedIndex === resetItemIndex ? 'bg-menu-item-selected' : ''}"
+                    role="menuitem"
+                    tabindex="-1"
+                    onclick={handleResetLayout}
+                    onmouseenter={() => {
+                        focusedIndex = resetItemIndex;
+                    }}
+                >
+                    <Icon name="reset" size={16} class="text-(--color-menu-text)" />
+                    <span class="flex-1">{t('menu.resetLayout' as TranslationKey)}</span>
+                </button>
             </div>
         {/key}
     </Backdrop>

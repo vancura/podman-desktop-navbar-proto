@@ -38,6 +38,7 @@ export const de: Partial<Record<TranslationKey, string>> = {
     'menu.showHiddenItems': 'Ausgeblendete Elemente anzeigen',
     'menu.noHiddenItems': '(Keine ausgeblendeten Elemente)',
     'menu.resetNavbar': 'Navigationsleiste zurücksetzen',
+    'menu.resetLayout': 'Layout zurücksetzen',
     'menu.hiddenItems': 'Ausgeblendete Elemente',
     'menu.show': 'Anzeigen',
 
