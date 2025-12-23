@@ -59,7 +59,7 @@
                 { keys: { cmd: true, key: '3' }, description: 'Images' },
                 { keys: { cmd: true, key: '4' }, description: 'Pods' },
                 { keys: { cmd: true, key: '5' }, description: 'Kubernetes' },
-                { keys: { cmd: true, key: '6' }, description: 'Terminal' },
+                { keys: { cmd: true, key: '6' }, description: 'Networks' },
                 { keys: { cmd: true, key: ',' }, description: 'Settings' },
             ],
         },
