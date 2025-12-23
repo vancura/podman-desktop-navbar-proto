@@ -71,8 +71,6 @@
     let scrollHeight = $state(0);
     let clientHeight = $state(0);
 
-    const showTopFade = $derived(scrollTop > 0);
-
     // Calculate opacity for bottom fade (0-1) based on distance from bottom
     // Fades out in the last 100pt: 100% visible until last 100pt, then fades to 0%
     const bottomFadeOpacity = $derived.by(() => {
@@ -136,7 +134,7 @@
                         {isExpanded}
                         isActive={activeItemId === navItem.id}
                         isFocused={focusedItemId === navItem.id}
-                        keyboardShortcut={getKeyboardShortcut(navItem.id)}
+                        keyboardShortcut={getKeyboardShortcut(navItem.id) || ''}
                         onclick={() => handleItemClick(navItem.id)}
                         oncontextmenu={(e) => handleItemContextMenu(e, navItem.id)}
                     />
@@ -155,7 +153,7 @@
                             isActive={activeItemId === navItem.id}
                             isFocused={focusedItemId === navItem.id}
                             isPinned={true}
-                            keyboardShortcut={getPinnedKeyboardShortcut(index)}
+                            keyboardShortcut={getPinnedKeyboardShortcut(index) || ''}
                             onclick={() => handleItemClick(navItem.id)}
                             oncontextmenu={(e) => handleItemContextMenu(e, navItem.id)}
                         />
@@ -174,7 +172,7 @@
                             {isExpanded}
                             isActive={activeItemId === navItem.id}
                             isFocused={focusedItemId === navItem.id}
-                            keyboardShortcut={getKeyboardShortcut(navItem.id)}
+                            keyboardShortcut={getKeyboardShortcut(navItem.id) || ''}
                             onclick={() => handleItemClick(navItem.id)}
                             oncontextmenu={(e) => handleItemContextMenu(e, navItem.id)}
                         />
@@ -209,7 +207,9 @@
 
         {#if bottomFadeOpacity > 0}
             <div
-                class="absolute w-[100%] left-0 bg-gradient-to-b pointer-events-none h-30 my-[-20px] from-transparent to-navbar-bg"
+                class="absolute w-full left-0 bg-linear-to-b pointer-events-none h-30 from-transparent to-navbar-bg {isExpanded
+                    ? 'my-[-48px]'
+                    : 'my-[-24px]'} "
                 style="bottom: {isExpanded ? '158px' : '134px'}; opacity: {bottomFadeOpacity};"
                 aria-hidden="true"
             ></div>
@@ -225,7 +225,7 @@
                     {isExpanded}
                     isActive={activeItemId === navItem.id}
                     isFocused={focusedItemId === navItem.id}
-                    keyboardShortcut={getKeyboardShortcut(navItem.id)}
+                    keyboardShortcut={getKeyboardShortcut(navItem.id) || ''}
                     onclick={() => handleItemClick(navItem.id)}
                     oncontextmenu={(e) => handleItemContextMenu(e, navItem.id)}
                 />
