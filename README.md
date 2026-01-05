@@ -14,7 +14,8 @@ A comprehensive interactive prototype exploring the next-generation navigation b
 [Podman Desktop](https://podman-desktop.io/). Built with Svelte 5, Tailwind CSS v4, and TypeScript by
 [@vancura](https://github.com/vancura/).
 
-See the prototype at https://podman-desktop-navbar-proto.vancura.dev or pull the repo and install via `pnpm`.
+- See the prototype at https://podman-desktop-navbar-proto.vancura.dev or pull the repo and install via `pnpm`.
+- GitHub issue and discussion: https://github.com/podman-desktop/podman-desktop/issues/6774
 
 ---
 
@@ -79,18 +80,24 @@ Resize by dragging the navbar edge. 10px hysteresis prevents flickering.
 
 **On navigation items:**
 
-- Pin to Top / Unpin
-- Hide From Navigation Bar (with restore warning)
-- Keyboard Shortcut… (placeholder)
-- Extension Settings / Remove Extension
-- Configure Navigation Bar
+| Action                       | What It Does                                                              |
+|------------------------------|---------------------------------------------------------------------------|
+| **Pin to Top** / **Unpin**   | Moves item to/from the Pinned section for quick access.                   |
+| **Hide From Navigation Bar** | Removes item from view. Restore via More button or "Show Hidden Items".  |
+| **Keyboard Shortcut…**       | Opens shortcut assignment dialog (placeholder in prototype).              |
+| **Extension Settings**       | Opens the extension's settings page in Podman Desktop Settings.           |
+| **Remove Extension**         | Initiates extension uninstall flow.                                       |
+| **Configure Navigation Bar** | Opens Navigation Bar settings in Podman Desktop Settings.                 |
 
 **On empty space:**
 
-- Show Icons and Titles / Show Icons Only
-- Show Hidden Items (submenu)
-- Configure Navigation Bar
-- Reset Navigation Bar
+| Action                        | What It Does                                                    |
+|-------------------------------|-----------------------------------------------------------------|
+| **Show Icons and Titles**     | Expands navbar to show both icons and text labels.              |
+| **Show Icons Only**           | Collapses navbar to compact icon-only mode.                     |
+| **Show Hidden Items**         | Submenu listing all hidden items. Click to restore.             |
+| **Configure Navigation Bar**  | Opens Navigation Bar settings in Podman Desktop Settings.       |
+| **Reset Navigation Bar**      | Restores all items to default state (unpins, unhides all).      |
 
 ---
 
@@ -180,13 +187,19 @@ Open `http://localhost:5173` to explore the prototype.
 
 ### Interacting with the Prototype
 
-| Action             | How                                        |
-| ------------------ |--------------------------------------------|
-| Resize navbar      | Drag the right edge (60–240px)             |
-| Pin/hide items     | Right-click → context menu                |
-| Switch modes       | Right-click empty space → Show Icons Only |
-| Change language    | Use control panel buttons on right         |
-| Keyboard shortcuts | ⌘1–⌘6, ⌘,, Esc to close overlays        |
+| Action             | How                                         |
+| ------------------ |---------------------------------------------|
+| Resize navbar      | Drag the right edge (60–240px)              |
+| Pin/hide items     | Right-click → context menu                  |
+| Switch modes       | Right-click empty space → Show Icons Only   |
+| Change language    | Use control panel buttons on right          |
+| Keyboard shortcuts | ⌘1–⌘6, ⌘, for Settings, Esc to close overlays |
+
+> **💡 Tips and Tricks**
+>
+> - Hold **⌘** to see keyboard shortcuts above navigation bar items.
+> - **Right-click** on items or empty space to see context menus with additional actions.
+> - **Pin/unpin** and **hide/show** items to customize your navigation bar.
 
 ---
 
@@ -200,6 +213,12 @@ This prototype intentionally excludes:
 - Extension installation/uninstallation flows
 - State persistence (resets on reload)
 - Authentication flows
+
+---
+
+## Discussion
+
+Please see the GitHub issue and share your feedback: https://github.com/podman-desktop/podman-desktop/issues/6774
 
 ---
 
