@@ -1,208 +1,212 @@
 # Podman Desktop Navigation Bar Prototype
 
-A comprehensive prototype for the Podman Desktop navigation bar built with Svelte 5, Tailwind CSS, and TypeScript. This
-prototype demonstrates a fully-featured navigation bar with resizing, pinning, hiding, context menus, keyboard
-navigation, and internationalization support.
+[![CI](https://github.com/vancura/podman-desktop-navbar-proto/actions/workflows/ci.yml/badge.svg)](https://github.com/vancura/podman-desktop-navbar-proto/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-ISC-blue.svg)](./LICENSE)
 
-## Features
+> **⚠️ Important: This is a functional prototype, not a high-fidelity design.**
+>
+> All visuals (spacing, colors, icon sizes and icon glyphs themselves, item counts) are approximate and subject to
+> change. The Podman Desktop design team will create the final high-fidelity design.
+>
+> **This prototype exists solely to validate interaction patterns and UX decisions**.
 
-### Core Navigation
+A comprehensive interactive prototype exploring the next-generation navigation bar design for
+[Podman Desktop](https://podman-desktop.io/). Built with Svelte 5, Tailwind CSS v4, and TypeScript by
+[@vancura](https://github.com/vancura/).
 
-- **Four-tier structure** — Essentials, Pinned, Regular items, and Bottom panel (Settings/Account)
-- **Resizable width** — Drag the edge to resize between 80pt and 300pt
-- **Two display modes** — Icon-only and Icon+Title modes based on navbar width
-- **Scrollable content** — Scrollable top panel with fade gradients and macOS-style scrollbar
-- **More button** — Shows hidden items when available
+See the prototype at https://podman-desktop-navbar-proto.vancura.dev or pull the repo and install via `pnpm`.
 
-### Item Management
+---
 
-- **Pinning** — Pin frequently-used items to a dedicated section (max 10 items)
-- **Hiding** — Hide items from the main navigation (accessible via More button)
-- **Context menus** — Right-click items for pinning, hiding, keyboard shortcuts, and more
-- **Keyboard shortcuts** — Full keyboard navigation with shortcuts (Cmd+1, Cmd+2, etc.)
+## Focus
 
-### User Interface
+This prototype answers “Does this navigation model work?” before investing in pixel-perfect design.
 
-- **Tooltips** — Context-aware tooltips (shown only in icon-only mode)
-- **Context menus** — Rich context menus with submenus and separators
-- **Modal dialogs** — For confirmations and feature explanations
-- **Info banners** — Non-intrusive notifications for out-of-scope features
-- **Window frame** — macOS-style window with title bar, traffic lights, and status bar
+### What This Prototype IS
 
-### Multi-language Support
+- ✅ **A functional proof-of-concept**: Working implementation of complex navigation patterns.
+- ✅ **A UX validation tool**: Tests interactions, state management, and edge cases.
+- ✅ **A technical exploration**: Validates UX, i18n strategy, responsive design.
+- ✅ **A discussion starter**: A tangible artifact for gathering feedback on navigation patterns.
 
-- **Multi-language support** — English, German, Chinese, Arabic, and Hebrew
-- **RTL support** — Full right-to-left layout for Arabic and Hebrew
-- **Locale switching** — Test different languages and text expansion scenarios
+### What This Prototype IS NOT
 
-### Accessibility
+- ❌ **Not high-fidelity visual design**: Colors, spacing, icons, and font sizes are exploratory placeholders.
+- ❌ **Not final design metrics**: The team will refine distances, icon counts, panel sizes.
+- ❌ **Not pixel-perfect**: Visual polish happens during actual Podman Desktop integration.
+- ❌ **Not production code**: Built for experimentation, not direct integration.
 
-- **Keyboard navigation** — Full keyboard support with focus management
-- **Focus indicators** — Clear focus rings for keyboard users
-- **ARIA labels** — Proper semantic markup
-- **Text truncation** — Handles long translations gracefully
+---
 
-## Prerequisites
+## Phase 1: Core Navigation (Current)
 
-- **Node.js** v20 or higher (LTS recommended)
-- **pnpm** v10.24.0 or higher
+This prototype showcases **Phase 1** of the navigation bar redesign.
+
+### Four-Tier Structure
+
+A hard requirement organizing navigation into distinct zones:
+
+| Section           | Description                                                                      |
+| ----------------- |----------------------------------------------------------------------------------|
+| **Essentials**    | Core features always on top, cannot be hidden (Containers ⌘1, Images ⌘2).      |
+| **Pinned**        | User-customizable section for frequently-used items (max 10, like VSCode/Teams). |
+| **Regular Items** | All other navigation items (Pods, Volumes, Kubernetes, etc.)                     |
+| **Bottom Panel**  | Account + Settings, always visible, separated by divider.                        |
+
+### Display Modes
+
+Two modes with intelligent switching based on navbar width:
+
+- **icon + title (≥120px)**: Default mode, no tooltips (avoids duplication),
+- **icon only (<120px)**: Compact mode, tooltips always shown with keyboard shortcuts.
+
+Resize by dragging the navbar edge. 10px hysteresis prevents flickering.
+
+### Key Features Implemented
+
+| Feature                 | Description                                                                  |
+| ----------------------- |------------------------------------------------------------------------------|
+| **Pinning**             | Right-click → Pin to Top. Max 10 items. Follows VSCode/Teams gold standard. |
+| **Hiding**              | Hide items via context menu. Access hidden items via More button.            |
+| **More Button**         | Appears above bottom panel when items are hidden. Click to restore.          |
+| **Context Menus**       | Different menus for items, empty space, Settings, and Account.               |
+| **Tooltips**            | Context-aware: shown only in icon-only mode, include keyboard shortcuts.     |
+| **Scrolling**           | macOS-style scrollbar with fade gradients indicating scrollable content.     |
+| **RTL Support**         | Full right-to-left layout for Arabic and Hebrew.                             |
+| **Keyboard Navigation** | ⌘1–⌘6 for items, ⌘, for Settings, arrow keys in menus.                    |
+
+### Context Menu Actions
+
+**On navigation items:**
+
+- Pin to Top / Unpin
+- Hide From Navigation Bar (with restore warning)
+- Keyboard Shortcut… (placeholder)
+- Extension Settings / Remove Extension
+- Configure Navigation Bar
+
+**On empty space:**
+
+- Show Icons and Titles / Show Icons Only
+- Show Hidden Items (submenu)
+- Configure Navigation Bar
+- Reset Navigation Bar
+
+---
+
+## Phase 2: Drag & Drop (Planned)
+
+Future enhancements for item management:
+
+- **Drag-and-drop reordering**: Reorder items within sections (VSCode-style).
+- **Visual feedback**: Drop zones with dashed borders, ghost elements during the drag.
+- **Smooth transitions**: 200–300ms animations for a polished feel.
+- **Keyboard alternatives**: Full accessibility for reordering.
+- **Hide indicators**: "3 Items Hidden" count at the bottom of the navbar.
+- **Bulk operations**: Show/hide multiple items via the Settings panel.
+
+### Protection Rules
+
+- Essential items (Containers, Images) cannot be hidden.
+- Bottom items (Account, Settings) can’t be hidden or moved.
+- Currently active or pinned items can’t be hidden.
+
+---
+
+## Phase 3: Workspaces & Profiles (Future)
+
+Advanced customization for different workflows:
+
+- **Saved profiles**: Different navbar configurations for different tasks.
+- **Quick switching**: Dropdown in the navbar header to switch profiles.
+- **Collapsible sections**: Custom groupings with drag-drop organization.
+- **Built-in presets:**
+  - Development: Containers, Pods, Logs
+  - Debugging: Containers, Images, Volumes, Network, Logs
+  - Deployment: Pods, Services, Kubernetes items
+- **Team sharing**: Export/import profile configurations.
+
+---
+
+## Accessibility & Internationalization
+
+### Language Support
+
+- **5 languages**: English, German, Chinese, Arabic, Hebrew.
+- **RTL layout**: Full mirroring for Arabic and Hebrew.
+- **30–35% expansion planning**: German/Finnish expand significantly.
+
+### Active/Selected States
+
+Multiple indicators ensure accessibility:
+
+- Background color change (10–20% opacity)
+- Left border accent (3–5pt solid)
+- Title color change
+- Filled vs. outline icons
+- Focus rings (3:1 contrast, always visible)
+
+### Design Considerations
+
+- **Don’t rely on color alone**: All states have multiple visual indicators.
+- **Reduced motion support**: Respects `prefers-reduced-motion`.
+- **Zoom up to 200%**: Uses larger icons to prevent blur.
+- **Logical properties**: `padding-inline-start` for RTL compatibility.
+
+### Spacing Guidelines (Subject to Final Design)
+
+These values are placeholders for the prototype:
+
+| Element         | Current Value | Notes                        |
+| --------------- | ------------- | ---------------------------- |
+| Icon size       | 24px          | 20px for dense layout        |
+| Hit area        | ≥32×40px      | Desktop-optimized, not touch |
+| Section spacing | 16–24px       | Between groups               |
+| Icon-title gap  | 8–12px        | Following Fluent guidelines  |
+
+---
 
 ## Quick Start
 
-```bash
-# Install dependencies
-pnpm install
+Published prototype: https://podman-desktop-navbar-proto.vancura.dev
 
-# Start development server
+```bash
+# Prerequisites: Node.js v20+, pnpm v10.24.0+
+pnpm install
 pnpm dev
 ```
 
-Open your browser at `http://localhost:5173` to see the navigation bar prototype.
+Open `http://localhost:5173` to explore the prototype.
 
-## Scripts
+### Interacting with the Prototype
 
-| Command             | Description                                     |
-| ------------------- | ----------------------------------------------- |
-| `pnpm dev`          | Start dev server with HMR                       |
-| `pnpm build`        | Type-check and build for production             |
-| `pnpm preview`      | Preview the production build                    |
-| `pnpm check`        | Run Svelte type checking                        |
-| `pnpm lint`         | Run ESLint                                      |
-| `pnpm lint:fix`     | Run ESLint with auto-fix                        |
-| `pnpm format`       | Format code with Biome and Prettier             |
-| `pnpm format:check` | Check formatting without changes                |
-| `pnpm typecheck`    | Run TypeScript type checking                    |
-| `pnpm spellcheck`   | Run spell checker                               |
-| `pnpm preflight`    | Run all checks (format, lint, typecheck, spell) |
-| `pnpm clean`        | Remove dist and cache directories               |
+| Action             | How                                        |
+| ------------------ |--------------------------------------------|
+| Resize navbar      | Drag the right edge (60–240px)             |
+| Pin/hide items     | Right-click → context menu                |
+| Switch modes       | Right-click empty space → Show Icons Only |
+| Change language    | Use control panel buttons on right         |
+| Keyboard shortcuts | ⌘1–⌘6, ⌘,, Esc to close overlays        |
 
-## Project Structure
+---
 
-```text
-podman-desktop-navbar-proto/
-├── src/
-│   ├── main.ts                    # Application entry point
-│   ├── App.svelte                 # Root component
-│   ├── app.css                    # Global styles
-│   └── lib/
-│       ├── components/
-│       │   ├── controls/          # Control panel and debug buttons
-│       │   ├── navbar/            # Navigation bar components
-│       │   ├── overlays/          # Context menus, tooltips, modals
-│       │   ├── scrollbar/         # Scrollbar fade gradients
-│       │   └── window/            # Window frame components
-│       ├── i18n/                  # Internationalization
-│       │   ├── index.ts           # Translation functions
-│       │   └── locales/           # Translation files (en, de, zh, ar, he)
-│       ├── state/                 # State management
-│       │   ├── app-state.svelte.ts
-│       │   ├── nav-items.ts       # Default navigation items
-│       │   └── types.ts           # TypeScript types
-│       └── utils/                 # Utility functions
-│           ├── constants.ts       # Design tokens and constants
-│           ├── keyboard.ts        # Keyboard handling
-│           └── menu-navigation.ts # Menu navigation logic
-├── index.html                     # HTML template
-├── package.json
-├── tsconfig.json                  # TypeScript configuration
-├── vite.config.ts                 # Vite configuration
-├── svelte.config.js               # Svelte configuration
-├── eslint.config.js               # ESLint flat config
-├── prettier.config.js             # Prettier configuration
-├── biome.json                     # Biome configuration
-├── commitlint.config.js           # Commit message linting
-└── PLAN.md                        # Detailed implementation plan
-```
+## Out of Scope
 
-## Technologies
+This prototype intentionally excludes:
 
-- **[Svelte 5](https://svelte.dev/)** — Modern reactive framework with runes
-- **[Tailwind CSS v4](https://tailwindcss.com/)** — Utility-first CSS framework
-- **[TypeScript](https://www.typescriptlang.org/)** — Type-safe JavaScript
-- **[Vite](https://vite.dev/)** — Fast build tool with HMR
-- **[Biome](https://biomejs.dev/)** — Fast formatter and linter
-- **[ESLint](https://eslint.org/)** — Code linting
-- **[Prettier](https://prettier.io/)** — Code formatting
+- Actual Podman Desktop integration
+- Real Settings pages (info banners explain what would happen)
+- Keyboard shortcut assignment dialogs
+- Extension installation/uninstallation flows
+- State persistence (resets on reload)
+- Authentication flows
 
-## Component Architecture
+---
 
-### Navigation Bar Components
+## Related Projects
 
-- `Navbar.svelte` — Main navigation container
-- `NavbarItem.svelte` — Individual navigation item
-- `NavbarDivider.svelte` — Visual separator between sections
-- `ResizeHandle.svelte` — Drag handle for resizing navbar width
-
-### Overlay Components
-
-- `ContextMenu.svelte` — Right-click context menu with submenu support
-- `Tooltip.svelte` — Hover tooltips with keyboard shortcut display
-- `ModalDialog.svelte` — Modal dialogs for confirmations
-- `InfoBanner.svelte` — Non-intrusive info banners
-- `MoreMenu.svelte` — Dropdown menu for hidden items
-- `Backdrop.svelte` — Semi-transparent backdrop for modals
-
-### Window Components
-
-- `WindowFrame.svelte` — Main window container
-- `TitleBar.svelte` — macOS-style title bar
-- `TrafficLights.svelte` — Window controls (close, minimize, maximize)
-- `StatusBar.svelte` — Bottom status bar
-- `ContentArea.svelte` — Main content area with control panel
-
-### Control Components
-
-- `ControlPanel.svelte` — Debug/testing control panel
-- `ActionButton.svelte` — Reusable action button
-- `LocaleSwitcher.svelte` — Language switcher
-- `KeyboardShortcutsHelp.svelte` — Keyboard shortcuts reference
-
-## State Management
-
-The application uses Svelte 5 runes for reactive state management:
-
-- `app-state.svelte.ts` — Centralized application state
-- Reactive derived values for computed properties
-- Actions for state mutations
-- Persistent state for navbar width and preferences
-
-## Internationalization
-
-The prototype supports 5 languages:
-
-- **English** (en) — Default
-- **German** (de)
-- **Chinese** (zh)
-- **Arabic** (ar) — RTL
-- **Hebrew** (he) — RTL
-
-Translations are managed in `src/lib/i18n/locales/` and automatically handle:
-
-- RTL layout switching
-- Platform-specific keyboard shortcut formatting
-- Text truncation for long translations
-
-## Keyboard Shortcuts
-
-- `Cmd+1` — Containers
-- `Cmd+2` — Images
-- `Cmd+3` — Pods
-- `Cmd+4` — Kubernetes
-- `Cmd+5` — Terminal
-- `Cmd+,` — Settings
-- `Esc` — Close modals/context menus
-- Arrow keys — Navigate items and menus
-
-## Development
-
-The control panel (visible in the content area) provides buttons to test various features:
-
-- Add/remove items
-- Pin/unpin items
-- Hide/show items
-- Switch locales
-- View keyboard shortcuts
+- **[Podman Desktop](https://github.com/containers/podman-desktop)** — The main application
 
 ## License
 
-ISC
+ISC License — Copyright (c) 2025 Václav Vančura. See [LICENSE](./LICENSE).
